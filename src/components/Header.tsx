@@ -2,10 +2,18 @@
 
 import { motion } from "framer-motion";
 import { Search, ShoppingBag, UserRound } from "lucide-react";
+import Link from "next/link";
 import { useCart } from "@/lib/cart";
+import { products, formatRupiah } from "@/data/products";
 
 export function Header() {
+  const items = useCart((state) => state.items);
   const cartCount = useCart((state) => state.getCount());
+
+  const cartTotal = items.reduce((sum, item) => {
+    const product = products.find((p) => p.id === item.id);
+    return product ? sum + product.price * item.quantity : sum;
+  }, 0);
 
   return (
     <header className="border-b border-gray-200 bg-white">
@@ -30,29 +38,33 @@ export function Header() {
           transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
           className="flex items-center gap-4 sm:gap-6"
         >
-          <a
-            href="#"
+          <Link
+            href="/account"
             className="hidden text-sm text-zinc-700 transition-colors hover:text-orange-600 sm:inline"
           >
             Akun Saya
-          </a>
+          </Link>
           <span className="hidden h-5 w-px bg-gray-300 sm:inline-block" />
 
-          <a
-            href="#"
+          <Link
+            href="/checkout"
             className="hidden text-sm text-zinc-700 transition-colors hover:text-orange-600 md:inline"
           >
-            Keranjang &gt; <span className="font-semibold">Rp. 90.400</span>
-          </a>
+            Keranjang &gt;{" "}
+            <span className="font-semibold">{formatRupiah(cartTotal)}</span>
+          </Link>
 
           {/* Cart icon with animated count badge */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.92 }}
+          <Link
+            href="/checkout"
             className="relative"
             aria-label="Keranjang"
           >
-            <div className="relative">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.92 }}
+              className="relative"
+            >
               <ShoppingBag
                 className="h-6 w-6 text-zinc-800"
                 strokeWidth={1.75}
@@ -66,8 +78,8 @@ export function Header() {
               >
                 {cartCount}
               </motion.span>
-            </div>
-          </motion.button>
+            </motion.div>
+          </Link>
 
           <motion.button
             whileHover={{ scale: 1.05 }}
