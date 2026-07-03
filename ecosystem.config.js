@@ -24,10 +24,10 @@ module.exports = {
       name: "ecommerce-fe",
       script: "node_modules/next/dist/bin/next",
       args: "start",
-      // Run Next.js production server on port 3000 (override with PORT env)
+      // Run Next.js production server on port 6699 (override with PORT env)
       env: {
         NODE_ENV: "production",
-        PORT: 3000,
+        PORT: 6699,
       },
       // Working directory — uncomment if PM2 runs from elsewhere
       // cwd: "/var/www/ecommerce-fe",
@@ -68,7 +68,7 @@ module.exports = {
       // ─── Environment overrides (optional) ────────────────────────
       // env_production: {
       //   NODE_ENV: "production",
-      //   PORT: 3000,
+      //   PORT: 6699,
       // },
     },
   ],
