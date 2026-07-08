@@ -3,54 +3,86 @@
 import { motion } from "framer-motion";
 import { ChevronDown, Truck, CreditCard } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/lib/cart";
-import { products, formatRupiah } from "@/data/products";
-import type { Product } from "@/types/product";
+import { formatRupiah } from "@/data/products";
+import { api } from "@/lib/api";
+
+const API_HOST = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 interface OrderSummaryProps {
-  onCheckout: () => void;
+  onCheckout: (details: { shippingMethod: string; shippingCost: number; paymentMethod: string }) => void;
   isProcessing?: boolean;
 }
 
-const SHIPPING_METHODS = [
-  { id: "gojek", name: "Go-jek", eta: "Estimasi 1 – 2 jam", cost: 10000 },
-  { id: "grab", name: "Grab", eta: "Estimasi 2 – 3 jam", cost: 12000 },
-  { id: "jne", name: "JNE Regular", eta: "Estimasi 2 – 3 hari", cost: 9000 },
-];
-
-const PAYMENT_METHODS = [
-  { id: "qris", name: "QRIS (default)" },
-  { id: "bca", name: "Transfer Bank BCA" },
-  { id: "dana", name: "DANA" },
-  { id: "cod", name: "Bayar di Tempat (COD)" },
-];
-
 export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
-  const items = useCart((state) => state.items);
   const updateQuantity = useCart((state) => state.updateQuantity);
 
+  const [cartDetails, setCartDetails] = useState<any[]>([]);
+  const [shippingMethods, setShippingMethods] = useState<any[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [shipping, setShipping] = useState<any>(null);
+  const [payment, setPayment] = useState<any>(null);
+  
   const [shippingOpen, setShippingOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const [shipping, setShipping] = useState(SHIPPING_METHODS[0]);
-  const [payment, setPayment] = useState(PAYMENT_METHODS[0]);
+  const [loading, setLoading] = useState(true);
 
-  // Resolve cart items to products
-  const lineItems = items
-    .map((item) => {
-      const product = products.find((p) => p.id === item.id);
-      return product ? { product, quantity: item.quantity } : null;
-    })
-    .filter((x): x is { product: Product; quantity: number } => x !== null);
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const dbCart = await api.get("/cart");
+        setCartDetails(dbCart);
 
-  const subtotal = lineItems.reduce(
-    (sum, { product, quantity }) => sum + product.price * quantity,
+        if (dbCart.length > 0) {
+          const storeId = dbCart[0]?.variant?.product?.storeId;
+          if (storeId) {
+            const settings = await api.get(`/mitra/store/${storeId}/checkout-settings`);
+            
+            const activeShippings = settings.shippings || [];
+            const activePayments = settings.payments || [];
+
+            setShippingMethods(activeShippings);
+            setPaymentMethods(activePayments);
+
+            if (activeShippings.length > 0) {
+              setShipping(activeShippings[0]);
+            }
+            if (activePayments.length > 0) {
+              setPayment(activePayments[0]);
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load checkout settings", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  const subtotal = cartDetails.reduce(
+    (sum, item) => sum + (item.variant?.price ?? 0) * item.quantity,
     0
   );
-  const shippingCost = subtotal >= 80000 ? 0 : shipping.cost;
+  
+  const shippingCost = subtotal >= 80000 ? 0 : (shipping?.cost ?? 0);
   const total = subtotal + shippingCost;
 
-  if (lineItems.length === 0) {
+  if (loading) {
+    return (
+      <motion.aside
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="rounded-sm border border-zinc-200 bg-white p-6 text-center text-sm text-zinc-500"
+      >
+        Memuat ringkasan pesanan...
+      </motion.aside>
+    );
+  }
+
+  if (cartDetails.length === 0) {
     return (
       <motion.aside
         initial={{ opacity: 0 }}
@@ -83,41 +115,57 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
 
       {/* Line items list */}
       <ul className="divide-y divide-zinc-200">
-        {lineItems.map(({ product, quantity }) => (
-          <li
-            key={product.id}
-            className="grid grid-cols-[1fr_auto] items-center gap-4 px-6 py-4"
-          >
-            <div className="flex items-start gap-3">
-              <div className="relative h-12 w-12 shrink-0 overflow-hidden bg-zinc-100">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  sizes="48px"
-                  className="object-cover"
-                  unoptimized
-                />
+        {cartDetails.map((item) => {
+          const variant = item.variant;
+          const product = variant?.product;
+          if (!product) return null;
+
+          const rawImg = product.images?.[0];
+          const image = rawImg && rawImg.startsWith("/uploads")
+            ? `${API_HOST}${rawImg}`
+            : (rawImg || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80");
+
+          return (
+            <li
+              key={item.id}
+              className="grid grid-cols-[1fr_auto] items-center gap-4 px-6 py-4"
+            >
+              <div className="flex items-start gap-3">
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden bg-zinc-100">
+                  <Image
+                    src={image}
+                    alt={product.name}
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm text-zinc-800">
+                    {product.name} - {variant.name}
+                  </p>
+                  <p className="text-xs text-zinc-500">× {item.quantity}</p>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await updateQuantity(variant.id, item.quantity - 1);
+                      // Reload cart details locally after updating quantity
+                      const dbCart = await api.get("/cart");
+                      setCartDetails(dbCart);
+                    }}
+                    className="mt-1 text-xs text-zinc-400 underline-offset-2 hover:text-zinc-700 hover:underline"
+                  >
+                    Kurangi
+                  </button>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm text-zinc-800">
-                  {product.name} - {product.unit}
-                </p>
-                <p className="text-xs text-zinc-500">× {quantity}</p>
-                <button
-                  type="button"
-                  onClick={() => updateQuantity(product.id, quantity - 1)}
-                  className="mt-1 text-xs text-zinc-400 underline-offset-2 hover:text-zinc-700 hover:underline"
-                >
-                  Kurangi
-                </button>
-              </div>
-            </div>
-            <span className="text-sm font-medium text-zinc-900">
-              {formatRupiah(product.price * quantity)}
-            </span>
-          </li>
-        ))}
+              <span className="text-sm font-medium text-zinc-900">
+                {formatRupiah(variant.price * item.quantity)}
+              </span>
+            </li>
+          );
+        })}
       </ul>
 
       {/* Totals */}
@@ -125,12 +173,14 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
         <Row label="Subtotal" value={formatRupiah(subtotal)} />
         <Row
           label="Pengiriman"
-          valueRight={shipping.name}
+          valueRight={shipping ? shipping.name : "-"}
           value={
-            shippingCost === 0 ? (
+            shippingCost === 0 && shipping ? (
               <span className="font-medium text-emerald-600">GRATIS</span>
-            ) : (
+            ) : shipping ? (
               formatRupiah(shippingCost)
+            ) : (
+              "-"
             )
           }
         />
@@ -140,122 +190,137 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
         </div>
       </div>
 
-      {/* Shipping method */}
-      <div className="border-t border-zinc-200 px-6 py-4">
-        <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-700">
-          <Truck className="h-3.5 w-3.5" strokeWidth={2.5} />
-          <span>Pengiriman</span>
-        </div>
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShippingOpen(!shippingOpen)}
-            className="flex w-full items-center justify-between border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-left text-sm text-zinc-800 transition-colors hover:border-zinc-400"
-          >
-            <span>
-              {shipping.name}{" "}
-              <span className="text-zinc-500">({shipping.eta})</span>
-            </span>
-            <motion.span
-              animate={{ rotate: shippingOpen ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronDown className="h-4 w-4 text-zinc-500" />
-            </motion.span>
-          </button>
-          {shippingOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setShippingOpen(false)}
-              />
-              <motion.ul
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute left-0 right-0 z-20 mt-1 overflow-hidden border border-zinc-200 bg-white shadow-lg"
-              >
-                {SHIPPING_METHODS.map((m) => (
-                  <li key={m.id}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShipping(m);
-                        setShippingOpen(false);
-                      }}
-                      className={`w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-zinc-50 ${
-                        m.id === shipping.id
-                          ? "bg-zinc-50 font-medium text-zinc-900"
-                          : "text-zinc-700"
-                      }`}
+      <div className="p-4 space-y-6">
+        {/* Shipping method */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            Metode Pengiriman
+          </label>
+          <div className="relative">
+            {shippingMethods.length === 0 ? (
+              <div className="border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
+                Toko ini tidak menyediakan metode pengiriman aktif.
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShippingOpen(!shippingOpen)}
+                  className="flex w-full items-center justify-between border border-zinc-200 bg-zinc-50 px-4 py-3 text-left text-sm text-zinc-700 transition-colors hover:border-zinc-400 focus:border-zinc-900 focus:bg-white"
+                >
+                  <span className="flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-zinc-400" />
+                    {shipping ? (
+                      <span>
+                        {shipping.name}{" "}
+                        <span className="text-xs text-zinc-500">({shipping.eta})</span>
+                      </span>
+                    ) : (
+                      <span>Pilih Pengiriman</span>
+                    )}
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-zinc-400" />
+                </button>
+                {shippingOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setShippingOpen(false)}
+                    />
+                    <motion.ul
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-auto border border-zinc-200 bg-white shadow-lg"
                     >
-                      {m.name}{" "}
-                      <span className="text-zinc-500">({m.eta})</span>
-                    </button>
-                  </li>
-                ))}
-              </motion.ul>
-            </>
-          )}
+                      {shippingMethods.map((s) => (
+                        <li key={s.id}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShipping(s);
+                              setShippingOpen(false);
+                            }}
+                            className={`w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-zinc-50 ${
+                              s.id === shipping?.id
+                                ? "bg-zinc-50 font-medium text-zinc-900"
+                                : "text-zinc-700"
+                            }`}
+                          >
+                            {s.name} - {formatRupiah(s.cost)}{" "}
+                            <span className="text-xs text-zinc-500">({s.eta})</span>
+                          </button>
+                        </li>
+                      ))}
+                    </motion.ul>
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Payment method */}
-      <div className="border-t border-zinc-200 px-6 py-4">
-        <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-700">
-          <CreditCard className="h-3.5 w-3.5" strokeWidth={2.5} />
-          <span>Metode Pembayaran</span>
-        </div>
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setPaymentOpen(!paymentOpen)}
-            className="flex w-full items-center justify-between border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-left text-sm text-zinc-800 transition-colors hover:border-zinc-400"
-          >
-            <span className="flex items-center gap-2">
-              <span className="font-mono text-[10px] font-semibold text-zinc-500">
-                QRIS
-              </span>
-              <span>{payment.name}</span>
-            </span>
-            <motion.span
-              animate={{ rotate: paymentOpen ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronDown className="h-4 w-4 text-zinc-500" />
-            </motion.span>
-          </button>
-          {paymentOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setPaymentOpen(false)}
-              />
-              <motion.ul
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute left-0 right-0 z-20 mt-1 overflow-hidden border border-zinc-200 bg-white shadow-lg"
-              >
-                {PAYMENT_METHODS.map((m) => (
-                  <li key={m.id}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPayment(m);
-                        setPaymentOpen(false);
-                      }}
-                      className={`w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-zinc-50 ${
-                        m.id === payment.id
-                          ? "bg-zinc-50 font-medium text-zinc-900"
-                          : "text-zinc-700"
-                      }`}
+        {/* Payment method */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            Metode Pembayaran
+          </label>
+          <div className="relative">
+            {paymentMethods.length === 0 ? (
+              <div className="border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
+                Toko ini tidak menyediakan metode pembayaran aktif.
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setPaymentOpen(!paymentOpen)}
+                  className="flex w-full items-center justify-between border border-zinc-200 bg-zinc-50 px-4 py-3 text-left text-sm text-zinc-700 transition-colors hover:border-zinc-400 focus:border-zinc-900 focus:bg-white"
+                >
+                  <span className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-zinc-400" />
+                    {payment ? (
+                      <span>{payment.name}</span>
+                    ) : (
+                      <span>Pilih Pembayaran</span>
+                    )}
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-zinc-400" />
+                </button>
+                {paymentOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setPaymentOpen(false)}
+                    />
+                    <motion.ul
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-auto border border-zinc-200 bg-white shadow-lg"
                     >
-                      {m.name}
-                    </button>
-                  </li>
-                ))}
-              </motion.ul>
-            </>
-          )}
+                      {paymentMethods.map((m) => (
+                        <li key={m.id}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPayment(m);
+                              setPaymentOpen(false);
+                            }}
+                            className={`w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-zinc-50 ${
+                              m.id === payment?.id
+                                ? "bg-zinc-50 font-medium text-zinc-900"
+                                : "text-zinc-700"
+                            }`}
+                          >
+                            {m.name}
+                          </button>
+                        </li>
+                      ))}
+                    </motion.ul>
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -263,10 +328,20 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
       <div className="border-t border-zinc-200 p-4">
         <motion.button
           type="button"
-          onClick={onCheckout}
-          disabled={isProcessing}
-          whileHover={{ scale: isProcessing ? 1 : 1.01 }}
-          whileTap={{ scale: isProcessing ? 1 : 0.98 }}
+          onClick={() => {
+            if (!shipping || !payment) {
+              alert("Mohon pilih metode pengiriman dan pembayaran.");
+              return;
+            }
+            onCheckout({
+              shippingMethod: `${shipping.name} (${shipping.eta})`,
+              shippingCost: shippingCost,
+              paymentMethod: payment.name,
+            });
+          }}
+          disabled={isProcessing || !shipping || !payment}
+          whileHover={{ scale: isProcessing || !shipping || !payment ? 1 : 1.01 }}
+          whileTap={{ scale: isProcessing || !shipping || !payment ? 1 : 0.98 }}
           className="w-full bg-zinc-900 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
         >
           {isProcessing ? "Memproses..." : "Lanjut Pembayaran"}

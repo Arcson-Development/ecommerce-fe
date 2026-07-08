@@ -2,6 +2,8 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { api } from "./api";
+import { useAuth } from "./auth";
 
 export type MitraStatus = "review" | "approved" | "rejected";
 
@@ -9,12 +11,10 @@ export interface MitraApplication {
   id: string;
   date: string; // ISO
   status: MitraStatus;
-  // Pemilik
   email: string;
   firstName: string;
   lastName: string;
   phone: string;
-  // Toko
   storeName: string;
   province: string;
   city: string;
@@ -22,74 +22,72 @@ export interface MitraApplication {
   address: string;
   postalCode: string;
   storeType: string;
-  documentUrl?: string; // optional
-  // Catatan admin (optional, untuk status approved/rejected)
+  documentUrl?: string;
   adminNote?: string;
 }
 
 interface MitraState {
   applications: MitraApplication[];
   hasApplied: boolean;
-  addApplication: (a: MitraApplication) => void;
+  storeProfile: any | null;
+  addApplication: (a: MitraApplication) => Promise<void>;
+  fetchMitraStatus: () => Promise<void>;
   getApplication: (id: string) => MitraApplication | undefined;
-  setStatus: (id: string, status: MitraStatus, note?: string) => void;
 }
-
-const seedApplications: MitraApplication[] = [
-  {
-    id: "231344",
-    date: "2026-05-04T10:00:00.000Z",
-    status: "approved",
-    email: "toko.manis@email.com",
-    firstName: "Toko",
-    lastName: "Manis & Perhiasan",
-    phone: "081234567890",
-    storeName: "Toko Manis & Perhiasan",
-    province: "Jawa Barat",
-    city: "Depok",
-    district: "Pancoran Mas",
-    address: "Jl. Margonda Raya No. 88",
-    postalCode: "16424",
-    storeType: "Toko Retail",
-  },
-  {
-    id: "231355",
-    date: "2026-06-12T08:30:00.000Z",
-    status: "review",
-    email: "sayur.segar@email.com",
-    firstName: "Sayur",
-    lastName: "Segar",
-    phone: "081234567891",
-    storeName: "Sayur Segar Makmur",
-    province: "DKI Jakarta",
-    city: "Jakarta Selatan",
-    district: "Kebayoran Baru",
-    address: "Jl. Senopati No. 12",
-    postalCode: "12190",
-    storeType: "Petani / Peternak",
-  },
-];
 
 export const useMitra = create<MitraState>()(
   persist(
     (set, get) => ({
-      applications: seedApplications,
-      hasApplied: true,
-      addApplication: (a) =>
-        set((state) => ({
-          applications: [a, ...state.applications],
-          hasApplied: true,
-        })),
+      applications: [],
+      hasApplied: false,
+      storeProfile: null,
+      addApplication: async (a) => {
+        const isAuth = useAuth.getState().isAuthenticated;
+        if (!isAuth) {
+          throw new Error("Anda harus masuk terlebih dahulu.");
+        }
+
+        try {
+          // Register store in the backend
+          const res = await api.post("/mitra/register", {
+            name: a.storeName,
+            address: `${a.address}, ${a.district}, ${a.city}, ${a.province} ${a.postalCode}`,
+            description: `${a.storeType} - Mitra baru Pasar Jaya`,
+          });
+          
+          set({ 
+            hasApplied: true,
+            storeProfile: res,
+            applications: [a, ...get().applications] 
+          });
+
+          // Re-fetch user profile because their role might change or they have a store linked
+          await useAuth.getState().fetchProfile();
+        } catch (e: any) {
+          console.error("Mitra registration failed", e);
+          throw e;
+        }
+      },
+      fetchMitraStatus: async () => {
+        const isAuth = useAuth.getState().isAuthenticated;
+        if (isAuth) {
+          try {
+            const profile = await api.get("/mitra/profile").catch(() => null);
+            if (profile) {
+              set({ 
+                hasApplied: true,
+                storeProfile: profile,
+              });
+            } else {
+              set({ hasApplied: false, storeProfile: null });
+            }
+          } catch (e) {
+            set({ hasApplied: false, storeProfile: null });
+          }
+        }
+      },
       getApplication: (id) =>
         get().applications.find((x) => x.id === id),
-      setStatus: (id, status, note) =>
-        set((state) => ({
-          applications: state.applications.map((a) =>
-            a.id === id
-              ? { ...a, status, ...(note ? { adminNote: note } : {}) }
-              : a
-          ),
-        })),
     }),
     { name: "snowys-mitra" }
   )

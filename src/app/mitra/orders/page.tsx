@@ -1,42 +1,62 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
-import { merchantOrders, type MerchantOrderStatus } from "@/lib/merchant-data";
 import { formatRupiah } from "@/data/products";
+import { api } from "@/lib/api";
 
 const FILTERS: { key: "inbox" | "on_the_way" | "completed"; label: string }[] = [
   { key: "inbox", label: "Kotak Masuk" },
-  { key: "on_the_way", label: "On The Way" },
+  { key: "on_the_way", label: "Dalam Perjalanan" },
   { key: "completed", label: "Selesai" },
 ];
 
-const STATUS_LABEL: Record<MerchantOrderStatus, string> = {
-  inbox: "Pengiriman",
-  on_the_way: "Dalam Perjalanan",
-  completed: "Selesai",
+const STATUS_LABEL: Record<string, string> = {
+  PENDING: "Menunggu Diproses",
+  PROCESSING: "Sedang Diproses",
+  SHIPPED: "Dalam Pengiriman",
+  COMPLETED: "Selesai",
+  CANCELLED: "Dibatalkan",
 };
 
 export default function MitraOrdersPage() {
-  const [filter, setFilter] = useState<"inbox" | "on_the_way" | "completed">(
-    "inbox"
-  );
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"inbox" | "on_the_way" | "completed">("inbox");
 
-  const counts = useMemo(
-    () => ({
-      inbox: merchantOrders.filter((o) => o.status === "inbox").length,
-      on_the_way: merchantOrders.filter((o) => o.status === "on_the_way").length,
-      completed: merchantOrders.filter((o) => o.status === "completed").length,
-    }),
-    []
-  );
+  async function loadOrders() {
+    try {
+      const data = await api.get("/mitra/orders");
+      setOrders(data || []);
+    } catch (e) {
+      console.error("Failed to load mitra orders", e);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  const filtered = useMemo(
-    () => merchantOrders.filter((o) => o.status === filter),
-    [filter]
-  );
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const counts = useMemo(() => {
+    return {
+      inbox: orders.filter((o) => o.status === "PENDING" || o.status === "PROCESSING").length,
+      on_the_way: orders.filter((o) => o.status === "SHIPPED").length,
+      completed: orders.filter((o) => o.status === "COMPLETED" || o.status === "CANCELLED").length,
+    };
+  }, [orders]);
+
+  const filtered = useMemo(() => {
+    return orders.filter((o) => {
+      if (filter === "inbox") return o.status === "PENDING" || o.status === "PROCESSING";
+      if (filter === "on_the_way") return o.status === "SHIPPED";
+      if (filter === "completed") return o.status === "COMPLETED" || o.status === "CANCELLED";
+      return false;
+    });
+  }, [orders, filter]);
 
   return (
     <MitraShell>
@@ -47,10 +67,10 @@ export default function MitraOrdersPage() {
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-semibold text-zinc-900 sm:text-3xl">
-              Akun Mitra
+              Pesanan Toko Anda
             </h1>
             <p className="mt-1 text-xs font-medium uppercase tracking-wider text-zinc-500">
-              Dasbor
+              Kelola pesanan dari pembeli
             </p>
           </div>
 
@@ -94,7 +114,7 @@ export default function MitraOrdersPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                    <th className="px-5 py-3">Pesanan</th>
+                    <th className="px-5 py-3">No. Pesanan</th>
                     <th className="px-5 py-3">Tanggal Masuk</th>
                     <th className="px-5 py-3">Status</th>
                     <th className="px-5 py-3">Total</th>
@@ -103,7 +123,16 @@ export default function MitraOrdersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200">
-                  {filtered.length === 0 ? (
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-5 py-12 text-center text-sm text-zinc-500"
+                      >
+                        Memuat data pesanan...
+                      </td>
+                    </tr>
+                  ) : filtered.length === 0 ? (
                     <tr>
                       <td
                         colSpan={6}
@@ -121,17 +150,29 @@ export default function MitraOrdersPage() {
                         className="text-sm text-zinc-700 transition-colors hover:bg-zinc-50"
                       >
                         <td className="px-5 py-4 font-mono font-semibold text-zinc-900">
-                          #{order.id}
+                          {order.orderNumber}
                         </td>
                         <td className="px-5 py-4 text-zinc-600">
-                          {new Date(order.date).toLocaleDateString("id-ID", {
+                          {new Date(order.createdAt).toLocaleDateString("id-ID", {
                             day: "numeric",
                             month: "long",
                             year: "numeric",
                           })}
                         </td>
                         <td className="px-5 py-4">
-                          <span className="italic text-zinc-700">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                              order.status === "PENDING"
+                                ? "bg-rose-50 text-rose-700"
+                                : order.status === "PROCESSING"
+                                  ? "bg-blue-50 text-blue-700"
+                                  : order.status === "SHIPPED"
+                                    ? "bg-amber-50 text-amber-700"
+                                    : order.status === "COMPLETED"
+                                      ? "bg-emerald-50 text-emerald-700"
+                                      : "bg-zinc-100 text-zinc-600"
+                            }`}
+                          >
                             {STATUS_LABEL[order.status]}
                           </span>
                         </td>
@@ -140,18 +181,18 @@ export default function MitraOrdersPage() {
                             {formatRupiah(order.total)}
                           </span>
                           <span className="ml-1 text-xs text-zinc-500">
-                            untuk {order.items.length} item
+                            untuk {order.items?.length || 0} item
                           </span>
                         </td>
                         <td className="px-5 py-4">
                           <span
                             className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
-                              order.paymentStatus === "Lunas"
+                              order.paymentStatus === "PAID"
                                 ? "bg-emerald-50 text-emerald-700"
                                 : "bg-amber-50 text-amber-700"
                             }`}
                           >
-                            {order.paymentStatus}
+                            {order.paymentStatus === "PAID" ? "Lunas" : "Belum Bayar"}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-right">
@@ -159,7 +200,7 @@ export default function MitraOrdersPage() {
                             href={`/mitra/orders/${order.id}`}
                             className="inline-block border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-700 hover:text-zinc-900"
                           >
-                            Lihat Pesanan
+                            Kelola Pesanan
                           </a>
                         </td>
                       </motion.tr>

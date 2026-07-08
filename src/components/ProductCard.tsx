@@ -28,7 +28,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
 
   return (
     <Link
-      href={`/product/${product.id}`}
+      href={`/product/${product.productId || product.id}`}
       className="group flex flex-col items-center"
       aria-label={`Lihat ${product.name} ${product.unit}`}
     >

@@ -12,8 +12,12 @@ import {
   Truck,
   Package,
   CheckCircle2,
+  Camera,
 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
+import { api } from "@/lib/api";
+
+const API_HOST = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 import { Header } from "@/components/Header";
 import { CategoryNav } from "@/components/CategoryNav";
 import {
@@ -21,7 +25,7 @@ import {
   AccountLayoutHeader,
 } from "@/components/account/AccountSidebar";
 import { categories, formatRupiah } from "@/data/products";
-import { useOrders } from "@/lib/orders";
+import { useOrders, type Order, type OrderStatus } from "@/lib/orders";
 import {
   ORDER_STATUS_META,
   formatOrderDateTime,
@@ -31,15 +35,61 @@ export default function OrderDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const getOrder = useOrders((s) => s.getOrder);
-  const [mounted, setMounted] = useState(false);
+  const [order, setOrder] = useState<any | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [recipientPhotoUrl, setRecipientPhotoUrl] = useState<string>("");
+
+  const refreshOrder = async () => {
+    try {
+      const data = await getOrder(params.id);
+      setOrder(data);
+      if (data && (data as any).recipientPhoto) {
+        setRecipientPhotoUrl((data as any).recipientPhoto);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    let active = true;
+    async function load() {
+      try {
+        const data = await getOrder(params.id);
+        if (active) {
+          setOrder(data);
+          if (data && (data as any).recipientPhoto) {
+            setRecipientPhotoUrl((data as any).recipientPhoto);
+          }
+          setLoading(false);
+        }
+      } catch (e) {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+    load();
+    return () => {
+      active = false;
+    };
+  }, [params.id, getOrder]);
 
-  const order = mounted ? getOrder(params.id) : undefined;
+  if (loading) {
+    return (
+      <>
+        <TopBar />
+        <Header />
+        <CategoryNav categories={categories} />
+        <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 text-center">
+          <p className="text-sm text-zinc-500">Memuat detail pesanan...</p>
+        </main>
+      </>
+    );
+  }
 
-  if (!mounted) return null;
   if (!order) {
     return (
       <>
@@ -51,7 +101,7 @@ export default function OrderDetailPage() {
             Pesanan tidak ditemukan
           </h1>
           <p className="mt-2 text-sm text-zinc-500">
-            Pesanan yang kamu cari tidak tersedia.
+            Pesanan yang kamu cari tidak tersedia atau belum dibuat.
           </p>
           <button
             onClick={() => router.push("/account/orders")}
@@ -64,7 +114,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  const meta = ORDER_STATUS_META[order.status];
+  const meta = ORDER_STATUS_META[order.status as OrderStatus];
 
   return (
     <>
@@ -124,7 +174,7 @@ export default function OrderDetailPage() {
                 </h3>
               </div>
               <ul className="divide-y divide-zinc-200">
-                {order.items.map((item, i) => (
+                {order.items.map((item: any, i: number) => (
                   <li
                     key={i}
                     className="flex items-center gap-4 px-5 py-4"
@@ -206,16 +256,130 @@ export default function OrderDetailPage() {
               </div>
             </div>
 
-            {/* Action button */}
-            {order.status === "completed" && (
-              <button
-                type="button"
-                className="flex w-full items-center justify-center gap-2 rounded-sm bg-zinc-900 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-zinc-800 sm:w-auto sm:px-8"
-              >
-                <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} />
-                Beli Lagi
-              </button>
+            {/* Bukti Pengiriman & Penerimaan Foto */}
+            {(order.status === "shipped" || order.status === "completed") && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4">
+                <div className="border border-zinc-200 p-4 rounded-sm bg-zinc-50">
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Bukti Kirim Kurir Penjual</p>
+                  {order.shippingPhoto ? (
+                    <div className="relative h-40 w-full overflow-hidden bg-zinc-100 border border-zinc-200">
+                      <Image
+                        src={order.shippingPhoto.startsWith("/uploads") ? `${API_HOST}${order.shippingPhoto}` : order.shippingPhoto}
+                        alt="Bukti Kirim Kurir"
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-sm text-zinc-400 italic">Penjual belum mengunggah foto bukti kirim.</p>
+                  )}
+                </div>
+
+                <div className="border border-zinc-200 p-4 rounded-sm bg-zinc-50">
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Bukti Terima Pembeli</p>
+                  {order.recipientPhoto ? (
+                    <div className="relative h-40 w-full overflow-hidden bg-zinc-100 border border-zinc-200">
+                      <Image
+                        src={order.recipientPhoto.startsWith("/uploads") ? `${API_HOST}${order.recipientPhoto}` : order.recipientPhoto}
+                        alt="Bukti Terima"
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  ) : order.status === "shipped" ? (
+                    <div className="space-y-2">
+                      <p className="text-xs text-zinc-500">Unggah foto penerimaan (opsional):</p>
+                      {recipientPhotoUrl ? (
+                        <div className="relative h-32 w-32 overflow-hidden bg-zinc-100 border border-zinc-200 mb-2">
+                          <Image
+                            src={recipientPhotoUrl.startsWith("/uploads") ? `${API_HOST}${recipientPhotoUrl}` : recipientPhotoUrl}
+                            alt="Bukti Terima Preview"
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      ) : null}
+                      <label className="inline-flex items-center gap-2 cursor-pointer border border-zinc-300 bg-white hover:bg-zinc-50 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors">
+                        <Camera className="h-4 w-4" />
+                        {uploading ? "Mengunggah..." : "Pilih / Ambil Foto"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setUploading(true);
+                            const formData = new FormData();
+                            formData.append("file", file);
+                            try {
+                              const token = localStorage.getItem("snowys-auth-token");
+                              const res = await fetch(`${API_HOST}/api/uploads/image`, {
+                                method: "POST",
+                                headers: { Authorization: `Bearer ${token}` },
+                                body: formData,
+                              });
+                              if (!res.ok) throw new Error("Upload failed");
+                              const d = await res.json();
+                              setRecipientPhotoUrl(d.url);
+                              alert("Foto berhasil diunggah!");
+                            } catch (err) {
+                              alert("Gagal mengunggah foto.");
+                            } finally {
+                              setUploading(false);
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-zinc-400 italic">Tidak ada foto bukti penerimaan.</p>
+                  )}
+                </div>
+              </div>
             )}
+
+            {/* Action buttons */}
+            <div className="mt-6 flex flex-wrap gap-3">
+              {order.status === "shipped" && (
+                <button
+                  type="button"
+                  disabled={updating || uploading}
+                  onClick={async () => {
+                    setUpdating(true);
+                    try {
+                      await api.put(`/orders/${order.id}/complete`, {
+                        photoUrl: recipientPhotoUrl || undefined,
+                      });
+                      alert("Pesanan berhasil dikonfirmasi selesai!");
+                      refreshOrder();
+                    } catch (e: any) {
+                      alert(e.message || "Gagal mengonfirmasi pesanan.");
+                    } finally {
+                      setUpdating(false);
+                    }
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-sm bg-emerald-600 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-emerald-700 sm:w-auto sm:px-8 disabled:bg-zinc-400"
+                >
+                  <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} />
+                  {updating ? "Memproses..." : "Konfirmasi Terima Pesanan"}
+                </button>
+              )}
+
+              {order.status === "completed" && (
+                <button
+                  type="button"
+                  onClick={() => router.push("/")}
+                  className="flex w-full items-center justify-center gap-2 rounded-sm bg-zinc-900 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-zinc-800 sm:w-auto sm:px-8"
+                >
+                  <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} />
+                  Beli Lagi
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </main>

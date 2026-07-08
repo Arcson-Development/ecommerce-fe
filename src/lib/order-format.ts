@@ -8,6 +8,12 @@ export interface StatusMeta {
 }
 
 export const ORDER_STATUS_META: Record<OrderStatus, StatusMeta> = {
+  pending: {
+    label: "Belum Dibayar",
+    bg: "bg-purple-50",
+    text: "text-purple-700",
+    dot: "bg-purple-500",
+  },
   processing: {
     label: "Diproses",
     bg: "bg-amber-50",

@@ -2,8 +2,10 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { api } from "./api";
+import { useAuth } from "./auth";
 
-export type OrderStatus = "processing" | "shipped" | "completed" | "cancelled";
+export type OrderStatus = "pending" | "processing" | "shipped" | "completed" | "cancelled";
 
 export interface OrderItem {
   productId: string;
@@ -33,159 +35,136 @@ export interface Order {
     postalCode: string;
   };
   trackingNumber?: string;
+  paymentUrl?: string;
+  paymentToken?: string;
+  shippingPhoto?: string;
+  recipientPhoto?: string;
 }
 
 interface OrdersState {
   orders: Order[];
-  addOrder: (order: Order) => void;
-  getOrder: (id: string) => Order | undefined;
+  fetchOrders: () => Promise<void>;
+  checkout: (details: {
+    shippingMethod: string;
+    shippingCost: number;
+    paymentMethod: string;
+  }) => Promise<{ redirectUrl: string; token: string; orderId: string } | null>;
+  getOrder: (id: string) => Promise<Order | undefined>;
 }
 
-const seedOrders: Order[] = [
-  {
-    id: "SNW-1029384",
-    date: "2026-06-28T09:15:00.000Z",
-    status: "completed",
-    items: [
-      {
-        productId: "1",
-        productName: "Brokoli",
-        productImage:
-          "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?w=600&q=80",
-        unit: "1 Kg",
-        price: 18200,
-        quantity: 2,
-      },
-      {
-        productId: "2",
-        productName: "Tomat Merah",
-        productImage:
-          "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&q=80",
-        unit: "1 Kg",
-        price: 28000,
-        quantity: 1,
-      },
-    ],
-    subtotal: 64400,
-    shippingCost: 10000,
-    shippingMethod: "Go-jek (Estimasi 1 – 2 jam)",
-    paymentMethod: "QRIS (default)",
-    total: 74400,
+// Maps backend order to frontend Order format
+function mapBackendOrder(order: any): Order {
+  const subtotal = order.items.reduce(
+    (sum: number, item: any) => sum + item.price * item.quantity,
+    0
+  );
+  
+  // Since backend doesn't store address per order (it links to user.addresses),
+  // we extract address details from user or return placeholder
+  const address = order.user?.addresses?.[0] || {
+    recipient: order.user?.nickname || order.user?.username || "Customer",
+    phone: order.user?.phone || "080000000",
+    street: "Alamat Toko / Pengiriman",
+    city: "Depok",
+    province: "Jawa Barat",
+    postalCode: "16424",
+  };
+
+  return {
+    id: order.id,
+    date: order.createdAt,
+    status: order.status.toLowerCase() as OrderStatus,
+    items: order.items.map((item: any) => ({
+      productId: item.variant?.product?.id || "N/A",
+      productName: item.variant?.product?.name || item.variant?.name || "Produk",
+      productImage: item.variant?.product?.images?.[0] || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
+      unit: item.variant?.product?.unit || "Item",
+      price: item.price,
+      quantity: item.quantity,
+    })),
+    subtotal,
+    shippingCost: order.shippingCost,
+    shippingMethod: order.shippingMethod,
+    paymentMethod: order.paymentMethod,
+    total: order.total,
     shippingAddress: {
-      name: "Juniko Dwi Putra",
-      phone: "081234567890",
-      address: "Jl. Margonda Raya No. 100",
-      city: "Depok",
-      province: "Jawa Barat",
-      postalCode: "16424",
+      name: address.recipient,
+      phone: address.phone,
+      address: address.street,
+      city: address.city,
+      province: address.province,
+      postalCode: address.postalCode,
     },
-    trackingNumber: "GJK-2026-0618-9921",
-  },
-  {
-    id: "SNW-1029312",
-    date: "2026-06-22T14:42:00.000Z",
-    status: "shipped",
-    items: [
-      {
-        productId: "3",
-        productName: "Bawang Merah",
-        productImage:
-          "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&q=80",
-        unit: "1 Kg",
-        price: 45000,
-        quantity: 1,
-      },
-      {
-        productId: "4",
-        productName: "Wortel",
-        productImage:
-          "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=600&q=80",
-        unit: "1 Kg",
-        price: 26000,
-        quantity: 2,
-      },
-    ],
-    subtotal: 97000,
-    shippingCost: 0,
-    shippingMethod: "JNE Regular (Estimasi 2 – 3 hari)",
-    paymentMethod: "Transfer Bank BCA",
-    total: 97000,
-    shippingAddress: {
-      name: "Juniko Dwi Putra",
-      phone: "081234567890",
-      address: "Jl. Margonda Raya No. 100",
-      city: "Depok",
-      province: "Jawa Barat",
-      postalCode: "16424",
-    },
-    trackingNumber: "JNE-7766554433",
-  },
-  {
-    id: "SNW-1029201",
-    date: "2026-06-15T08:05:00.000Z",
-    status: "processing",
-    items: [
-      {
-        productId: "1",
-        productName: "Brokoli",
-        productImage:
-          "https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?w=600&q=80",
-        unit: "1 Kg",
-        price: 18200,
-        quantity: 1,
-      },
-    ],
-    subtotal: 18200,
-    shippingCost: 12000,
-    shippingMethod: "Grab (Estimasi 2 – 3 jam)",
-    paymentMethod: "DANA",
-    total: 30200,
-    shippingAddress: {
-      name: "Juniko Dwi Putra",
-      phone: "081234567890",
-      address: "Jl. Margonda Raya No. 100",
-      city: "Depok",
-      province: "Jawa Barat",
-      postalCode: "16424",
-    },
-  },
-  {
-    id: "SNW-1028987",
-    date: "2026-05-30T19:20:00.000Z",
-    status: "cancelled",
-    items: [
-      {
-        productId: "2",
-        productName: "Tomat Merah",
-        productImage:
-          "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&q=80",
-        unit: "1 Kg",
-        price: 28000,
-        quantity: 3,
-      },
-    ],
-    subtotal: 84000,
-    shippingCost: 10000,
-    shippingMethod: "Go-jek (Estimasi 1 – 2 jam)",
-    paymentMethod: "QRIS (default)",
-    total: 94000,
-    shippingAddress: {
-      name: "Juniko Dwi Putra",
-      phone: "081234567890",
-      address: "Jl. Margonda Raya No. 100",
-      city: "Depok",
-      province: "Jawa Barat",
-      postalCode: "16424",
-    },
-  },
-];
+    trackingNumber: order.trackingNumber || undefined,
+    paymentUrl: order.paymentUrl || undefined,
+    paymentToken: order.paymentToken || undefined,
+    shippingPhoto: order.shippingPhoto || undefined,
+    recipientPhoto: order.recipientPhoto || undefined,
+  };
+}
 
 export const useOrders = create<OrdersState>()(
   persist(
     (set, get) => ({
-      orders: seedOrders,
-      addOrder: (order) => set((state) => ({ orders: [order, ...state.orders] })),
-      getOrder: (id) => get().orders.find((o) => o.id === id),
+      orders: [],
+      fetchOrders: async () => {
+        const isAuth = useAuth.getState().isAuthenticated;
+        if (isAuth) {
+          try {
+            const dbOrders = await api.get("/orders");
+            const mapped = dbOrders.map(mapBackendOrder);
+            set({ orders: mapped });
+          } catch (e) {
+            console.error("Failed to fetch orders from backend", e);
+          }
+        }
+      },
+      checkout: async (details) => {
+        const isAuth = useAuth.getState().isAuthenticated;
+        if (!isAuth) {
+          throw new Error("Anda harus masuk terlebih dahulu.");
+        }
+
+        try {
+          const res = await api.post("/orders/checkout", details);
+          // Orders checkout returns array of created orders (usually length 1 if single shop)
+          const primaryOrder = res[0];
+          
+          // Re-fetch orders list to update UI
+          await get().fetchOrders();
+
+          if (primaryOrder && primaryOrder.paymentUrl) {
+            return {
+              redirectUrl: primaryOrder.paymentUrl,
+              token: primaryOrder.paymentToken,
+              orderId: primaryOrder.id,
+            };
+          }
+          return null;
+        } catch (e: any) {
+          console.error("Checkout failed", e);
+          throw e;
+        }
+      },
+      getOrder: async (id) => {
+        // Try locally first
+        let found = get().orders.find((o) => o.id === id);
+        if (found) return found;
+
+        const isAuth = useAuth.getState().isAuthenticated;
+        if (isAuth) {
+          try {
+            const order = await api.get(`/orders`);
+            const singleOrder = order.find((o: any) => o.id === id);
+            if (singleOrder) {
+              return mapBackendOrder(singleOrder);
+            }
+          } catch (e) {
+            console.error("Failed to fetch single order from backend", e);
+          }
+        }
+        return undefined;
+      },
     }),
     { name: "snowys-orders" }
   )

@@ -14,6 +14,7 @@ import {
 import { categories } from "@/data/products";
 import { useOrders } from "@/lib/orders";
 import { formatRupiah } from "@/data/products";
+import { useAuth } from "@/lib/auth";
 import {
   ORDER_STATUS_META,
   formatOrderDate,
@@ -21,6 +22,7 @@ import {
 
 export default function AccountDashboardPage() {
   const orders = useOrders((s) => s.orders);
+  const user = useAuth((s) => s.user);
 
   const counts = {
     processing: orders.filter((o) => o.status === "processing").length,
@@ -56,7 +58,7 @@ export default function AccountDashboardPage() {
                 Selamat datang kembali
               </p>
               <h2 className="mt-1 text-xl font-semibold sm:text-2xl">
-                Hai, Juniko 👋
+                Hai, {user?.nickname || user?.username || "Pelanggan"} 👋
               </h2>
               <p className="mt-2 text-sm text-zinc-300">
                 Dari dashboard ini kamu bisa melihat pesanan, mengatur alamat,

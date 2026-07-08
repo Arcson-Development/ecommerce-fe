@@ -11,7 +11,9 @@ import {
   User,
   CreditCard,
   LogOut,
+  Shield,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export type AccountSection =
   | "dashboard"
@@ -19,7 +21,8 @@ export type AccountSection =
   | "mitra"
   | "addresses"
   | "account"
-  | "payment";
+  | "payment"
+  | "admin";
 
 interface AccountSidebarProps {
   active: AccountSection;
@@ -43,27 +46,38 @@ const MENU: MenuItem[] = [
 
 export function AccountSidebar({ active }: AccountSidebarProps) {
   const router = useRouter();
+  const user = useAuth((state) => state.user);
+
+  const menuItems = [...MENU];
+  if (user?.role === "ADMIN") {
+    menuItems.push({ key: "admin", label: "Admin Panel", href: "/admin", icon: Shield });
+  }
+
+  // Get initials for avatar
+  const initials = user?.nickname
+    ? user.nickname.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+    : user?.username ? user.username.slice(0, 2).toUpperCase() : "US";
 
   return (
     <aside className="w-full lg:w-64 lg:shrink-0">
       <div className="rounded-sm border border-zinc-200 bg-white">
         <div className="flex items-center gap-3 border-b border-zinc-200 px-5 py-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-sm font-semibold text-white">
-            JD
+            {initials}
           </div>
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
               Akun Saya
             </p>
             <p className="mt-0.5 truncate text-sm font-semibold text-zinc-900">
-              Juniko Dwi Putra
+              {user?.nickname || user?.username || "Pelanggan"}
             </p>
-            <p className="truncate text-xs text-zinc-500">juniko@email.com</p>
+            <p className="truncate text-xs text-zinc-500">{user?.email || ""}</p>
           </div>
         </div>
 
         <nav className="p-2">
-          {MENU.map((item) => {
+          {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = item.key === active;
             return (

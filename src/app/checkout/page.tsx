@@ -14,6 +14,8 @@ import {
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { categories } from "@/data/products";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth";
+import { useOrders } from "@/lib/orders";
 
 const EMPTY_FORM: CheckoutFormData = {
   email: "",
@@ -40,7 +42,11 @@ export default function CheckoutPage() {
     setMounted(true);
   }, []);
 
-  const handleCheckout = () => {
+  const handleCheckout = async (details: {
+    shippingMethod: string;
+    shippingCost: number;
+    paymentMethod: string;
+  }) => {
     const required: (keyof CheckoutFormData)[] = [
       "email",
       "firstName",
@@ -55,10 +61,32 @@ export default function CheckoutPage() {
       alert("Mohon lengkapi semua field yang wajib diisi.");
       return;
     }
+
+    const { isAuthenticated } = useAuth.getState();
+    if (!isAuthenticated) {
+      alert("Anda harus masuk (login) terlebih dahulu untuk membuat pesanan.");
+      router.push("/auth");
+      return;
+    }
+
     setIsProcessing(true);
-    setTimeout(() => {
-      router.push("/checkout/success");
-    }, 800);
+    try {
+      // Send shipping details to backend and get midtrans redirect URL
+      const checkoutResult = await useOrders.getState().checkout(details);
+      
+      if (checkoutResult && checkoutResult.redirectUrl) {
+        // Clear local cart
+        await useCart.getState().clear();
+        // Redirect browser to Midtrans Snap Payment page
+        window.location.href = checkoutResult.redirectUrl;
+      } else {
+        alert("Gagal memproses link pembayaran Midtrans.");
+        setIsProcessing(false);
+      }
+    } catch (e: any) {
+      alert(e.message || "Gagal melakukan checkout.");
+      setIsProcessing(false);
+    }
   };
 
   return (

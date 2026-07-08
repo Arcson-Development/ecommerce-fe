@@ -11,17 +11,58 @@ interface PaginationProps {
 
 
 
-// Show pages 1-4, ellipsis, 13-15
-const visiblePages: (number | "...")[] = [1, 2, 3, 4, "...", 13, 14, 15];
+function getVisiblePages(current: number, total: number): (number | "...")[] {
+  const pages: (number | "...")[] = [];
+  
+  if (total <= 9) {
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+  
+  // Selalu tampilkan 3 halaman pertama
+  pages.push(1, 2, 3);
+  
+  if (current > 5) {
+    pages.push("...");
+  }
+  
+  // Tampilkan halaman di tengah (aktif +/- 1)
+  const start = Math.max(4, current - 1);
+  const end = Math.min(total - 3, current + 1);
+  
+  for (let i = start; i <= end; i++) {
+    if (!pages.includes(i)) {
+      pages.push(i);
+    }
+  }
+  
+  if (current < total - 4) {
+    pages.push("...");
+  }
+  
+  // Selalu tampilkan 3 halaman terakhir
+  const lastPages = [total - 2, total - 1, total];
+  lastPages.forEach(p => {
+    if (!pages.includes(p)) {
+      pages.push(p);
+    }
+  });
+  
+  return pages;
+}
 
 export function Pagination({ current, total, onChange }: PaginationProps) {
+  const pages = getVisiblePages(current, total);
+
   return (
     <nav
       className="mx-auto flex max-w-7xl justify-center px-4 py-12 sm:px-6 lg:px-8"
       aria-label="Pagination"
     >
       <ul className="flex items-center gap-2">
-        {visiblePages.map((page, i) =>
+        {pages.map((page, i) =>
           page === "..." ? (
             <li
               key={`ellipsis-${i}`}

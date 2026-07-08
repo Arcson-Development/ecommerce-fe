@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, ChevronRight, Package } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
@@ -21,6 +21,7 @@ import {
 
 const FILTERS: { key: "all" | OrderStatus; label: string }[] = [
   { key: "all", label: "Semua" },
+  { key: "pending", label: "Belum Dibayar" },
   { key: "processing", label: "Diproses" },
   { key: "shipped", label: "Dikirim" },
   { key: "completed", label: "Selesai" },
@@ -29,8 +30,13 @@ const FILTERS: { key: "all" | OrderStatus; label: string }[] = [
 
 export default function OrdersPage() {
   const orders = useOrders((s) => s.orders);
+  const fetchOrders = useOrders((s) => s.fetchOrders);
   const [filter, setFilter] = useState<"all" | OrderStatus>("all");
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const filtered = useMemo(() => {
     let list = orders;
@@ -51,13 +57,16 @@ export default function OrdersPage() {
   const counts = useMemo(() => {
     const c: Record<"all" | OrderStatus, number> = {
       all: orders.length,
+      pending: 0,
       processing: 0,
       shipped: 0,
       completed: 0,
       cancelled: 0,
     };
     orders.forEach((o) => {
-      c[o.status] += 1;
+      if (c[o.status] !== undefined) {
+        c[o.status] += 1;
+      }
     });
     return c;
   }, [orders]);

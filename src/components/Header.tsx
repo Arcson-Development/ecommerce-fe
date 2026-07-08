@@ -1,14 +1,34 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Search, ShoppingBag, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth";
+import { useMitra } from "@/lib/mitra";
 import { products, formatRupiah } from "@/data/products";
 
 export function Header() {
   const items = useCart((state) => state.items);
   const cartCount = useCart((state) => state.getCount());
+  
+  const user = useAuth((state) => state.user);
+  const isAuthenticated = useAuth((state) => state.isAuthenticated);
+  const fetchProfile = useAuth((state) => state.fetchProfile);
+  const fetchCart = useCart((state) => state.fetchCart);
+  const fetchMitraStatus = useMitra((state) => state.fetchMitraStatus);
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (isAuthenticated) {
+      fetchProfile();
+      fetchCart();
+      fetchMitraStatus();
+    }
+  }, [isAuthenticated, fetchProfile, fetchCart, fetchMitraStatus]);
 
   const cartTotal = items.reduce((sum, item) => {
     const product = products.find((p) => p.id === item.id);
@@ -27,7 +47,7 @@ export function Header() {
         >
           <Logo />
           <span className="hidden text-xl font-semibold text-zinc-900 sm:inline">
-            Snowy&apos;s Store
+            Pasar Jaya
           </span>
         </motion.div>
 
@@ -39,10 +59,10 @@ export function Header() {
           className="flex items-center gap-4 sm:gap-6"
         >
           <Link
-            href="/account"
+            href={isAuthenticated ? "/account" : "/auth"}
             className="hidden text-sm text-zinc-700 transition-colors hover:text-orange-600 sm:inline"
           >
-            Akun Saya
+            {isAuthenticated && user ? `Hai, ${user.nickname || user.username}` : "Masuk / Daftar"}
           </Link>
           <span className="hidden h-5 w-px bg-gray-300 sm:inline-block" />
 
@@ -51,7 +71,7 @@ export function Header() {
             className="hidden text-sm text-zinc-700 transition-colors hover:text-orange-600 md:inline"
           >
             Keranjang &gt;{" "}
-            <span className="font-semibold">{formatRupiah(cartTotal)}</span>
+            <span className="font-semibold">{formatRupiah(mounted ? cartTotal : 0)}</span>
           </Link>
 
           {/* Cart icon with animated count badge */}
@@ -69,15 +89,17 @@ export function Header() {
                 className="h-6 w-6 text-zinc-800"
                 strokeWidth={1.75}
               />
-              <motion.span
-                key={cartCount}
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-900 px-1 text-[10px] font-bold text-white"
-              >
-                {cartCount}
-              </motion.span>
+              {mounted && cartCount > 0 && (
+                <motion.span
+                  key={cartCount}
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                  className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-900 px-1 text-[10px] font-bold text-white"
+                >
+                  {cartCount}
+                </motion.span>
+              )}
             </motion.div>
           </Link>
 

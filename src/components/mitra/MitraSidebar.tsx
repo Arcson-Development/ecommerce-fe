@@ -11,6 +11,7 @@ import {
   UserCircle2,
   LogOut,
   ShoppingBag,
+  Settings,
 } from "lucide-react";
 
 export type MitraSection =
@@ -18,7 +19,8 @@ export type MitraSection =
   | "orders"
   | "stock"
   | "address"
-  | "account";
+  | "account"
+  | "settings";
 
 interface MitraSidebarProps {
   active: MitraSection;
@@ -35,6 +37,7 @@ const MENU: MenuItem[] = [
   { key: "dashboard", label: "Dasbor", href: "/mitra", icon: LayoutDashboard },
   { key: "orders", label: "Pesanan Masuk", href: "/mitra/orders", icon: Inbox },
   { key: "stock", label: "Stok Produk", href: "/mitra/products", icon: Boxes },
+  { key: "settings", label: "Pengaturan Toko", href: "/mitra/settings", icon: Settings },
   { key: "address", label: "Alamat", href: "/mitra/address", icon: MapPin },
   { key: "account", label: "Detail Akun Mitra", href: "/mitra/account", icon: UserCircle2 },
 ];
