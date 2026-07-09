@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown, Search, X } from "lucide-react";
 import { useState } from "react";
 import type { SortOption } from "@/types/product";
 
@@ -11,6 +11,7 @@ interface BreadcrumbProps {
   showCount: number;
   sortBy: SortOption;
   onSortChange: (s: SortOption) => void;
+  searchQuery?: string;
 }
 
 const sortLabels: Record<SortOption, string> = {
@@ -27,11 +28,12 @@ export function Breadcrumb({
   showCount,
   sortBy,
   onSortChange,
+  searchQuery,
 }: BreadcrumbProps) {
   return (
     <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-3 px-4 py-4 text-sm sm:flex-row sm:items-center sm:px-6 lg:px-8">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-zinc-500">
+      <nav className="flex items-center gap-1.5 text-zinc-500 flex-wrap">
         {items.map((item, i) => (
           <span key={item} className="flex items-center gap-1.5">
             {i > 0 && (
@@ -52,6 +54,18 @@ export function Breadcrumb({
             )}
           </span>
         ))}
+        {searchQuery && (
+          <>
+            <ChevronRight
+              className="h-3.5 w-3.5 text-zinc-400"
+              strokeWidth={2}
+            />
+            <span className="flex items-center gap-1.5 bg-orange-50 px-2 py-1 rounded-full">
+              <Search className="h-3 w-3 text-orange-600" />
+              <span className="font-medium text-orange-700 text-xs">"{searchQuery}"</span>
+            </span>
+          </>
+        )}
       </nav>
 
       {/* Right side: result count + sort */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { CategoryNav } from "@/components/CategoryNav";
@@ -25,9 +26,13 @@ const VEG_CATEGORIES: Category[] = [
 ];
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [page, setPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [productsList, setProductsList] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -35,7 +40,7 @@ export default function Home() {
 
   useEffect(() => {
     setPage(1);
-  }, [selectedCategory]);
+  }, [selectedCategory, searchQuery]);
 
   useEffect(() => {
     async function loadProducts() {
@@ -43,9 +48,14 @@ export default function Home() {
       try {
         const queryParams = new URLSearchParams();
         queryParams.append("page", page.toString());
-        queryParams.append("limit", "12"); // Tampilkan 12 produk per halaman (1 baris isi 4 item, total 3 baris)
+        queryParams.append("limit", "12");
+        
         if (selectedCategory !== "Semua") {
           queryParams.append("categoryName", selectedCategory);
+        }
+        
+        if (searchQuery) {
+          queryParams.append("search", searchQuery);
         }
 
         const res = await api.get(`/products?${queryParams.toString()}`);
@@ -57,7 +67,6 @@ export default function Home() {
         setTotalPages(pages);
 
         const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
-        // Map backend Prisma Product structure to frontend Product structure
         const mapped = dbProducts.map((p: any) => {
           const primaryVariant = p.variants?.[0];
           const imageUrl = p.images?.[0];
@@ -66,7 +75,7 @@ export default function Home() {
             : (imageUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80");
 
           return {
-            id: primaryVariant?.id || p.id, // We use variant ID for checkout/cart, so map variant ID to product ID in the grid
+            id: primaryVariant?.id || p.id,
             productId: p.id,
             name: p.name,
             image,
@@ -93,7 +102,6 @@ export default function Home() {
         setProductsList(sorted);
       } catch (e) {
         console.error("Failed to load products from backend API, using mock products", e);
-        // Fallback mapping for static mock data
         setProductsList(mockProducts.map(p => ({ ...p, categoryName: "Sayuran" })));
         setTotalProducts(mockProducts.length);
         setTotalPages(Math.ceil(mockProducts.length / 12));
@@ -102,12 +110,16 @@ export default function Home() {
       }
     }
     loadProducts();
-  }, [page, selectedCategory, sortBy]);
+  }, [page, selectedCategory, sortBy, searchQuery]);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
 
   return (
     <>
       <TopBar />
-      <Header />
+      <Header onSearch={handleSearch} initialSearch={initialSearch} />
       <CategoryNav
         categories={VEG_CATEGORIES}
         selectedCategory={selectedCategory}
@@ -119,6 +131,7 @@ export default function Home() {
         showCount={productsList.length}
         sortBy={sortBy}
         onSortChange={setSortBy}
+        searchQuery={searchQuery}
       />
       {loading ? (
         <div className="text-center py-16 text-zinc-500 text-sm">
@@ -126,7 +139,10 @@ export default function Home() {
         </div>
       ) : productsList.length === 0 ? (
         <div className="text-center py-16 text-zinc-500 text-sm">
-          Tidak ada sayuran segar di kategori "{selectedCategory}".
+          {searchQuery 
+            ? `Tidak ada produk yang cocok dengan "${searchQuery}"`
+            : `Tidak ada sayuran segar di kategori "${selectedCategory}".`
+          }
         </div>
       ) : (
         <ProductGrid products={productsList} />

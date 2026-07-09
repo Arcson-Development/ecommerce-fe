@@ -1,15 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Search, ShoppingBag, UserRound } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, ShoppingBag, UserRound, X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { useMitra } from "@/lib/mitra";
 import { products, formatRupiah } from "@/data/products";
 
-export function Header() {
+interface HeaderProps {
+  onSearch?: (query: string) => void;
+  initialSearch?: string;
+}
+
+export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
   const items = useCart((state) => state.items);
   const cartCount = useCart((state) => state.getCount());
   
@@ -20,6 +26,10 @@ export function Header() {
   const fetchMitraStatus = useMitra((state) => state.fetchMitraStatus);
 
   const [mounted, setMounted] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -29,6 +39,31 @@ export function Header() {
       fetchMitraStatus();
     }
   }, [isAuthenticated, fetchProfile, fetchCart, fetchMitraStatus]);
+
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSearch) {
+      onSearch(searchQuery);
+    } else {
+      router.push(`/?search=${encodeURIComponent(searchQuery)}`);
+    }
+    setSearchOpen(false);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    if (onSearch) {
+      onSearch("");
+    } else {
+      router.push("/");
+    }
+  };
 
   const cartTotal = items.reduce((sum, item) => {
     const product = products.find((p) => p.id === item.id);
@@ -45,10 +80,40 @@ export function Header() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="flex items-center gap-3"
         >
-          <Logo />
+          <Link href="/">
+            <Logo />
+          </Link>
           <span className="hidden text-xl font-semibold text-zinc-900 sm:inline">
             Pasar Jaya
           </span>
+        </motion.div>
+
+        {/* Search Bar - Desktop */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="hidden md:flex flex-1 max-w-xl"
+        >
+          <form onSubmit={handleSearch} className="relative w-full">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari sayur, buah, daging, seafood..."
+              className="w-full border border-gray-300 bg-gray-50 pl-12 pr-12 py-3 text-sm rounded-lg focus:border-orange-500 focus:bg-white focus:outline-none transition-colors"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </form>
         </motion.div>
 
         {/* Right actions */}
@@ -103,16 +168,59 @@ export function Header() {
             </motion.div>
           </Link>
 
+          {/* Mobile search button */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.92 }}
+            onClick={() => setSearchOpen(true)}
             aria-label="Cari"
-            className="text-zinc-800"
+            className="md:hidden text-zinc-800"
           >
             <Search className="h-6 w-6" strokeWidth={1.75} />
           </motion.button>
         </motion.div>
       </div>
+
+      {/* Mobile Search Modal */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 md:hidden"
+            onClick={() => setSearchOpen(false)}
+          >
+            <motion.div
+              initial={{ y: -100 }}
+              animate={{ y: 0 }}
+              exit={{ y: -100 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-white p-4 shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cari sayur, buah, daging, seafood..."
+                  className="w-full border border-gray-300 bg-gray-50 pl-12 pr-12 py-3 text-sm rounded-lg focus:border-orange-500 focus:bg-white focus:outline-none transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(false)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
