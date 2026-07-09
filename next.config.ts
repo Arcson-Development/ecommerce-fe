@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    turbo: { enabled: false },
+  },
 };
 
 export default nextConfig;
