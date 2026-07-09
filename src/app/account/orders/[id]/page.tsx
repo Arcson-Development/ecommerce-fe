@@ -316,7 +316,7 @@ export default function OrderDetailPage() {
                             const formData = new FormData();
                             formData.append("file", file);
                             try {
-                              const token = localStorage.getItem("snowys-auth-token");
+                              const token = localStorage.getItem("pasarjaya-token") || JSON.parse(localStorage.getItem("pasarjaya-auth") || "{}")?.state?.token;
                               const res = await fetch(`${API_HOST}/api/uploads/image`, {
                                 method: "POST",
                                 headers: { Authorization: `Bearer ${token}` },

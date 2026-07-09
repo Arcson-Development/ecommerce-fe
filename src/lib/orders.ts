@@ -166,6 +166,6 @@ export const useOrders = create<OrdersState>()(
         return undefined;
       },
     }),
-    { name: "snowys-orders" }
+    { name: "pasarjaya-orders" }
   )
 );

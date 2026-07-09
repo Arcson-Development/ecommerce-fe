@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
@@ -12,19 +12,6 @@ import { products as mockProducts } from "@/data/products";
 import { api } from "@/lib/api";
 import type { Product, Category, SortOption } from "@/types/product";
 
-const VEG_CATEGORIES: Category[] = [
-  { name: "Semua" },
-  { name: "Sayuran" },
-  { name: "Buah-buahan" },
-  { name: "Daging" },
-  { name: "Seafood" },
-  { name: "Bumbu Dapur" },
-  { name: "Fashion" },
-  { name: "Make Up" },
-  { name: "Food" },
-  { name: "Lainnya" },
-];
-
 export default function Home() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
@@ -34,9 +21,36 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [productsList, setProductsList] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([{ name: "Semua" }]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+
+  // Fetch categories from API
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const res = await api.get("/categories");
+        const cats = Array.isArray(res) ? res : [];
+        setCategories([{ name: "Semua" }, ...cats.map((c: any) => ({ name: c.name }))]);
+      } catch (e) {
+        // Fallback to default categories if API fails
+        setCategories([
+          { name: "Semua" },
+          { name: "Sayuran" },
+          { name: "Buah-buahan" },
+          { name: "Daging" },
+          { name: "Seafood" },
+          { name: "Bumbu Dapur" },
+          { name: "Fashion" },
+          { name: "Make Up" },
+          { name: "Food" },
+          { name: "Lainnya" },
+        ]);
+      }
+    }
+    loadCategories();
+  }, []);
 
   useEffect(() => {
     setPage(1);
@@ -121,7 +135,7 @@ export default function Home() {
       <TopBar />
       <Header onSearch={handleSearch} initialSearch={initialSearch} />
       <CategoryNav
-        categories={VEG_CATEGORIES}
+        categories={categories}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
@@ -141,7 +155,7 @@ export default function Home() {
         <div className="text-center py-16 text-zinc-500 text-sm">
           {searchQuery 
             ? `Tidak ada produk yang cocok dengan "${searchQuery}"`
-            : `Tidak ada sayuran segar di kategori "${selectedCategory}".`
+            : `Tidak ada produk di kategori "${selectedCategory}".`
           }
         </div>
       ) : (

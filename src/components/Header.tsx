@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { useMitra } from "@/lib/mitra";
-import { products, formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/data/products";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -18,6 +18,7 @@ interface HeaderProps {
 export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
   const items = useCart((state) => state.items);
   const cartCount = useCart((state) => state.getCount());
+  const cartTotal = useCart((state) => state.getTotal());
   
   const user = useAuth((state) => state.user);
   const isAuthenticated = useAuth((state) => state.isAuthenticated);
@@ -64,11 +65,6 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
       router.push("/");
     }
   };
-
-  const cartTotal = items.reduce((sum, item) => {
-    const product = products.find((p) => p.id === item.id);
-    return product ? sum + product.price * item.quantity : sum;
-  }, 0);
 
   return (
     <header className="border-b border-gray-200 bg-white">

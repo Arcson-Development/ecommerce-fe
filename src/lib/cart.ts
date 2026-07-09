@@ -6,18 +6,22 @@ import { api } from "./api";
 import { useAuth } from "./auth";
 
 export interface CartItem {
-  id: string; // This represents the variantId in the frontend
+  id: string; // variantId
   quantity: number;
+  price?: number; // Price at time of adding
+  name?: string; // Product name for display
+  image?: string; // Product image for display
 }
 
 interface CartState {
   items: CartItem[];
   fetchCart: () => Promise<void>;
-  addItem: (variantId: string) => Promise<void>;
+  addItem: (variantId: string, price?: number, name?: string, image?: string) => Promise<void>;
   removeItem: (variantId: string) => Promise<void>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
   clear: () => Promise<void>;
   getCount: () => number;
+  getTotal: () => number;
 }
 
 export const useCart = create<CartState>()(
@@ -29,10 +33,12 @@ export const useCart = create<CartState>()(
         if (isAuth) {
           try {
             const dbItems = await api.get("/cart");
-            // Map backend CartItem { variantId, quantity } to frontend CartItem { id: variantId, quantity }
             const mapped = dbItems.map((item: any) => ({
               id: item.variantId,
               quantity: item.quantity,
+              price: item.variant?.price,
+              name: item.variant?.product?.name,
+              image: item.variant?.product?.images?.[0],
             }));
             set({ items: mapped });
           } catch (e) {
@@ -40,10 +46,9 @@ export const useCart = create<CartState>()(
           }
         }
       },
-      addItem: async (variantId) => {
+      addItem: async (variantId, price, name, image) => {
         const isAuth = useAuth.getState().isAuthenticated;
         
-        // Update local state first (Optimistic update)
         const currentItems = get().items;
         const existing = currentItems.find((i) => i.id === variantId);
         let newItems: CartItem[] = [];
@@ -53,12 +58,11 @@ export const useCart = create<CartState>()(
             i.id === variantId ? { ...i, quantity: i.quantity + 1 } : i
           );
         } else {
-          newItems = [...currentItems, { id: variantId, quantity: 1 }];
+          newItems = [...currentItems, { id: variantId, quantity: 1, price, name, image }];
         }
         
         set({ items: newItems });
 
-        // Sync with backend if authenticated
         if (isAuth) {
           try {
             const quantity = existing ? existing.quantity + 1 : 1;
@@ -71,12 +75,10 @@ export const useCart = create<CartState>()(
       removeItem: async (variantId) => {
         const isAuth = useAuth.getState().isAuthenticated;
         
-        // Update local state
         set((state) => ({
           items: state.items.filter((i) => i.id !== variantId),
         }));
 
-        // Sync with backend
         if (isAuth) {
           try {
             await api.delete(`/cart/items/${variantId}`);
@@ -93,14 +95,12 @@ export const useCart = create<CartState>()(
           return;
         }
 
-        // Update local state
         set((state) => ({
           items: state.items.map((i) =>
             i.id === variantId ? { ...i, quantity } : i
           ),
         }));
 
-        // Sync with backend
         if (isAuth) {
           try {
             await api.post("/cart/items", { variantId, quantity });
@@ -110,11 +110,11 @@ export const useCart = create<CartState>()(
         }
       },
       clear: async () => {
-        set({ items: [] });
-        // Handled automatically on checkout, but if cleared manually and authenticated:
         const isAuth = useAuth.getState().isAuthenticated;
-        if (isAuth) {
-          const currentItems = get().items;
+        const currentItems = get().items;
+        
+        // Sync with backend BEFORE clearing
+        if (isAuth && currentItems.length > 0) {
           for (const item of currentItems) {
             try {
               await api.delete(`/cart/items/${item.id}`);
@@ -123,10 +123,14 @@ export const useCart = create<CartState>()(
             }
           }
         }
+        
+        set({ items: [] });
       },
       getCount: () =>
         get().items.reduce((sum, item) => sum + item.quantity, 0),
+      getTotal: () =>
+        get().items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0),
     }),
-    { name: "snowys-cart" }
+    { name: "pasarjaya-cart" }
   )
 );

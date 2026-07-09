@@ -89,7 +89,7 @@ export const useMitra = create<MitraState>()(
       getApplication: (id) =>
         get().applications.find((x) => x.id === id),
     }),
-    { name: "snowys-mitra" }
+    { name: "pasarjaya-mitra" }
   )
 );
 

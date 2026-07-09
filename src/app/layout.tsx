@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Snowy's Store — Sayur Segar Online",
+  title: "Pasar Jaya — Sayur Segar Online",
   description:
     "Belanja sayur segar online dengan ongkir hemat. Dikirim langsung dari toko sayur terpercaya.",
 };
