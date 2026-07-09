@@ -35,9 +35,9 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
   useEffect(() => {
     setMounted(true);
     if (isAuthenticated) {
-      fetchProfile();
-      fetchCart();
-      fetchMitraStatus();
+      fetchProfile().catch(() => {});
+      fetchCart().catch(() => {});
+      fetchMitraStatus().catch(() => {});
     }
   }, [isAuthenticated, fetchProfile, fetchCart, fetchMitraStatus]);
 
@@ -92,12 +92,13 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
           className="hidden md:flex flex-1 max-w-xl"
         >
           <form onSubmit={handleSearch} className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" aria-hidden="true" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari sayur, buah, daging, seafood..."
+              aria-label="Cari produk"
               className="w-full border border-gray-300 bg-gray-50 pl-12 pr-12 py-3 text-sm rounded-lg focus:border-orange-500 focus:bg-white focus:outline-none transition-colors"
             />
             {searchQuery && (
@@ -196,13 +197,14 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
               onClick={(e) => e.stopPropagation()}
             >
               <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" aria-hidden="true" />
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari sayur, buah, daging, seafood..."
+                  aria-label="Cari produk"
                   className="w-full border border-gray-300 bg-gray-50 pl-12 pr-12 py-3 text-sm rounded-lg focus:border-orange-500 focus:bg-white focus:outline-none transition-colors"
                 />
                 <button
