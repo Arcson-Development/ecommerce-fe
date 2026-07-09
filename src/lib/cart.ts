@@ -20,6 +20,7 @@ interface CartState {
   removeItem: (variantId: string) => Promise<void>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
   clear: () => Promise<void>;
+  syncGuestCart: () => Promise<void>;
   getCount: () => number;
   getTotal: () => number;
 }
@@ -126,11 +127,25 @@ export const useCart = create<CartState>()(
         
         set({ items: [] });
       },
-      getCount: () =>
-        get().items.reduce((sum, item) => sum + item.quantity, 0),
-      getTotal: () =>
-        get().items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0),
-    }),
+  syncGuestCart: async () => {
+    const isAuth = useAuth.getState().isAuthenticated;
+    const localItems = get().items;
+    if (isAuth && localItems.length > 0) {
+      try {
+        for (const item of localItems) {
+          await api.post("/cart/items", { variantId: item.id, quantity: item.quantity });
+        }
+        await get().fetchCart();
+      } catch (e) {
+        console.error("Failed to sync guest cart", e);
+      }
+    }
+  },
+  getCount: () =>
+    get().items.reduce((sum, item) => sum + item.quantity, 0),
+  getTotal: () =>
+    get().items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0),
+}),
     { name: "pasarjaya-cart" }
   )
 );

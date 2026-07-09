@@ -32,15 +32,23 @@ const EMPTY_FORM: CheckoutFormData = {
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const isAuthenticated = useAuth((s) => s.isAuthenticated);
   const items = useCart((state) => state.items);
   const [form, setForm] = useState<CheckoutFormData>(EMPTY_FORM);
   const [isProcessing, setIsProcessing] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Avoid hydration mismatch with persisted Zustand store
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    if (!isAuthenticated) {
+      router.replace("/auth?redirect=/checkout");
+    } else {
+      useCart.getState().fetchCart();
+    }
+    setCheckingAuth(false);
+  }, [isAuthenticated, router]);
 
   const handleCheckout = async (details: {
     shippingMethod: string;

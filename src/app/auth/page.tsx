@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { useCart } from "@/lib/cart";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { Mail, Phone, Lock, User as UserIcon, Loader } from "lucide-react";
@@ -12,6 +13,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
   // Form Fields
   const [username, setUsername] = useState("");
@@ -21,7 +23,12 @@ export default function AuthPage() {
   const [nickname, setNickname] = useState("");
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, register } = useAuth();
+
+  useEffect(() => {
+    setRedirectTo(searchParams.get("redirect"));
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,12 +37,15 @@ export default function AuthPage() {
 
     try {
       if (isLogin) {
-        // backend login accepts username, email or phone as loginKey
         await login({ loginKey: username, password });
       } else {
         await register({ username, password, email, phone, nickname });
       }
-      router.push("/account");
+
+      // Sync guest cart items to backend after login/register
+      await useCart.getState().syncGuestCart();
+
+      router.push(redirectTo || "/account");
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
     } finally {
