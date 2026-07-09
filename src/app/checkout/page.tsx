@@ -37,18 +37,34 @@ export default function CheckoutPage() {
   const [form, setForm] = useState<CheckoutFormData>(EMPTY_FORM);
   const [isProcessing, setIsProcessing] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+  }, []);
 
+  useEffect(() => {
+    const unsub = useAuth.persist.onFinishHydration(() => setHydrated(true));
+    if (useAuth.persist.hasHydrated()) setHydrated(true);
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     if (!isAuthenticated) {
       router.replace("/auth?redirect=/checkout");
     } else {
       useCart.getState().fetchCart();
     }
-    setCheckingAuth(false);
-  }, [isAuthenticated, router]);
+  }, [hydrated, isAuthenticated, router]);
+
+  if (!mounted || !hydrated) {
+    return <CheckoutShell><LoadingState /></CheckoutShell>;
+  }
+
+  if (!isAuthenticated) {
+    return <CheckoutShell><LoadingState /></CheckoutShell>;
+  }
 
   const handleCheckout = async (details: {
     shippingMethod: string;
@@ -98,31 +114,23 @@ export default function CheckoutPage() {
   };
 
   return (
-    <>
-      <TopBar />
-      <Header />
-      <CategoryNav categories={categories} />
-
-      <CheckoutSteps current="checkout" />
-
-      <main className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
-        {!mounted || items.length === 0 ? (
-          <EmptyCart />
-        ) : (
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px] lg:gap-12">
-            <div>
-              <CheckoutForm data={form} onChange={setForm} />
-            </div>
-            <div className="lg:sticky lg:top-6 lg:self-start">
-              <OrderSummary
-                onCheckout={handleCheckout}
-                isProcessing={isProcessing}
-              />
-            </div>
+    <CheckoutShell>
+      {items.length === 0 ? (
+        <EmptyCart />
+      ) : (
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px] lg:gap-12">
+          <div>
+            <CheckoutForm data={form} onChange={setForm} />
           </div>
-        )}
-      </main>
-    </>
+          <div className="lg:sticky lg:top-6 lg:self-start">
+            <OrderSummary
+              onCheckout={handleCheckout}
+              isProcessing={isProcessing}
+            />
+          </div>
+        </div>
+      )}
+    </CheckoutShell>
   );
 }
 
@@ -147,5 +155,27 @@ function EmptyCart() {
         Mulai Belanja
       </button>
     </motion.div>
+  );
+}
+
+function CheckoutShell({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <TopBar />
+      <Header />
+      <CategoryNav categories={categories} />
+      <CheckoutSteps current="checkout" />
+      <main className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
+        {children}
+      </main>
+    </>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="flex items-center justify-center py-20">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900" />
+    </div>
   );
 }
