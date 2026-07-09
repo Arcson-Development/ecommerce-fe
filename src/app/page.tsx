@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
@@ -12,7 +12,7 @@ import { products as mockProducts } from "@/data/products";
 import { api } from "@/lib/api";
 import type { Product, Category, SortOption } from "@/types/product";
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get("search") || "";
   
@@ -163,5 +163,13 @@ export default function Home() {
       )}
       <Pagination current={page} total={totalPages} onChange={setPage} />
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="text-center py-16 text-zinc-500 text-sm">Memuat...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
