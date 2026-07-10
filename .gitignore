@@ -44,3 +44,6 @@ next-env.d.ts
 # pm2
 /logs
 ecosystem.snapshot.*
+
+# core dumps
+core.*
