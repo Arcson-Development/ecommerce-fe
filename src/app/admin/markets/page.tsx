@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { Building2, Plus, Search, X, MapPin, Power, Edit3, Trash2 } from "lucide-react";
-import { LeafletMap } from "@/components/LeafletMap";
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
+
+const LeafletMap = dynamic(() => import("@/components/LeafletMap").then((m) => ({ default: m.LeafletMap })), { ssr: false });
 
 export default function AdminMarketsPage() {
   const [markets, setMarkets] = useState<any[]>([]);

@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ChevronDown, ChevronLeft, Upload } from "lucide-react";
+import dynamic from "next/dynamic";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
-import { LeafletMap } from "@/components/LeafletMap";
+
+const LeafletMap = dynamic(() => import("@/components/LeafletMap").then((m) => ({ default: m.LeafletMap })), { ssr: false });
 import {
   AccountSidebar,
   AccountLayoutHeader,
