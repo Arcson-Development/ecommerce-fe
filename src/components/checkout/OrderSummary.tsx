@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ChevronDown, Truck, CreditCard } from "lucide-react";
+import { ChevronDown, Truck, CreditCard, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useCart } from "@/lib/cart";
@@ -18,6 +18,8 @@ interface OrderSummaryProps {
 
 export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
   const updateQuantity = useCart((state) => state.updateQuantity);
+  const removeItem = useCart((state) => state.removeItem);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const [cartDetails, setCartDetails] = useState<any[]>([]);
   const [shippingMethods, setShippingMethods] = useState<any[]>([]);
@@ -147,18 +149,45 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
                     {product.name} - {variant.name}
                   </p>
                   <p className="text-xs text-zinc-500">× {item.quantity}</p>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      await updateQuantity(variant.id, item.quantity - 1);
-                      // Reload cart details locally after updating quantity
-                      const dbCart = await api.get("/cart");
-                      setCartDetails(dbCart);
-                    }}
-                    className="mt-1 text-xs text-zinc-400 underline-offset-2 hover:text-zinc-700 hover:underline"
-                  >
-                    Kurangi
-                  </button>
+                  <div className="mt-1 flex items-center gap-3">
+                    <button
+                      type="button"
+                      disabled={updatingId === item.id}
+                      onClick={async () => {
+                        setUpdatingId(item.id);
+                        try {
+                          await updateQuantity(variant.id, item.quantity - 1);
+                          const dbCart = await api.get("/cart");
+                          setCartDetails(dbCart);
+                        } finally {
+                          setUpdatingId(null);
+                        }
+                      }}
+                      className="text-xs text-zinc-400 underline-offset-2 hover:text-zinc-700 hover:underline disabled:opacity-50"
+                    >
+                      Kurangi
+                    </button>
+                    <button
+                      type="button"
+                      disabled={updatingId === item.id}
+                      onClick={async () => {
+                        setUpdatingId(item.id);
+                        try {
+                          await removeItem(variant.id);
+                          const dbCart = await api.get("/cart");
+                          setCartDetails(dbCart);
+                          toast.success("Item dihapus dari keranjang");
+                        } catch {
+                          toast.error("Gagal menghapus item");
+                        } finally {
+                          setUpdatingId(null);
+                        }
+                      }}
+                      className="flex items-center gap-1 text-xs text-rose-400 underline-offset-2 hover:text-rose-600 hover:underline disabled:opacity-50"
+                    >
+                      <Trash2 className="h-3 w-3" /> Hapus
+                    </button>
+                  </div>
                 </div>
               </div>
               <span className="text-sm font-medium text-zinc-900">
