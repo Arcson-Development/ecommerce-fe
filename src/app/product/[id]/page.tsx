@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
@@ -88,7 +89,7 @@ export default function ProductPage() {
         setRelatedProducts(filtered);
       } catch (e) {
         console.error("Failed to fetch product details", e);
-        router.push("/404");
+        notFound();
       } finally {
         setLoading(false);
       }
@@ -109,7 +110,18 @@ export default function ProductPage() {
     );
   }
 
-  if (!product) return null;
+  if (!product) {
+    return (
+      <>
+        <TopBar />
+        <Header />
+        <CategoryNav categories={VEG_CATEGORIES} />
+        <div className="text-center py-16 text-zinc-500 text-sm">
+          Produk tidak ditemukan.
+        </div>
+      </>
+    );
+  }
 
   const galleryImages = [product.image, product.image, product.image];
 
