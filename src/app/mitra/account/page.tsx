@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronLeft,
   Save,
@@ -22,6 +22,7 @@ import {
   Power,
   Hash,
   User as UserIcon,
+  MapPin,
 } from "lucide-react";
 import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
@@ -31,7 +32,9 @@ import {
   useSelectState,
   inputClass,
 } from "@/components/mitra/FormFields";
-import { merchantAccount } from "@/lib/merchant-data";
+import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 
 const STORE_TYPES = [
   "Toko Retail",
@@ -76,54 +79,128 @@ interface AccountForm {
   description: string;
 }
 
-const INITIAL_FORM: AccountForm = {
-  storeName: merchantAccount.storeName,
-  ownerName: merchantAccount.ownerName,
-  email: merchantAccount.email,
-  phone: merchantAccount.phone,
-  storeType: merchantAccount.storeType,
-  description: merchantAccount.description,
+const DEFAULT_OPERATING_HOURS: Record<string, { open: string; close: string; isOpen: boolean }> = {
+  Senin: { open: "06:00", close: "20:00", isOpen: true },
+  Selasa: { open: "06:00", close: "20:00", isOpen: true },
+  Rabu: { open: "06:00", close: "20:00", isOpen: true },
+  Kamis: { open: "06:00", close: "20:00", isOpen: true },
+  Jumat: { open: "06:00", close: "20:00", isOpen: true },
+  Sabtu: { open: "06:00", close: "21:00", isOpen: true },
+  Minggu: { open: "07:00", close: "18:00", isOpen: true },
 };
 
 export default function MitraAccountPage() {
   const router = useRouter();
+  const { user, fetchProfile } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState<AccountForm>(INITIAL_FORM);
-  const [operatingHours, setOperatingHours] = useState(
-    merchantAccount.operatingHours
-  );
+  const [form, setForm] = useState<AccountForm>({
+    storeName: "",
+    ownerName: "",
+    email: "",
+    phone: "",
+    storeType: "Toko Retail",
+    description: "",
+  });
+  const [operatingHours, setOperatingHours] = useState(DEFAULT_OPERATING_HOURS);
   const [bankForm, setBankForm] = useState({
-    bank: merchantAccount.bankAccount.bank,
-    accountNumber: merchantAccount.bankAccount.accountNumber,
-    accountName: merchantAccount.bankAccount.accountName,
+    bank: "BCA",
+    accountNumber: "",
+    accountName: "",
   });
   const [editingBank, setEditingBank] = useState(false);
-  // Track which time select is open: { "Senin-open" | "Senin-close" | ... }
   const [openTimeSelect, setOpenTimeSelect] = useState<string | null>(null);
+  const [storeProfile, setStoreProfile] = useState<any>(null);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [markets, setMarkets] = useState<any[]>([]);
+  const [marketId, setMarketId] = useState<string>("");
 
   const storeTypeSelect = useSelectState(false);
+  const marketSelect = useSelectState(false);
   const bankSelect = useSelectState(false);
+
+  // Fetch data from API on mount
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [profile, dashboard] = await Promise.all([
+          api.get("/mitra/profile"),
+          api.get("/mitra/dashboard"),
+        ]);
+        setStoreProfile(profile);
+        setDashboardStats(dashboard);
+        setForm({
+          storeName: profile.name || "",
+          ownerName: user?.nickname || user?.username || "",
+          email: user?.email || "",
+          phone: user?.phone || "",
+          storeType: "Toko Retail",
+          description: profile.description || "",
+        });
+        setMarketId(profile.marketId || "");
+        if (profile.operatingHours) {
+          setOperatingHours(profile.operatingHours);
+        }
+      } catch (e: any) {
+        console.error("Failed to load profile", e);
+        setError(e.message || "Gagal memuat profil toko.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+    // Load markets list
+    api.get("/markets").then(setMarkets).catch(console.error);
+  }, [user]);
 
   const update = (field: keyof AccountForm, value: string) => {
     setForm((f) => ({ ...f, [field]: value }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.storeName || !form.ownerName || !form.email) {
-      alert("Mohon lengkapi field wajib.");
+      toast.error("Mohon lengkapi field wajib.");
       return;
     }
-    setEditing(false);
-    alert("Profil toko berhasil diperbarui!");
+    try {
+      await Promise.all([
+        api.put("/mitra/profile", {
+          name: form.storeName,
+          description: form.description,
+          operatingHours,
+          marketId: marketId || undefined,
+        }),
+        api.put("/users/profile", {
+          nickname: form.ownerName,
+        }),
+      ]);
+      await fetchProfile();
+      setEditing(false);
+      toast.success("Profil toko berhasil diperbarui!");
+    } catch (e: any) {
+      toast.error(e.message || "Gagal menyimpan profil.");
+    }
   };
 
   const handleCancel = () => {
-    setForm(INITIAL_FORM);
+    if (storeProfile) {
+      setForm({
+        storeName: storeProfile.name || "",
+        ownerName: user?.nickname || user?.username || "",
+        email: user?.email || "",
+        phone: user?.phone || "",
+        storeType: "Toko Retail",
+        description: storeProfile.description || "",
+      });
+      setOperatingHours(storeProfile.operatingHours || DEFAULT_OPERATING_HOURS);
+      setMarketId(storeProfile.marketId || "");
+    }
     setEditing(false);
   };
 
   const toggleDay = (day: (typeof DAYS)[number]) => {
-    setOperatingHours((h) => ({
+    setOperatingHours((h: any) => ({
       ...h,
       [day]: { ...h[day], isOpen: !h[day].isOpen },
     }));
@@ -134,7 +211,7 @@ export default function MitraAccountPage() {
     field: "open" | "close",
     value: string
   ) => {
-    setOperatingHours((h) => ({
+    setOperatingHours((h: any) => ({
       ...h,
       [day]: { ...h[day], [field]: value },
     }));
@@ -142,12 +219,38 @@ export default function MitraAccountPage() {
 
   const handleSaveBank = () => {
     if (!bankForm.bank || !bankForm.accountNumber || !bankForm.accountName) {
-      alert("Mohon lengkapi data rekening.");
+      toast.error("Mohon lengkapi data rekening.");
       return;
     }
     setEditingBank(false);
-    alert("Rekening payout berhasil diperbarui!");
+    toast.info("Fitur rekening payout belum tersedia di backend.");
   };
+
+  if (loading) {
+    return (
+      <MitraShell>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[16rem_1fr]">
+          <MitraSidebar active="account" />
+          <div className="flex items-center justify-center min-h-[40vh] text-sm text-zinc-500">
+            Memuat profil toko...
+          </div>
+        </div>
+      </MitraShell>
+    );
+  }
+
+  if (error) {
+    return (
+      <MitraShell>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[16rem_1fr]">
+          <MitraSidebar active="account" />
+          <div className="flex items-center justify-center min-h-[40vh] text-sm text-rose-600">
+            {error}
+          </div>
+        </div>
+      </MitraShell>
+    );
+  }
 
   return (
     <MitraShell>
@@ -194,28 +297,29 @@ export default function MitraAccountPage() {
             <StatCard
               icon={Calendar}
               label="Bergabung"
-              value={new Date(merchantAccount.stats.joinedDate).toLocaleDateString(
-                "id-ID",
-                { day: "numeric", month: "short", year: "numeric" }
-              )}
+              value={storeProfile?.createdAt
+                ? new Date(storeProfile.createdAt).toLocaleDateString("id-ID", {
+                    day: "numeric", month: "short", year: "numeric",
+                  })
+                : "-"}
               color="sky"
             />
             <StatCard
               icon={Package}
               label="Total Produk"
-              value={merchantAccount.stats.totalProducts}
+              value={dashboardStats?.totalProducts ?? 0}
               color="emerald"
             />
             <StatCard
               icon={ShoppingBag}
               label="Total Pesanan"
-              value={merchantAccount.stats.totalOrders}
+              value={dashboardStats?.totalOrders ?? 0}
               color="amber"
             />
             <StatCard
               icon={Star}
               label="Rating Toko"
-              value={`${merchantAccount.stats.rating} (${merchantAccount.stats.totalReviews})`}
+              value={dashboardStats?.rating ? `${dashboardStats.rating} (${dashboardStats.totalReviews})` : "-"}
               color="rose"
             />
           </motion.section>
@@ -311,6 +415,23 @@ export default function MitraAccountPage() {
                         />
                       </Field>
 
+                      <Field label="Berada di Pasar">
+                        <SelectInput
+                          value={markets.find((m: any) => m.id === marketId)?.name || ""}
+                          placeholder="Pilih Pasar"
+                          options={markets
+                            .filter((m: any) => m.isActive !== false)
+                            .map((m: any) => m.name)}
+                          open={marketSelect.open}
+                          onToggle={marketSelect.toggle}
+                          onSelect={(name) => {
+                            const m = markets.find((x: any) => x.name === name);
+                            if (m) setMarketId(m.id);
+                            marketSelect.close();
+                          }}
+                        />
+                      </Field>
+
                       <Field label="Deskripsi Toko" required>
                         <textarea
                           required
@@ -354,12 +475,12 @@ export default function MitraAccountPage() {
                         </p>
                         <p className="text-xs text-zinc-500">
                           {form.storeType} • Mitra sejak{" "}
-                          {new Date(
-                            merchantAccount.stats.joinedDate
-                          ).toLocaleDateString("id-ID", {
-                            month: "long",
-                            year: "numeric",
-                          })}
+                          {storeProfile?.createdAt
+                            ? new Date(storeProfile.createdAt).toLocaleDateString("id-ID", {
+                                month: "long",
+                                year: "numeric",
+                              })
+                            : "-"}
                         </p>
                         <div className="mt-1 flex items-center gap-1.5">
                           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
@@ -381,6 +502,11 @@ export default function MitraAccountPage() {
                       icon={Building2}
                       label="Jenis Toko"
                       value={form.storeType}
+                    />
+                    <InfoRow
+                      icon={MapPin}
+                      label="Berada di Pasar"
+                      value={storeProfile?.market?.name || "-"}
                     />
                     <div className="flex items-start gap-3 border-t border-zinc-100 pt-3">
                       <FileText
@@ -498,7 +624,7 @@ export default function MitraAccountPage() {
                 <div className="flex justify-end border-t border-zinc-200 bg-zinc-50 px-5 py-3">
                   <button
                     type="button"
-                    onClick={() => alert("Jam operasional berhasil disimpan!")}
+                    onClick={() => toast.success("Jam operasional berhasil disimpan!")}
                     className="flex items-center gap-1.5 bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
                   >
                     <Save className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -598,11 +724,9 @@ export default function MitraAccountPage() {
                         type="button"
                         onClick={() => {
                           setBankForm({
-                            bank: merchantAccount.bankAccount.bank,
-                            accountNumber:
-                              merchantAccount.bankAccount.accountNumber,
-                            accountName:
-                              merchantAccount.bankAccount.accountName,
+                            bank: "BCA",
+                            accountNumber: "",
+                            accountName: "",
                           });
                           setEditingBank(false);
                         }}
@@ -629,12 +753,12 @@ export default function MitraAccountPage() {
                     <InfoRow
                       icon={Hash}
                       label="No. Rekening"
-                      value={bankForm.accountNumber}
+                      value={bankForm.accountNumber || "-"}
                     />
                     <InfoRow
                       icon={UserIcon}
                       label="Atas Nama"
-                      value={bankForm.accountName}
+                      value={bankForm.accountName || "-"}
                     />
                   </div>
                 )}
@@ -655,17 +779,17 @@ export default function MitraAccountPage() {
                 <p className="mt-3 text-base font-semibold text-zinc-900">
                   {form.storeName}
                 </p>
-                <p className="text-xs text-zinc-500">#{merchantAccount.stats.joinedDate.replace(/-/g, "").slice(2)}</p>
+                <p className="text-xs text-zinc-500">#{storeProfile?.id?.slice(0, 8) || "-"}</p>
                 <div className="mt-3 flex items-center justify-center gap-1.5">
                   <Star
                     className="h-4 w-4 fill-amber-400 text-amber-400"
                     strokeWidth={1.5}
                   />
                   <span className="text-sm font-semibold text-zinc-900">
-                    {merchantAccount.stats.rating}
+                    {dashboardStats?.rating ? dashboardStats.rating.toFixed(1) : "-"}
                   </span>
                   <span className="text-xs text-zinc-500">
-                    ({merchantAccount.stats.totalReviews} ulasan)
+                    ({dashboardStats?.totalReviews || 0} ulasan)
                   </span>
                 </div>
                 <div className="mt-4 flex items-center justify-center gap-2 border-t border-zinc-100 pt-4 text-xs">

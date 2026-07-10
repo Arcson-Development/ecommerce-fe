@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar, MitraLayoutHeader } from "@/components/mitra/MitraSidebar";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 export default function MitraSettingsPage() {
   const [shippings, setShippings] = useState<any[]>([]);
@@ -52,9 +53,9 @@ export default function MitraSettingsPage() {
         shippings,
         payments,
       });
-      alert("Pengaturan toko berhasil disimpan!");
+      toast.success("Pengaturan toko berhasil disimpan!");
     } catch (e: any) {
-      alert(e.message || "Gagal menyimpan pengaturan.");
+      toast.error(e.message || "Gagal menyimpan pengaturan.");
     } finally {
       setSaving(false);
     }

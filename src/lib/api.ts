@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:6670/api";
 
 export async function request(path: string, options: RequestInit = {}) {
   let token: string | null = null;

@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import type { Product } from "@/types/product";
-import { formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/lib/format-rupiah";
 import { useCart } from "@/lib/cart";
 
 interface ProductCardProps {

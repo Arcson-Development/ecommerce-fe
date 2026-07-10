@@ -7,8 +7,9 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, Printer, Send, User, MapPin, PackageOpen, Camera } from "lucide-react";
 import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
-import { formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/lib/format-rupiah";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 const API_HOST = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -55,10 +56,10 @@ export default function MitraOrderDetailPage() {
     setUpdating(true);
     try {
       await api.put(`/mitra/orders/${params.id}/process`, {});
-      alert("Pesanan berhasil diproses!");
+      toast.success("Pesanan berhasil diproses!");
       loadOrder();
     } catch (e: any) {
-      alert(e.message || "Gagal memproses pesanan.");
+      toast.error(e.message || "Gagal memproses pesanan.");
     } finally {
       setUpdating(false);
     }
@@ -85,10 +86,10 @@ export default function MitraOrderDetailPage() {
       if (!res.ok) throw new Error("Upload failed");
       const data = await res.json();
       setShippingPhotoUrl(data.url);
-      alert("Bukti foto pengiriman berhasil diunggah!");
+      toast.success("Bukti foto pengiriman berhasil diunggah!");
     } catch (err) {
       console.error(err);
-      alert("Gagal mengunggah foto bukti kirim.");
+      toast.error("Gagal mengunggah foto bukti kirim.");
     } finally {
       setUploading(false);
     }
@@ -96,7 +97,7 @@ export default function MitraOrderDetailPage() {
 
   const handleShipOrder = async () => {
     if (!shippingPhotoUrl) {
-      alert("Mohon unggah foto bukti pengiriman terlebih dahulu.");
+      toast.error("Mohon unggah foto bukti pengiriman terlebih dahulu.");
       return;
     }
 
@@ -105,10 +106,10 @@ export default function MitraOrderDetailPage() {
       await api.post(`/mitra/orders/${params.id}/ship`, {
         photoUrl: shippingPhotoUrl,
       });
-      alert("Pesanan ditandai sebagai dalam pengiriman!");
+      toast.success("Pesanan ditandai sebagai dalam pengiriman!");
       loadOrder();
     } catch (e: any) {
-      alert(e.message || "Gagal mengirim pesanan.");
+      toast.error(e.message || "Gagal mengirim pesanan.");
     } finally {
       setUpdating(false);
     }

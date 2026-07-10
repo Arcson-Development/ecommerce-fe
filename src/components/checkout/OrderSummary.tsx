@@ -5,8 +5,9 @@ import { ChevronDown, Truck, CreditCard } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useCart } from "@/lib/cart";
-import { formatRupiah } from "@/data/products";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { formatRupiah } from "@/lib/format-rupiah";
 
 const API_HOST = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -330,7 +331,7 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
           type="button"
           onClick={() => {
             if (!shipping || !payment) {
-              alert("Mohon pilih metode pengiriman dan pembayaran.");
+              toast.error("Mohon pilih metode pengiriman dan pembayaran.");
               return;
             }
             onCheckout({

@@ -15,50 +15,53 @@ import {
 import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
 import { BarChart } from "@/components/mitra/BarChart";
-import { formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/lib/format-rupiah";
 import { useMitra } from "@/lib/mitra";
-import {
-  merchantOrders,
-  merchantProducts,
-  weeklyRevenue,
-  ACTIVE_STORE,
-} from "@/lib/merchant-data";
+import { api } from "@/lib/api";
 
-const ORDER_STATUS_META = {
-  inbox: { label: "Pesanan Masuk", bg: "bg-rose-50", text: "text-rose-700", dot: "bg-rose-500" },
-  on_the_way: { label: "Dikirim", bg: "bg-sky-50", text: "text-sky-700", dot: "bg-sky-500" },
-  completed: { label: "Selesai", bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-  cancelled: { label: "Batal", bg: "bg-zinc-100", text: "text-zinc-600", dot: "bg-zinc-400" },
-} as Record<"inbox" | "on_the_way" | "completed" | "cancelled", { label: string; bg: string; text: string; dot: string }>;
+const ORDER_STATUS_META: Record<string, { label: string; bg: string; text: string; dot: string }> = {
+  PENDING: { label: "Menunggu", bg: "bg-rose-50", text: "text-rose-700", dot: "bg-rose-500" },
+  PROCESSING: { label: "Diproses", bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500" },
+  SHIPPED: { label: "Dikirim", bg: "bg-sky-50", text: "text-sky-700", dot: "bg-sky-500" },
+  COMPLETED: { label: "Selesai", bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
+  CANCELLED: { label: "Batal", bg: "bg-zinc-100", text: "text-zinc-600", dot: "bg-zinc-400" },
+};
 
 export default function MitraDashboardPage() {
-  const applications = useMitra((s) => s.applications);
+  const storeProfile = useMitra((s) => s.storeProfile);
+  const fetchMitraStatus = useMitra((s) => s.fetchMitraStatus);
   const [mounted, setMounted] = useState(false);
+  const [dashboard, setDashboard] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
+    fetchMitraStatus();
+    loadDashboard();
   }, []);
 
-  // Find the approved application for the active store
-  const activeStore = applications.find(
-    (a) =>
-      a.storeName === ACTIVE_STORE.name && a.status === "approved"
-  );
+  async function loadDashboard() {
+    try {
+      const data = await api.get("/mitra/dashboard");
+      setDashboard(data);
+    } catch (e) {
+      console.error("Failed to load dashboard", e);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  const inboxOrders = merchantOrders.filter((o) => o.status === "inbox");
-  const today = new Date().toDateString();
-  const revenueToday = merchantOrders
-    .filter((o) => o.status === "completed" && new Date(o.date).toDateString() === today)
-    .reduce((s, o) => s + o.total, 0);
-  const totalRevenue = merchantOrders
-    .filter((o) => o.status === "completed" || o.status === "on_the_way")
-    .reduce((s, o) => s + o.total, 0);
-  const completedOrders = merchantOrders.filter((o) => o.status === "completed").length;
-  const totalProducts = merchantProducts.length;
-  const rating = 4.8;
-
-  // Top selling product
-  const topProduct = merchantProducts[0];
+  const storeName = dashboard?.storeName || storeProfile?.name || "Toko Anda";
+  const isApproved = storeProfile?.status === "APPROVED";
+  const inboxOrders = dashboard?.inboxOrders || [];
+  const revenueToday = dashboard?.revenueToday || 0;
+  const totalRevenue = dashboard?.totalRevenue || 0;
+  const totalOrders = dashboard?.totalOrders || 0;
+  const totalProducts = dashboard?.totalProducts || 0;
+  const pendingOrders = dashboard?.pendingOrders || 0;
+  const processingOrders = dashboard?.processingOrders || 0;
+  const shippedOrders = dashboard?.shippedOrders || 0;
+  const weeklyRevenue = dashboard?.weeklyRevenue || [];
 
   return (
     <MitraShell>
@@ -67,7 +70,7 @@ export default function MitraDashboardPage() {
 
           <div className="space-y-6">
             {/* Not approved warning */}
-            {mounted && !activeStore && (
+            {mounted && storeProfile && !isApproved && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -104,7 +107,7 @@ export default function MitraDashboardPage() {
                 Mitra Dashboard
               </p>
               <h2 className="mt-1 text-xl font-semibold sm:text-2xl">
-                Selamat datang, {ACTIVE_STORE.name} 🌿
+                Selamat datang, {storeName} 🌿
               </h2>
               <p className="mt-2 text-sm text-emerald-100">
                 Kelola pesanan, produk, dan performa tokomu dari satu tempat.
@@ -131,30 +134,30 @@ export default function MitraDashboardPage() {
               <StatCard
                 icon={ShoppingBag}
                 label="Pesanan Masuk"
-                value={inboxOrders.length}
+                value={pendingOrders + processingOrders}
                 color="rose"
-                delta="+2 dari kemarin"
+                delta={pendingOrders + processingOrders > 0 ? `${pendingOrders + processingOrders} perlu diproses` : "Tidak ada"}
               />
               <StatCard
                 icon={Wallet}
                 label="Pendapatan Hari Ini"
                 value={formatRupiah(revenueToday)}
                 color="emerald"
-                delta="+12% minggu ini"
+                delta={revenueToday > 0 ? "Hari ini" : "Belum ada"}
               />
               <StatCard
                 icon={Package}
                 label="Total Produk"
                 value={totalProducts}
                 color="sky"
-                delta="Aktif di toko"
+                delta={totalProducts > 0 ? `${totalProducts} produk` : "Belum ada"}
               />
               <StatCard
                 icon={Star}
                 label="Rating Toko"
-                value={rating.toFixed(1)}
+                value={dashboard?.rating ? dashboard.rating.toFixed(1) : "-"}
                 color="amber"
-                delta={`${completedOrders} ulasan`}
+                delta={totalOrders > 0 ? `${totalOrders} pesanan selesai` : "Belum ada"}
               />
             </section>
 
@@ -169,10 +172,12 @@ export default function MitraDashboardPage() {
                     {formatRupiah(totalRevenue)}
                   </p>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                  <TrendingUp className="h-3 w-3" strokeWidth={2.5} />
-                  +18.2%
-                </span>
+                {weeklyRevenue.some((w: any) => w.value > 0) && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                    <TrendingUp className="h-3 w-3" strokeWidth={2.5} />
+                    7 hari terakhir
+                  </span>
+                )}
               </div>
               <BarChart data={weeklyRevenue} />
             </section>
@@ -199,7 +204,7 @@ export default function MitraDashboardPage() {
                       Tidak ada pesanan masuk.
                     </li>
                   ) : (
-                    inboxOrders.map((order) => {
+                    inboxOrders.map((order: any) => {
                       const meta = ORDER_STATUS_META[order.status];
                       return (
                         <li
@@ -211,7 +216,7 @@ export default function MitraDashboardPage() {
                               {order.id}
                             </p>
                             <p className="truncate text-xs text-zinc-500">
-                              {order.customer} • {order.items.length} produk
+                              {order.customer} • {order.items} produk
                             </p>
                           </div>
                           <div className="flex items-center gap-3">
@@ -236,35 +241,33 @@ export default function MitraDashboardPage() {
               <section className="rounded-sm border border-zinc-200 bg-white p-5">
                 <div className="mb-3 flex items-center gap-2">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-700">
-                    🏆 Produk Terlaris
+                    🏆 Produk
                   </span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-sm bg-zinc-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={topProduct.image}
-                      alt={topProduct.name}
-                      className="h-full w-full object-cover"
-                    />
+                {totalProducts > 0 ? (
+                  <>
+                    <p className="text-sm text-zinc-600">
+                      Kamu memiliki <strong>{totalProducts} produk</strong> di toko.
+                    </p>
+                    <Link
+                      href="/mitra/products"
+                      className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-orange-600 hover:text-orange-700"
+                    >
+                      Kelola Produk
+                      <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
+                    </Link>
+                  </>
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-sm text-zinc-500">Belum ada produk.</p>
+                    <Link
+                      href="/mitra/products/new"
+                      className="mt-2 inline-flex items-center gap-1 bg-zinc-900 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white hover:bg-zinc-800"
+                    >
+                      Tambah Produk
+                    </Link>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-zinc-900">
-                      {topProduct.name}
-                    </p>
-                    <p className="text-xs text-zinc-500">
-                      {topProduct.unit} • Stok: 24
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-zinc-900">
-                      {formatRupiah(topProduct.price)}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-4 grid grid-cols-3 gap-3 border-t border-zinc-200 pt-3 text-center">
-                  <Mini label="Terjual" value="142" />
-                  <Mini label="Pendapatan" value="2.6jt" />
-                  <Mini label="Rating" value="4.9" />
-                </div>
+                )}
               </section>
             </div>
           </div>
@@ -310,13 +313,4 @@ function StatCard({
   );
 }
 
-function Mini({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-sm font-semibold text-zinc-900">{value}</p>
-      <p className="text-[10px] uppercase tracking-wider text-zinc-500">
-        {label}
-      </p>
-    </div>
-  );
-}
+

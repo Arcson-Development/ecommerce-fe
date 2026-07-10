@@ -2,20 +2,32 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Plus, RefreshCw } from "lucide-react";
 import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
-import { formatRupiah } from "@/data/products";
-import { merchantProductDetails } from "@/lib/merchant-data";
-
-const CATEGORY_META: Record<string, { label: string; bg: string; text: string }> = {
-  Makanan: { label: "Makanan", bg: "bg-zinc-100", text: "text-zinc-700" },
-  Sayur: { label: "Sayur", bg: "bg-emerald-50", text: "text-emerald-700" },
-  Dapur: { label: "Dapur", bg: "bg-amber-50", text: "text-amber-700" },
-};
+import { formatRupiah } from "@/lib/format-rupiah";
+import { api } from "@/lib/api";
 
 export default function MitraStockPage() {
   const router = useRouter();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function loadProducts() {
+    try {
+      const data = await api.get("/products/mitra/my-products");
+      setProducts(data || []);
+    } catch (e) {
+      console.error("Failed to load products", e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   return (
     <MitraShell>
@@ -26,10 +38,10 @@ export default function MitraStockPage() {
           {/* Header */}
           <div>
             <h1 className="text-2xl font-semibold text-zinc-900 sm:text-3xl">
-              Akun Mitra
+              Stok Produk
             </h1>
             <p className="mt-1 text-xs font-medium uppercase tracking-wider text-zinc-500">
-              Dasbor
+              Kelola produk toko
             </p>
           </div>
 
@@ -46,14 +58,6 @@ export default function MitraStockPage() {
                 <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
                 Tambahkan Produk
               </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-1.5 bg-zinc-900 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
-              >
-                <RefreshCw className="h-3.5 w-3.5" strokeWidth={2.5} />
-                Update Stok
-              </motion.button>
             </div>
           </div>
 
@@ -63,61 +67,68 @@ export default function MitraStockPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                    <th className="px-5 py-3">ID Produk</th>
                     <th className="px-5 py-3">Nama Produk</th>
-                    <th className="px-5 py-3">Kategori</th>
-                    <th className="px-5 py-3">Harga</th>
-                    <th className="px-5 py-3">Variasi</th>
+                    <th className="px-5 py-3">Varian</th>
+                    <th className="px-5 py-3">Harga Mulai</th>
+                    <th className="px-5 py-3">Total Stok</th>
                     <th className="px-5 py-3 text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200">
-                  {merchantProductDetails.map((p) => (
-                    <motion.tr
-                      key={p.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-sm text-zinc-700 transition-colors hover:bg-zinc-50"
-                    >
-                      <td className="px-5 py-4 font-mono font-semibold text-zinc-900">
-                        #{p.code}
+                  {loading ? (
+                    <tr>
+                      <td colSpan={5} className="px-5 py-12 text-center text-sm text-zinc-500">
+                        Memuat produk...
                       </td>
-                      <td className="px-5 py-4 text-zinc-900">{p.name}</td>
-                      <td className="px-5 py-4">
-                        <div className="flex flex-wrap gap-1.5">
-                          {p.categories.map((cat) => {
-                            const meta = CATEGORY_META[cat] ?? {
-                              label: cat,
-                              bg: "bg-zinc-100",
-                              text: "text-zinc-700",
-                            };
-                            return (
-                              <span
-                                key={cat}
-                                className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-medium ${meta.bg} ${meta.text}`}
-                              >
-                                {meta.label}
-                              </span>
-                            );
-                          })}
-                        </div>
+                    </tr>
+                  ) : products.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-5 py-12 text-center text-sm text-zinc-500">
+                        Belum ada produk. Mulai tambahkan produk!
                       </td>
-                      <td className="px-5 py-4 font-semibold text-zinc-900">
-                        {formatRupiah(p.price)}
-                      </td>
-                      <td className="px-5 py-4 text-xs text-zinc-600">
-                        {p.categoryTypes} jenis, {p.categoryList} tipe
-                      </td>
-                      <td className="px-5 py-4 text-right">
-                        <a
-                          href={`/mitra/products/${p.id}`}
-                          className="text-xs font-medium text-zinc-500 underline-offset-2 hover:text-zinc-900 hover:underline"
+                    </tr>
+                  ) : (
+                    products.map((p: any) => {
+                      const minPrice = p.variants?.length
+                        ? Math.min(...p.variants.map((v: any) => v.price))
+                        : 0;
+                      const totalStock = p.variants?.length
+                        ? p.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0)
+                        : 0;
+                      return (
+                        <motion.tr
+                          key={p.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="text-sm text-zinc-700 transition-colors hover:bg-zinc-50"
                         >
-                          Lihat Detail
-                        </a>
-                      </td>
-                    </motion.tr>
-                  ))}
+                          <td className="px-5 py-4">
+                            <p className="font-medium text-zinc-900">{p.name}</p>
+                            <p className="text-xs text-zinc-500">{p.unit}</p>
+                          </td>
+                          <td className="px-5 py-4 text-xs text-zinc-600">
+                            {p.variants?.length || 0} varian
+                          </td>
+                          <td className="px-5 py-4 font-semibold text-zinc-900">
+                            {formatRupiah(minPrice)}
+                          </td>
+                          <td className="px-5 py-4">
+                            <span className={`text-xs font-medium ${totalStock > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                              {totalStock > 0 ? `${totalStock} tersedia` : 'Habis'}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-right">
+                            <a
+                              href={`/mitra/products/${p.id}`}
+                              className="text-xs font-medium text-zinc-500 underline-offset-2 hover:text-zinc-900 hover:underline"
+                            >
+                              Lihat Detail
+                            </a>
+                          </td>
+                        </motion.tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>

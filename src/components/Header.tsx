@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { useMitra } from "@/lib/mitra";
-import { formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/lib/format-rupiah";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;

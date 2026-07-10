@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useMitra } from "@/lib/mitra";
 import {
   LayoutDashboard,
   Inbox,
@@ -44,6 +45,10 @@ const MENU: MenuItem[] = [
 
 export function MitraSidebar({ active }: MitraSidebarProps) {
   const router = useRouter();
+  const storeProfile = useMitra((s) => s.storeProfile);
+  const storeName = storeProfile?.name || "Toko Anda";
+  const storeId = storeProfile?.id ? `#${storeProfile.id.slice(0, 6)}` : "";
+
   return (
     <aside className="w-full lg:w-64 lg:shrink-0">
       {/* Header card */}
@@ -53,9 +58,9 @@ export function MitraSidebar({ active }: MitraSidebarProps) {
             🐤
           </div>
           <p className="mt-3 text-sm font-semibold text-zinc-900">
-            Toko Sayur Segar
+            {storeName}
           </p>
-          <p className="mt-0.5 text-xs text-zinc-500">#73142</p>
+          {storeId && <p className="mt-0.5 text-xs text-zinc-500">{storeId}</p>}
         </div>
 
         <nav className="border-t border-zinc-200 p-2">

@@ -6,11 +6,9 @@ import { useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
-import { CategoryNav } from "@/components/CategoryNav";
 import { CheckoutSteps } from "@/components/checkout/CheckoutSteps";
-import { categories } from "@/data/products";
 import { useCart } from "@/lib/cart";
-import { products, formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/lib/format-rupiah";
 
 export default function CheckoutSuccessPage() {
   const router = useRouter();
@@ -27,10 +25,7 @@ export default function CheckoutSuccessPage() {
   const orderNumber = `SNW-${Date.now().toString().slice(-7)}`;
 
   // Recalculate total (since cart was cleared, just show summary based on state at navigation)
-  const subtotal = items.reduce((sum, item) => {
-    const product = products.find((p) => p.id === item.id);
-    return product ? sum + product.price * item.quantity : sum;
-  }, 0);
+  const subtotal = items.reduce((sum, item) => sum + (item.price ?? 0) * item.quantity, 0);
   const shipping = subtotal >= 80000 ? 0 : 10000;
   const total = subtotal + shipping;
 
@@ -38,7 +33,6 @@ export default function CheckoutSuccessPage() {
     <>
       <TopBar />
       <Header />
-      <CategoryNav categories={categories} />
 
       <CheckoutSteps current="complete" />
 

@@ -6,16 +6,9 @@ import { useState } from "react";
 import { ChevronLeft, ChevronDown, Plus, Upload, X } from "lucide-react";
 import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
-
-const CATEGORIES = [
-  "Makanan",
-  "Sayur",
-  "Dapur",
-  "Buah",
-  "Bumbu",
-  "Minuman",
-  "Lainnya",
-];
+import { api } from "@/lib/api";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 interface Variant {
   type: string;
@@ -35,16 +28,29 @@ export default function MitraProductNewPage() {
     null,
     null,
   ]);
+  const [submitting, setSubmitting] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
 
   const [form, setForm] = useState({
     name: "",
     price: "",
     description: "",
     category: "",
+    categoryId: "",
   });
+
+  // Fetch categories from API
+  useEffect(() => {
+    api.get("/categories").then(setCategories).catch(console.error);
+  }, []);
 
   const update = (k: keyof typeof form, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  const selectCategory = (name: string, id: string) => {
+    setForm((f) => ({ ...f, category: name, categoryId: id }));
+    setOpenCategory(false);
+  };
 
   const handleAddVariant = () => {
     setVariants((v) => [...v, { type: "", option: "" }]);
@@ -62,14 +68,40 @@ export default function MitraProductNewPage() {
     setPhotos((p) => p.filter((_, idx) => idx !== i));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.price || !form.category) {
-      alert("Mohon lengkapi field wajib.");
+    if (!form.name || !form.price || !form.categoryId) {
+      toast.error("Mohon lengkapi field wajib (nama, harga, kategori).");
       return;
     }
-    alert("Produk berhasil dibuat!");
-    router.push("/mitra/products");
+
+    setSubmitting(true);
+    try {
+      const variantList = hasVariants && variants.length > 0
+        ? variants.filter(v => v.type || v.option).map(v => ({
+            name: v.option || v.type || form.name,
+            price: parseInt(form.price),
+            stock: 0,
+          }))
+        : [{ name: "Standar", price: parseInt(form.price), stock: 0 }];
+
+      const payload = {
+        name: form.name,
+        description: form.description,
+        unit: "Item",
+        images: photos.filter(Boolean) as string[],
+        categoryId: form.categoryId,
+        variants: variantList,
+      };
+
+      await api.post("/products/mitra", payload);
+      toast.success("Produk berhasil dibuat!");
+      router.push("/mitra/products");
+    } catch (e: any) {
+      toast.error("Gagal membuat produk: " + (e?.message || "Terjadi kesalahan"));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -88,10 +120,10 @@ export default function MitraProductNewPage() {
 
           <div>
             <h1 className="text-2xl font-semibold text-zinc-900 sm:text-3xl">
-              Akun Mitra
+              Tambah Produk Baru
             </h1>
             <p className="mt-1 text-xs font-medium uppercase tracking-wider text-zinc-500">
-              Dasbor
+              Produk
             </p>
           </div>
 
@@ -166,24 +198,29 @@ export default function MitraProductNewPage() {
                           animate={{ opacity: 1, y: 0 }}
                           className="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-auto border border-zinc-200 bg-white shadow-lg"
                         >
-                          {CATEGORIES.map((c) => (
-                            <li key={c}>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  update("category", c);
-                                  setOpenCategory(false);
-                                }}
-                                className={`w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-zinc-50 ${
-                                  c === form.category
-                                    ? "bg-zinc-50 font-medium text-zinc-900"
-                                    : "text-zinc-700"
-                                }`}
-                              >
-                                {c}
-                              </button>
+                          {categories.length === 0 ? (
+                            <li className="px-4 py-3 text-sm text-zinc-400">
+                              Memuat kategori...
                             </li>
-                          ))}
+                          ) : (
+                            categories
+                              .filter((c: any) => c.isActive !== false)
+                              .map((c: any) => (
+                                <li key={c.id}>
+                                  <button
+                                    type="button"
+                                    onClick={() => selectCategory(c.name, c.id)}
+                                    className={`w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-zinc-50 ${
+                                      c.id === form.categoryId
+                                        ? "bg-zinc-50 font-medium text-zinc-900"
+                                        : "text-zinc-700"
+                                    }`}
+                                  >
+                                    {c.name}
+                                  </button>
+                                </li>
+                              ))
+                          )}
                         </motion.ul>
                       </>
                     )}
@@ -326,9 +363,10 @@ export default function MitraProductNewPage() {
             <div className="border-t border-zinc-200 bg-zinc-50 px-6 py-4">
               <button
                 type="submit"
-                className="w-full bg-zinc-900 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-zinc-800 sm:w-auto sm:px-12"
+                disabled={submitting}
+                className="w-full bg-zinc-900 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 sm:w-auto sm:px-12"
               >
-                Simpan dan buat
+                {submitting ? "Menyimpan..." : "Simpan dan buat"}
               </button>
             </div>
           </motion.form>

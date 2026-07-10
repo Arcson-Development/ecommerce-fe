@@ -39,7 +39,7 @@ const MENU: MenuItem[] = [
   { key: "dashboard", label: "Dashboard", href: "/account", icon: LayoutDashboard },
   { key: "orders", label: "Pesanan", href: "/account/orders", icon: Package },
   { key: "mitra", label: "Mitra", href: "/account/mitra", icon: Store },
-  { key: "addresses", label: "Alamat", href: "/account/addresses", icon: MapPin },
+  { key: "addresses", label: "Alamat", href: "/account/address", icon: MapPin },
   { key: "account", label: "Detail Akun", href: "/account/details", icon: User },
   { key: "payment", label: "Metode Pembayaran", href: "/account/payment", icon: CreditCard },
 ];

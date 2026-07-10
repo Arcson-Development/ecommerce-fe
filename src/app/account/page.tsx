@@ -6,14 +6,12 @@ import Image from "next/image";
 import { Package, Truck, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
-import { CategoryNav } from "@/components/CategoryNav";
 import {
   AccountSidebar,
   AccountLayoutHeader,
 } from "@/components/account/AccountSidebar";
-import { categories } from "@/data/products";
 import { useOrders } from "@/lib/orders";
-import { formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/lib/format-rupiah";
 import { useAuth } from "@/lib/auth";
 import {
   ORDER_STATUS_META,
@@ -39,7 +37,6 @@ export default function AccountDashboardPage() {
     <>
       <TopBar />
       <Header />
-      <CategoryNav categories={categories} />
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <AccountLayoutHeader title="Dashboard" />

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
-import { formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/lib/format-rupiah";
 import type { Product } from "@/types/product";
 
 interface ProductInfoProps {

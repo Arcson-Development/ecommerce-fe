@@ -7,11 +7,8 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, Settings2, ImageIcon } from "lucide-react";
 import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
-import { formatRupiah } from "@/data/products";
-import {
-  merchantProductDetails,
-  type MerchantProductDetail,
-} from "@/lib/merchant-data";
+import { formatRupiah } from "@/lib/format-rupiah";
+import { api } from "@/lib/api";
 
 const CATEGORY_META: Record<string, { bg: string; text: string }> = {
   Makanan: { bg: "bg-zinc-100", text: "text-zinc-700" },
@@ -22,18 +19,33 @@ const CATEGORY_META: Record<string, { bg: string; text: string }> = {
 export default function MitraProductDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [activeThumb, setActiveThumb] = useState(0);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    async function loadProduct() {
+      try {
+        const data = await api.get(`/products/${params.id}`);
+        setProduct(data);
+      } catch (e) {
+        console.error("Failed to load product", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProduct();
+  }, [params.id]);
 
-  const product: MerchantProductDetail | undefined = mounted
-    ? merchantProductDetails.find((p) => p.id === params.id)
-    : undefined;
-
-  if (!mounted) return null;
+  if (loading) {
+    return (
+      <MitraShell>
+        <div className="py-16 text-center">
+          <p className="text-zinc-500">Memuat produk...</p>
+        </div>
+      </MitraShell>
+    );
+  }
 
   if (!product) {
     return (
@@ -53,10 +65,8 @@ export default function MitraProductDetailPage() {
     );
   }
 
-  const mainImage =
-    activeThumb === 0
-      ? product.image
-      : product.thumbnails[activeThumb - 1] ?? product.image;
+  const images = product.images?.length ? product.images : ['https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80'];
+  const mainImage = images[activeThumb] || images[0];
 
   return (
     <MitraShell>
@@ -97,9 +107,7 @@ export default function MitraProductDetailPage() {
                   />
                 </div>
                 <div className="grid grid-cols-4 gap-2">
-                  {[product.image, ...product.thumbnails]
-                    .slice(0, 4)
-                    .map((thumb, i) => (
+                  {images.slice(0, 4).map((thumb: string, i: number) => (
                       <button
                         key={i}
                         onClick={() => setActiveThumb(i)}
@@ -133,58 +141,43 @@ export default function MitraProductDetailPage() {
                     {product.name}
                   </h2>
                   <div className="mt-3 flex flex-wrap items-baseline gap-2">
-                    {product.originalPrice && (
+                    {product.variants?.[0]?.originalPrice && (
                       <span className="text-sm text-zinc-400 line-through">
-                        {formatRupiah(product.originalPrice)}
+                        {formatRupiah(product.variants[0].originalPrice)}
                       </span>
                     )}
                     <span className="text-2xl font-semibold text-zinc-900">
-                      {formatRupiah(product.price)}
+                      {product.variants?.length ? formatRupiah(product.variants[0].price) : '-'}
                     </span>
-                    {product.discount && (
-                      <span className="text-sm font-semibold text-rose-500">
-                        -{product.discount}%
+                    {product.variants?.length > 1 && (
+                      <span className="text-xs text-zinc-500">
+                        + {product.variants.length - 1} varian lainnya
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Availability */}
+                {/* Stock */}
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                     Ketersediaan
                   </p>
-                  <p
-                    className={`mt-1 text-sm font-medium ${
-                      product.availability === "Tersedia"
-                        ? "text-emerald-600"
-                        : "text-rose-600"
-                    }`}
-                  >
-                    {product.availability}
+                  <p className="mt-1 text-sm font-medium text-emerald-600">
+                    {product.variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) > 0 ? 'Tersedia' : 'Habis'}
                   </p>
                 </div>
 
-                {/* Categories */}
+                {/* Category */}
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                     Kategori
                   </p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {product.categories.map((cat) => {
-                      const meta = CATEGORY_META[cat] ?? {
-                        bg: "bg-zinc-100",
-                        text: "text-zinc-700",
-                      };
-                      return (
-                        <span
-                          key={cat}
-                          className={`inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium ${meta.bg} ${meta.text}`}
-                        >
-                          {cat}
-                        </span>
-                      );
-                    })}
+                    <span
+                      className="inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium bg-zinc-100 text-zinc-700"
+                    >
+                      {product.category?.name || 'Umum'}
+                    </span>
                   </div>
                 </div>
 
@@ -223,7 +216,7 @@ export default function MitraProductDetailPage() {
                 Variasi Lainnya
               </h3>
               <div className="mt-3 space-y-2">
-                {product.variants.map((variant) => (
+                {product.variants.map((variant: any) => (
                   <div
                     key={variant.name}
                     className="flex items-center justify-between gap-4 border border-zinc-200 px-4 py-3"
@@ -258,9 +251,7 @@ export default function MitraProductDetailPage() {
                           Tidak Ada Dalam Stok
                         </p>
                       )}
-                      <p className="mt-0.5 text-[10px] uppercase tracking-wider text-zinc-400">
-                        {variant.status}
-                      </p>
+
                     </div>
                   </div>
                 ))}

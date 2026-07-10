@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 import Link from "next/link";
 import { Store, CheckCircle2, ChevronRight, Package } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
@@ -10,9 +11,20 @@ import {
   AccountLayoutHeader,
 } from "@/components/account/AccountSidebar";
 import { useMitra, MITRA_STATUS_META } from "@/lib/mitra";
+import { useAuth } from "@/lib/auth";
 
 export default function MitraPage() {
   const applications = useMitra((s) => s.applications);
+  const hasApplied = useMitra((s) => s.hasApplied);
+  const fetchMitraStatus = useMitra((s) => s.fetchMitraStatus);
+  const user = useAuth((s) => s.user);
+
+  // Sync mitra status from backend on mount
+  useEffect(() => {
+    fetchMitraStatus();
+  }, [fetchMitraStatus]);
+
+  const isAlreadyMitra = user?.role === "MITRA" || hasApplied || applications.length > 0;
 
   return (
     <>
@@ -25,10 +37,10 @@ export default function MitraPage() {
           <AccountSidebar active="mitra" />
 
           <div className="space-y-6">
-            {applications.length === 0 ? (
-              <RecruitmentPanel />
-            ) : (
+            {isAlreadyMitra ? (
               <UserMitraDashboard />
+            ) : (
+              <RecruitmentPanel />
             )}
           </div>
         </div>
@@ -138,86 +150,125 @@ function Benefit({
 
 function UserMitraDashboard() {
   const applications = useMitra((s) => s.applications);
+  const storeProfile = useMitra((s) => s.storeProfile);
+  const user = useAuth((s) => s.user);
+
+  const isMitra = user?.role === "MITRA" || user?.role === "ADMIN";
 
   return (
     <>
-      <motion.section
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="rounded-sm border border-zinc-200 bg-white"
-      >
-        <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-900">
-            Mitra
-          </h3>
-          <p className="text-xs text-zinc-500">
-            {applications.length} pengajuan
-          </p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                <th className="px-5 py-3">ID Pengajuan</th>
-                <th className="px-5 py-3">Nama Toko</th>
-                <th className="px-5 py-3">Tanggal</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-200">
-              {applications.map((app) => {
-                const meta = MITRA_STATUS_META[app.status];
-                return (
-                  <tr
-                    key={app.id}
-                    className="text-sm text-zinc-700 transition-colors hover:bg-zinc-50"
-                  >
-                    <td className="px-5 py-4 font-mono font-semibold text-zinc-900">
-                      #{app.id}
-                    </td>
-                    <td className="px-5 py-4">{app.storeName}</td>
-                    <td className="px-5 py-4 text-zinc-600">
-                      {new Date(app.date).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${meta.bg} ${meta.text}`}
-                      >
-                        <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
-                        {meta.label}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <Link
-                        href={`/account/mitra/${app.id}`}
-                        className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-900"
-                      >
-                        Lihat Pengajuan
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </motion.section>
-
-      <div className="flex justify-end">
-        <Link
-          href="/account"
-          className="inline-flex items-center gap-1.5 rounded-sm border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-700 transition-colors hover:border-zinc-700 hover:text-zinc-900"
+      {/* Store Profile Card */}
+      {isMitra && storeProfile && (
+        <motion.section
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="rounded-sm border border-zinc-200 bg-white"
         >
-          Kembali ke Dashboard User
-        </Link>
-      </div>
+          <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-900">
+              Toko Anda
+            </h3>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Aktif
+            </span>
+          </div>
+          <div className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-sm bg-zinc-100">
+                <Store className="h-7 w-7 text-zinc-500" />
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-zinc-900">{storeProfile.name}</p>
+                <p className="text-sm text-zinc-500 mt-0.5">{storeProfile.address || "Alamat belum diisi"}</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 border-t border-zinc-200 bg-zinc-50 px-5 py-3">
+            <Link
+              href="/mitra"
+              className="inline-flex items-center gap-1.5 rounded-sm bg-zinc-900 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-zinc-800"
+            >
+              Masuk ke Mitra Mode
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </motion.section>
+      )}
+
+      {/* Application History */}
+      {applications.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="rounded-sm border border-zinc-200 bg-white"
+        >
+          <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-900">
+              Riwayat Pengajuan
+            </h3>
+            <p className="text-xs text-zinc-500">
+              {applications.length} pengajuan
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-zinc-200 bg-zinc-50 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  <th className="px-5 py-3">ID Pengajuan</th>
+                  <th className="px-5 py-3">Nama Toko</th>
+                  <th className="px-5 py-3">Tanggal</th>
+                  <th className="px-5 py-3">Status</th>
+                  <th className="px-5 py-3 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-200">
+                {applications.map((app) => {
+                  const meta = MITRA_STATUS_META[app.status];
+                  return (
+                    <tr
+                      key={app.id}
+                      className="text-sm text-zinc-700 transition-colors hover:bg-zinc-50"
+                    >
+                      <td className="px-5 py-4 font-mono font-semibold text-zinc-900">
+                        #{app.id}
+                      </td>
+                      <td className="px-5 py-4">{app.storeName}</td>
+                      <td className="px-5 py-4 text-zinc-600">
+                        {new Date(app.date).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${meta.bg} ${meta.text}`}
+                        >
+                          <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
+                          {meta.label}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <Link
+                          href={`/account/mitra/${app.id}`}
+                          className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-900"
+                        >
+                          Lihat Pengajuan
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </motion.section>
+      )}
+
     </>
   );
 }

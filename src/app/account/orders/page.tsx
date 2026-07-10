@@ -7,12 +7,11 @@ import { useState, useMemo, useEffect } from "react";
 import { Search, ChevronRight, Package } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
-import { CategoryNav } from "@/components/CategoryNav";
 import {
   AccountSidebar,
   AccountLayoutHeader,
 } from "@/components/account/AccountSidebar";
-import { categories, formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/lib/format-rupiah";
 import { useOrders, type OrderStatus } from "@/lib/orders";
 import {
   ORDER_STATUS_META,
@@ -75,7 +74,6 @@ export default function OrdersPage() {
     <>
       <TopBar />
       <Header />
-      <CategoryNav categories={categories} />
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <AccountLayoutHeader title="Pesanan Saya" />

@@ -45,7 +45,13 @@ export default function AuthPage() {
       // Sync guest cart items to backend after login/register
       await useCart.getState().syncGuestCart();
 
-      router.push(redirectTo || "/account");
+      // Redirect admin to admin panel, everyone else to account page
+      const currentUser = useAuth.getState().user;
+      if (currentUser?.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push(redirectTo || "/account");
+      }
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
     } finally {

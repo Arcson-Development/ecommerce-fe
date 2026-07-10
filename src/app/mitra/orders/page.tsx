@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect, useMemo } from "react";
 import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
-import { formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/lib/format-rupiah";
 import { api } from "@/lib/api";
 
 const FILTERS: { key: "inbox" | "on_the_way" | "completed"; label: string }[] = [

@@ -2,17 +2,18 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, ChevronLeft, Upload } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
-import { CategoryNav } from "@/components/CategoryNav";
+import { LeafletMap } from "@/components/LeafletMap";
 import {
   AccountSidebar,
   AccountLayoutHeader,
 } from "@/components/account/AccountSidebar";
-import { categories } from "@/data/products";
 import { useMitra } from "@/lib/mitra";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 const PROVINCES = [
   "DKI Jakarta",
@@ -45,6 +46,17 @@ const STORE_TYPES = [
 export default function MitraRegisterPage() {
   const router = useRouter();
   const addApplication = useMitra((s) => s.addApplication);
+  const [markets, setMarkets] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadMarkets() {
+      try {
+        const res = await api.get("/markets");
+        setMarkets(Array.isArray(res) ? res : []);
+      } catch (_) {}
+    }
+    loadMarkets();
+  }, []);
 
   const [form, setForm] = useState({
     email: "",
@@ -58,15 +70,18 @@ export default function MitraRegisterPage() {
     address: "",
     postalCode: "",
     storeType: "",
+    marketId: "",
+    lat: -6.2088,
+    lng: 106.8456,
   });
   const [openDropdown, setOpenDropdown] = useState<
-    null | "province" | "city" | "district" | "storeType"
+    null | "province" | "city" | "district" | "storeType" | "market"
   >(null);
   const [submitting, setSubmitting] = useState(false);
 
   const cities = form.province ? CITIES[form.province] ?? [] : [];
 
-  const update = (k: keyof typeof form, v: string) => {
+  const update = (k: keyof typeof form, v: any) => {
     setForm((f) => {
       const next = { ...f, [k]: v };
       if (k === "province") {
@@ -75,6 +90,13 @@ export default function MitraRegisterPage() {
       }
       if (k === "city") {
         next.district = "";
+      }
+      if (k === "marketId") {
+        const market = markets.find((m: any) => m.id === v);
+        if (market) {
+          next.lat = market.lat;
+          next.lng = market.lng;
+        }
       }
       return next;
     });
@@ -93,18 +115,20 @@ export default function MitraRegisterPage() {
       "address",
       "postalCode",
       "storeType",
+      "marketId",
     ];
-    if (required.some((k) => !form[k].trim())) {
-      alert("Mohon lengkapi semua field wajib.");
+    if (required.some((k) => String(form[k] ?? "").trim() === "")) {
+      toast.error("Mohon lengkapi semua field wajib.");
       return;
     }
     setSubmitting(true);
     const id = String(Date.now()).slice(-7);
+    const { marketId: _, lat: _lat, lng: _lng, ...rest } = form;
     addApplication({
       id,
       date: new Date().toISOString(),
       status: "review",
-      ...form,
+      ...rest,
     });
     setTimeout(() => {
       router.push(`/account/mitra/${id}`);
@@ -115,7 +139,6 @@ export default function MitraRegisterPage() {
     <>
       <TopBar />
       <Header />
-      <CategoryNav categories={categories} />
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <button
@@ -177,75 +200,6 @@ export default function MitraRegisterPage() {
                       />
                     </Field>
                   </div>
-
-                  <Field label="Provinsi" required>
-                    <SelectInput
-                      value={form.province}
-                      placeholder="Provinsi"
-                      options={PROVINCES}
-                      open={openDropdown === "province"}
-                      onToggle={() =>
-                        setOpenDropdown(
-                          openDropdown === "province" ? null : "province"
-                        )
-                      }
-                      onSelect={(v) => {
-                        update("province", v);
-                        setOpenDropdown(null);
-                      }}
-                    />
-                  </Field>
-
-                  <Field label="Kota" required>
-                    <SelectInput
-                      value={form.city}
-                      placeholder="Kota"
-                      options={cities}
-                      disabled={!form.province}
-                      open={openDropdown === "city"}
-                      onToggle={() =>
-                        setOpenDropdown(
-                          openDropdown === "city" ? null : "city"
-                        )
-                      }
-                      onSelect={(v) => {
-                        update("city", v);
-                        setOpenDropdown(null);
-                      }}
-                    />
-                  </Field>
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field label="Kecamatan">
-                      <input
-                        type="text"
-                        value={form.district}
-                        onChange={(e) => update("district", e.target.value)}
-                        placeholder="Kecamatan"
-                        className="form-input"
-                      />
-                    </Field>
-                    <Field label="Alamat Detail">
-                      <input
-                        type="text"
-                        value={form.address}
-                        onChange={(e) => update("address", e.target.value)}
-                        placeholder="Alamat Detail"
-                        className="form-input"
-                      />
-                    </Field>
-                  </div>
-
-                  <Field label="Kode Pos" required>
-                    <input
-                      type="text"
-                      required
-                      value={form.postalCode}
-                      onChange={(e) => update("postalCode", e.target.value)}
-                      placeholder="Kode Pos"
-                      className="form-input"
-                    />
-                  </Field>
 
                   <Field label="Telepon" required>
                     <input
@@ -333,6 +287,49 @@ export default function MitraRegisterPage() {
                       />
                     </Field>
                   </div>
+
+                  <Field label="Kode Pos" required>
+                    <input
+                      type="text"
+                      required
+                      value={form.postalCode}
+                      onChange={(e) => update("postalCode", e.target.value)}
+                      placeholder="Kode Pos"
+                      className="form-input"
+                    />
+                  </Field>
+
+                  <Field label="Pasar / Lokasi" required>
+                    <SelectInput
+                      value={markets.find((m: any) => m.id === form.marketId)?.name || ""}
+                      placeholder="Pilih Pasar"
+                      options={markets.map((m: any) => m.name)}
+                      open={openDropdown === "market"}
+                      onToggle={() =>
+                        setOpenDropdown(
+                          openDropdown === "market" ? null : "market"
+                        )
+                      }
+                      onSelect={(v) => {
+                        const market = markets.find((m: any) => m.name === v);
+                        if (market) update("marketId", market.id);
+                        setOpenDropdown(null);
+                      }}
+                    />
+                  </Field>
+
+                  <Field label="Lokasi Toko di Peta">
+                    <div className="h-64 border border-zinc-200 rounded-sm overflow-hidden">
+                      <LeafletMap
+                        lat={form.lat}
+                        lng={form.lng}
+                        onSelectLocation={(lat, lng) => {
+                          update("lat", String(lat));
+                          update("lng", String(lng));
+                        }}
+                      />
+                    </div>
+                  </Field>
 
                   <Field label="Jenis Toko" required>
                     <SelectInput

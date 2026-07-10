@@ -22,11 +22,23 @@ function HomeContent() {
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [productsList, setProductsList] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([{ name: "Semua" }]);
+  const [markets, setMarkets] = useState<any[]>([]);
+  const [selectedMarket, setSelectedMarket] = useState("");
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  // Fetch categories from API
+  // Fetch markets from API
+  useEffect(() => {
+    async function loadMarkets() {
+      try {
+        const res = await api.get("/markets");
+        setMarkets(Array.isArray(res) ? res : []);
+      } catch (_) {}
+    }
+    loadMarkets();
+  }, []);
+
   useEffect(() => {
     async function loadCategories() {
       try {
@@ -54,7 +66,7 @@ function HomeContent() {
 
   useEffect(() => {
     setPage(1);
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, selectedMarket]);
 
   useEffect(() => {
     async function loadProducts() {
@@ -68,6 +80,10 @@ function HomeContent() {
           queryParams.append("categoryName", selectedCategory);
         }
         
+        if (selectedMarket) {
+          queryParams.append("marketId", selectedMarket);
+        }
+
         if (searchQuery) {
           queryParams.append("search", searchQuery);
         }
@@ -124,7 +140,7 @@ function HomeContent() {
       }
     }
     loadProducts();
-  }, [page, selectedCategory, sortBy, searchQuery]);
+  }, [page, selectedCategory, sortBy, searchQuery, selectedMarket]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -134,6 +150,38 @@ function HomeContent() {
     <>
       <TopBar />
       <Header onSearch={handleSearch} initialSearch={initialSearch} />
+      {markets.length > 0 && (
+        <div className="sticky top-0 z-40 border-b border-zinc-100 bg-white/95 backdrop-blur-sm">
+          <div className="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto px-4 py-2.5 sm:px-6 lg:px-8">
+            <span className="hidden shrink-0 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 sm:inline">
+              Pasar
+            </span>
+            <button
+              onClick={() => setSelectedMarket("")}
+              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${
+                !selectedMarket
+                  ? "bg-zinc-900 text-white shadow-sm"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+              }`}
+            >
+              Semua
+            </button>
+            {markets.map((m: any) => (
+              <button
+                key={m.id}
+                onClick={() => setSelectedMarket(m.id)}
+                className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${
+                  selectedMarket === m.id
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                }`}
+              >
+                {m.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <CategoryNav
         categories={categories}
         selectedCategory={selectedCategory}

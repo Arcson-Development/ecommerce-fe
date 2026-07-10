@@ -7,12 +7,10 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, MapPin, Store, FileText, Phone } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
-import { CategoryNav } from "@/components/CategoryNav";
 import {
   AccountSidebar,
   AccountLayoutHeader,
 } from "@/components/account/AccountSidebar";
-import { categories } from "@/data/products";
 import { useMitra, MITRA_STATUS_META } from "@/lib/mitra";
 
 export default function MitraDetailPage() {
@@ -33,7 +31,6 @@ export default function MitraDetailPage() {
       <>
         <TopBar />
         <Header />
-        <CategoryNav categories={categories} />
         <main className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6">
           <h1 className="text-xl font-semibold text-zinc-900">
             Pengajuan tidak ditemukan
@@ -55,7 +52,6 @@ export default function MitraDetailPage() {
     <>
       <TopBar />
       <Header />
-      <CategoryNav categories={categories} />
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <button

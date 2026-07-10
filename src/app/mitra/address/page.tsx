@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronLeft,
   MapPin,
@@ -22,7 +22,8 @@ import {
   useSelectState,
   inputClass,
 } from "@/components/mitra/FormFields";
-import { storeAddress } from "@/lib/merchant-data";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 const PROVINCES = [
   "DKI Jakarta",
@@ -83,29 +84,57 @@ interface AddressForm {
   notes: string;
 }
 
-const INITIAL_FORM: AddressForm = {
-  label: storeAddress.label,
-  recipient: storeAddress.recipient,
-  phone: storeAddress.phone,
-  street: storeAddress.street,
-  province: storeAddress.province,
-  city: storeAddress.city,
-  district: storeAddress.district,
-  postalCode: storeAddress.postalCode,
-  notes: "Lokasi strategis di Pasar Induk Kramat Jati Blok B-12, mudah dijangkau kurir",
+const DEFAULT_FORM: AddressForm = {
+  label: "Toko Utama",
+  recipient: "",
+  phone: "",
+  street: "",
+  province: "",
+  city: "",
+  district: "",
+  postalCode: "",
+  notes: "",
 };
 
 export default function MitraAddressPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState<AddressForm>(INITIAL_FORM);
-  const [savedAddresses, setSavedAddresses] = useState<AddressForm[]>([
-    INITIAL_FORM,
-  ]);
+  const [form, setForm] = useState<AddressForm>(DEFAULT_FORM);
+  const [savedAddresses, setSavedAddresses] = useState<AddressForm[]>([]);
+  const [storeProfile, setStoreProfile] = useState<any>(null);
 
   const provinceSelect = useSelectState(false);
   const citySelect = useSelectState(false);
   const districtSelect = useSelectState(false);
+
+  // Fetch store profile from API
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const profile = await api.get("/mitra/profile");
+        setStoreProfile(profile);
+        const addressData: AddressForm = {
+          label: "Toko Utama",
+          recipient: profile.name || "",
+          phone: "",
+          street: profile.address || "",
+          province: "",
+          city: "",
+          district: "",
+          postalCode: "",
+          notes: "",
+        };
+        setForm(addressData);
+        setSavedAddresses([addressData]);
+      } catch (e) {
+        console.error("Failed to load store profile", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const cities = form.province ? CITIES[form.province] ?? [] : [];
   const districts = form.city ? DISTRICTS[form.city] ?? [] : [];
@@ -124,31 +153,37 @@ export default function MitraAddressPage() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.recipient || !form.phone || !form.street || !form.province) {
-      alert("Mohon lengkapi field wajib.");
+      toast.error("Mohon lengkapi field wajib.");
       return;
     }
-    setSavedAddresses((prev) => {
-      const idx = prev.findIndex((a) => a.label === INITIAL_FORM.label);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = form;
-        return next;
-      }
-      return [...prev, form];
-    });
-    setEditing(false);
-    alert("Alamat berhasil disimpan!");
+    try {
+      const fullAddress = `${form.street}, ${form.district ? form.district + ", " : ""}${form.city}, ${form.province} ${form.postalCode}`;
+      await api.put("/mitra/profile", { address: fullAddress });
+      setSavedAddresses((prev) => {
+        const idx = prev.findIndex((a) => a.label === "Toko Utama");
+        if (idx >= 0) {
+          const next = [...prev];
+          next[idx] = form;
+          return next;
+        }
+        return [...prev, form];
+      });
+      setEditing(false);
+      toast.success("Alamat berhasil disimpan!");
+    } catch (e: any) {
+      toast.error(e.message || "Gagal menyimpan alamat.");
+    }
   };
 
   const handleCancel = () => {
-    setForm(INITIAL_FORM);
+    setForm(DEFAULT_FORM);
     setEditing(false);
   };
 
   const handleUseCurrentLocation = () => {
-    alert("Meminta akses lokasi... (fitur ini memerlukan izin browser)");
+    toast.info("Meminta akses lokasi... (fitur ini memerlukan izin browser)");
   };
 
   return (
@@ -217,7 +252,7 @@ export default function MitraAddressPage() {
                               <p className="text-sm font-semibold text-zinc-900">
                                 {addr.label}
                               </p>
-                              {addr.label === storeAddress.label && (
+                              {addr.label === "Toko Utama" && (
                                 <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
                                   Utama
                                 </span>
@@ -269,7 +304,7 @@ export default function MitraAddressPage() {
                 >
                   <div className="border-b border-zinc-200 px-5 py-4">
                     <h3 className="text-sm font-semibold text-zinc-900">
-                      {form.label === storeAddress.label
+                      {form.label === "Toko Utama"
                         ? "Edit Alamat Utama"
                         : "Alamat Baru"}
                     </h3>
@@ -491,8 +526,8 @@ export default function MitraAddressPage() {
 
                 {/* Coordinates badge */}
                 <div className="absolute left-3 top-3 rounded-sm bg-white/80 px-2 py-1 text-[10px] font-mono text-zinc-600 backdrop-blur-sm">
-                  {storeAddress.coordinates.lat.toFixed(4)},{" "}
-                  {storeAddress.coordinates.lng.toFixed(4)}
+                  {storeProfile?.lat?.toFixed(4) || "-"},{" "}
+                  {storeProfile?.lng?.toFixed(4) || "-"}
                 </div>
               </div>
 

@@ -16,15 +16,15 @@ import {
 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 const API_HOST = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 import { Header } from "@/components/Header";
-import { CategoryNav } from "@/components/CategoryNav";
 import {
   AccountSidebar,
   AccountLayoutHeader,
 } from "@/components/account/AccountSidebar";
-import { categories, formatRupiah } from "@/data/products";
+import { formatRupiah } from "@/lib/format-rupiah";
 import { useOrders, type Order, type OrderStatus } from "@/lib/orders";
 import {
   ORDER_STATUS_META,
@@ -82,7 +82,6 @@ export default function OrderDetailPage() {
       <>
         <TopBar />
         <Header />
-        <CategoryNav categories={categories} />
         <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 text-center">
           <p className="text-sm text-zinc-500">Memuat detail pesanan...</p>
         </main>
@@ -95,7 +94,6 @@ export default function OrderDetailPage() {
       <>
         <TopBar />
         <Header />
-        <CategoryNav categories={categories} />
         <main className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6">
           <h1 className="text-xl font-semibold text-zinc-900">
             Pesanan tidak ditemukan
@@ -120,7 +118,6 @@ export default function OrderDetailPage() {
     <>
       <TopBar />
       <Header />
-      <CategoryNav categories={categories} />
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <button
@@ -325,9 +322,9 @@ export default function OrderDetailPage() {
                               if (!res.ok) throw new Error("Upload failed");
                               const d = await res.json();
                               setRecipientPhotoUrl(d.url);
-                              alert("Foto berhasil diunggah!");
+                              toast.success("Foto berhasil diunggah!");
                             } catch (err) {
-                              alert("Gagal mengunggah foto.");
+                              toast.error("Gagal mengunggah foto.");
                             } finally {
                               setUploading(false);
                             }
@@ -354,10 +351,10 @@ export default function OrderDetailPage() {
                       await api.put(`/orders/${order.id}/complete`, {
                         photoUrl: recipientPhotoUrl || undefined,
                       });
-                      alert("Pesanan berhasil dikonfirmasi selesai!");
+                      toast.success("Pesanan berhasil dikonfirmasi selesai!");
                       refreshOrder();
                     } catch (e: any) {
-                      alert(e.message || "Gagal mengonfirmasi pesanan.");
+                      toast.error(e.message || "Gagal mengonfirmasi pesanan.");
                     } finally {
                       setUpdating(false);
                     }

@@ -31,6 +31,7 @@ export interface Order {
     phone: string;
     address: string;
     city: string;
+    district: string;
     province: string;
     postalCode: string;
   };
@@ -41,14 +42,25 @@ export interface Order {
   recipientPhoto?: string;
 }
 
+interface CheckoutDetails {
+  shippingMethod: string;
+  shippingCost: number;
+  paymentMethod: string;
+  // Address fields
+  recipient?: string;
+  phone?: string;
+  street?: string;
+  city?: string;
+  district?: string;
+  province?: string;
+  postalCode?: string;
+  saveAddress?: boolean;
+}
+
 interface OrdersState {
   orders: Order[];
   fetchOrders: () => Promise<void>;
-  checkout: (details: {
-    shippingMethod: string;
-    shippingCost: number;
-    paymentMethod: string;
-  }) => Promise<{ redirectUrl: string; token: string; orderId: string } | null>;
+  checkout: (details: CheckoutDetails) => Promise<{ redirectUrl: string; token: string; orderId: string } | null>;
   getOrder: (id: string) => Promise<Order | undefined>;
 }
 
@@ -59,15 +71,23 @@ function mapBackendOrder(order: any): Order {
     0
   );
   
-  // Since backend doesn't store address per order (it links to user.addresses),
-  // we extract address details from user or return placeholder
-  const address = order.user?.addresses?.[0] || {
+  // Use the shipping address snapshot stored on the order
+  const address = order.shippingRecipient ? {
+    recipient: order.shippingRecipient,
+    phone: order.shippingPhone || '',
+    street: order.shippingStreet || '',
+    city: order.shippingCity || '',
+    district: order.shippingDistrict || '',
+    province: order.shippingProvince || '',
+    postalCode: order.shippingPostalCode || '',
+  } : {
     recipient: order.user?.nickname || order.user?.username || "Customer",
     phone: order.user?.phone || "080000000",
-    street: "Alamat Toko / Pengiriman",
-    city: "Depok",
-    province: "Jawa Barat",
-    postalCode: "16424",
+    street: "Alamat belum tersedia",
+    city: "",
+    district: "",
+    province: "",
+    postalCode: "",
   };
 
   return {
@@ -92,6 +112,7 @@ function mapBackendOrder(order: any): Order {
       phone: address.phone,
       address: address.street,
       city: address.city,
+      district: address.district,
       province: address.province,
       postalCode: address.postalCode,
     },
@@ -127,17 +148,21 @@ export const useOrders = create<OrdersState>()(
 
         try {
           const res = await api.post("/orders/checkout", details);
-          // Orders checkout returns array of created orders (usually length 1 if single shop)
-          const primaryOrder = res[0];
-          
+          // Orders checkout returns array of created orders (one per store)
+          // Each order now has its own paymentUrl/paymentToken (fixed multi-store)
+          const orders = Array.isArray(res) ? res : [res];
+
           // Re-fetch orders list to update UI
           await get().fetchOrders();
 
-          if (primaryOrder && primaryOrder.paymentUrl) {
+          // Return the first order's payment info (for redirect)
+          // All payment URLs are stored in each order
+          const firstPaid = orders.find((o: any) => o.paymentUrl);
+          if (firstPaid) {
             return {
-              redirectUrl: primaryOrder.paymentUrl,
-              token: primaryOrder.paymentToken,
-              orderId: primaryOrder.id,
+              redirectUrl: firstPaid.paymentUrl,
+              token: firstPaid.paymentToken,
+              orderId: firstPaid.id,
             };
           }
           return null;
@@ -154,10 +179,9 @@ export const useOrders = create<OrdersState>()(
         const isAuth = useAuth.getState().isAuthenticated;
         if (isAuth) {
           try {
-            const order = await api.get(`/orders`);
-            const singleOrder = order.find((o: any) => o.id === id);
-            if (singleOrder) {
-              return mapBackendOrder(singleOrder);
+            const order = await api.get(`/orders/${id}`);
+            if (order) {
+              return mapBackendOrder(order);
             }
           } catch (e) {
             console.error("Failed to fetch single order from backend", e);
