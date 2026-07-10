@@ -15,11 +15,7 @@
 
 # next.js
 /out/
-
-# Ignore Next.js dev cache (huge files, dev-only)
-.next/dev/
-.next/cache/
-.next/diagnostics/
+/.next/
 
 # production
 /build
