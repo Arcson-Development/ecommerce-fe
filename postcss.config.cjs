@@ -1,7 +1,8 @@
-const config = {
+module.exports = {
   plugins: {
-    "@tailwindcss/postcss": {},
+    "@tailwindcss/postcss": {
+      // Disable Lightning CSS optimization to reduce memory on low-RAM servers
+      optimize: false,
+    },
   },
 };
-
-module.exports = config;
