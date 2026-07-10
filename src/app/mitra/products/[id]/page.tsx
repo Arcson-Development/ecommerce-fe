@@ -10,6 +10,13 @@ import { MitraSidebar } from "@/components/mitra/MitraSidebar";
 import { formatRupiah } from "@/lib/format-rupiah";
 import { api } from "@/lib/api";
 
+const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
+
+function toAbsoluteUrl(path: string): string {
+  if (path.startsWith("/uploads")) return `${API_HOST}${path}`;
+  return path;
+}
+
 const CATEGORY_META: Record<string, { bg: string; text: string }> = {
   Makanan: { bg: "bg-zinc-100", text: "text-zinc-700" },
   Sayur: { bg: "bg-emerald-50", text: "text-emerald-700" },
@@ -65,7 +72,7 @@ export default function MitraProductDetailPage() {
     );
   }
 
-  const images = product.images?.length ? product.images : ['https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80'];
+  const images = (product.images?.length ? product.images : ['https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80']).map(toAbsoluteUrl);
   const mainImage = images[activeThumb] || images[0];
 
   return (

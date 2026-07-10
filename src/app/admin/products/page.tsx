@@ -6,6 +6,8 @@ import { api } from "@/lib/api";
 import { Package, Search, Store, Eye } from "lucide-react";
 import { formatRupiah } from "@/lib/format-rupiah";
 
+const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
+
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,7 +94,7 @@ export default function AdminProductsPage() {
               <div className="h-40 bg-zinc-100 relative">
                 {p.images?.[0] ? (
                   <img
-                    src={p.images[0]}
+                    src={p.images[0].startsWith("/uploads") ? `${API_HOST}${p.images[0]}` : p.images[0]}
                     alt={p.name}
                     className="w-full h-full object-cover"
                   />
