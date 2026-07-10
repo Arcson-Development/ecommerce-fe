@@ -34,6 +34,7 @@ export default function MitraProductNewPage() {
   const [form, setForm] = useState({
     name: "",
     price: "",
+    stock: "0",
     description: "",
     category: "",
     categoryId: "",
@@ -81,9 +82,9 @@ export default function MitraProductNewPage() {
         ? variants.filter(v => v.type || v.option).map(v => ({
             name: v.option || v.type || form.name,
             price: parseInt(form.price),
-            stock: 0,
+            stock: parseInt(form.stock) || 0,
           }))
-        : [{ name: "Standar", price: parseInt(form.price), stock: 0 }];
+        : [{ name: "Standar", price: parseInt(form.price), stock: parseInt(form.stock) || 0 }];
 
       const payload = {
         name: form.name,
@@ -251,6 +252,17 @@ export default function MitraProductNewPage() {
                       <span className="text-sm">⚙</span>
                     </span>
                   </div>
+                </Field>
+
+                <Field label="Stok Awal">
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.stock}
+                    onChange={(e) => update("stock", e.target.value)}
+                    placeholder="0"
+                    className="form-input"
+                  />
                 </Field>
 
                 <label className="flex items-center gap-2 text-sm text-zinc-700">
@@ -430,11 +442,38 @@ function PhotoSlot({
   onRemove?: () => void;
   label: string;
 }) {
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    onUpload(url);
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:6670/api";
+      const res = await fetch(`${BASE_URL}/uploads/image`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("pasarjaya-token")}`,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Upload gagal");
+      }
+
+      const data = await res.json();
+      onUpload(data.url);
+    } catch (err: any) {
+      toast.error("Gagal upload gambar: " + (err?.message || "Unknown error"));
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -449,11 +488,14 @@ function PhotoSlot({
       ) : (
         <label className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-1 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600">
           <Upload className="h-4 w-4" strokeWidth={2} />
-          <span className="text-[10px] font-medium">{label}</span>
+          <span className="text-[10px] font-medium">
+            {uploading ? "Mengupload..." : label}
+          </span>
           <input
             type="file"
             accept="image/*"
             className="hidden"
+            disabled={uploading}
             onChange={handleFile}
           />
         </label>

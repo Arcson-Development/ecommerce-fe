@@ -9,6 +9,7 @@ import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
 import { formatRupiah } from "@/lib/format-rupiah";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
 
@@ -30,17 +31,18 @@ export default function MitraProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [activeThumb, setActiveThumb] = useState(0);
 
-  useEffect(() => {
-    async function loadProduct() {
-      try {
-        const data = await api.get(`/products/${params.id}`);
-        setProduct(data);
-      } catch (e) {
-        console.error("Failed to load product", e);
-      } finally {
-        setLoading(false);
-      }
+  async function loadProduct() {
+    try {
+      const data = await api.get(`/products/${params.id}`);
+      setProduct(data);
+    } catch (e) {
+      console.error("Failed to load product", e);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     loadProduct();
   }, [params.id]);
 
@@ -224,43 +226,7 @@ export default function MitraProductDetailPage() {
               </h3>
               <div className="mt-3 space-y-2">
                 {product.variants.map((variant: any) => (
-                  <div
-                    key={variant.name}
-                    className="flex items-center justify-between gap-4 border border-zinc-200 px-4 py-3"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-zinc-900">
-                        {variant.name}
-                      </p>
-                      <div className="mt-0.5 flex items-baseline gap-2">
-                        <span className="text-sm font-semibold text-zinc-900">
-                          {formatRupiah(variant.price)}
-                        </span>
-                        {variant.originalPrice && (
-                          <span className="text-xs text-zinc-400 line-through">
-                            {formatRupiah(variant.originalPrice)}
-                          </span>
-                        )}
-                        {variant.discount && (
-                          <span className="text-xs font-semibold text-rose-500">
-                            -{variant.discount}%
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {variant.stock > 0 ? (
-                        <p className="text-xs font-medium text-emerald-600">
-                          {variant.stock} Tersisa
-                        </p>
-                      ) : (
-                        <p className="text-xs font-medium text-zinc-500">
-                          Tidak Ada Dalam Stok
-                        </p>
-                      )}
-
-                    </div>
-                  </div>
+                  <VariantStockRow key={variant.id} variant={variant} onStockUpdated={loadProduct} />
                 ))}
               </div>
             </div>
@@ -268,5 +234,82 @@ export default function MitraProductDetailPage() {
         </div>
       </div>
     </MitraShell>
+  );
+}
+
+function VariantStockRow({ variant, onStockUpdated }: { variant: any; onStockUpdated: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [stockInput, setStockInput] = useState(String(variant.stock || 0));
+  const [updating, setUpdating] = useState(false);
+
+  const handleSave = async () => {
+    setUpdating(true);
+    try {
+      await api.put(`/products/mitra/variant/${variant.id}/stock`, { stock: parseInt(stockInput) || 0 });
+      setEditing(false);
+      onStockUpdated();
+    } catch (e: any) {
+      toast.error("Gagal update stok: " + (e?.message || "Unknown error"));
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-4 border border-zinc-200 px-4 py-3">
+      <div>
+        <p className="text-sm font-medium text-zinc-900">{variant.name}</p>
+        <div className="mt-0.5 flex items-baseline gap-2">
+          <span className="text-sm font-semibold text-zinc-900">{formatRupiah(variant.price)}</span>
+          {variant.originalPrice && (
+            <span className="text-xs text-zinc-400 line-through">{formatRupiah(variant.originalPrice)}</span>
+          )}
+          {variant.discount && (
+            <span className="text-xs font-semibold text-rose-500">-{variant.discount}%</span>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        {editing ? (
+          <>
+            <input
+              type="number"
+              min="0"
+              value={stockInput}
+              onChange={(e) => setStockInput(e.target.value)}
+              className="w-20 border border-zinc-300 px-2 py-1 text-sm text-center"
+              autoFocus
+            />
+            <button
+              onClick={handleSave}
+              disabled={updating}
+              className="bg-zinc-900 px-3 py-1 text-xs font-semibold text-white hover:bg-zinc-800 disabled:opacity-50"
+            >
+              {updating ? "..." : "Simpan"}
+            </button>
+            <button
+              onClick={() => { setEditing(false); setStockInput(String(variant.stock || 0)); }}
+              className="text-xs text-zinc-500 hover:text-zinc-900"
+            >
+              Batal
+            </button>
+          </>
+        ) : (
+          <>
+            {variant.stock > 0 ? (
+              <p className="text-xs font-medium text-emerald-600">{variant.stock} Tersisa</p>
+            ) : (
+              <p className="text-xs font-medium text-zinc-500">Tidak Ada Dalam Stok</p>
+            )}
+            <button
+              onClick={() => setEditing(true)}
+              className="text-xs font-medium text-zinc-500 underline-offset-2 hover:text-zinc-900 hover:underline"
+            >
+              Atur Stok
+            </button>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
