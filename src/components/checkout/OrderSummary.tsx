@@ -9,7 +9,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/format-rupiah";
 
-const API_HOST = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
 
 interface OrderSummaryProps {
   onCheckout: (details: { shippingMethod: string; shippingCost: number; paymentMethod: string }) => void;

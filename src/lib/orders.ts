@@ -5,6 +5,14 @@ import { persist } from "zustand/middleware";
 import { api } from "./api";
 import { useAuth } from "./auth";
 
+const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
+
+function toImageUrl(path: string | undefined, fallback: string): string {
+  if (!path) return fallback;
+  if (path.startsWith("/uploads")) return `${API_HOST}${path}`;
+  return path;
+}
+
 export type OrderStatus = "pending" | "processing" | "shipped" | "completed" | "cancelled";
 
 export interface OrderItem {
@@ -97,7 +105,7 @@ function mapBackendOrder(order: any): Order {
     items: order.items.map((item: any) => ({
       productId: item.variant?.product?.id || "N/A",
       productName: item.variant?.product?.name || item.variant?.name || "Produk",
-      productImage: item.variant?.product?.images?.[0] || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
+      productImage: toImageUrl(item.variant?.product?.images?.[0], "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80"),
       unit: item.variant?.product?.unit || "Item",
       price: item.price,
       quantity: item.quantity,

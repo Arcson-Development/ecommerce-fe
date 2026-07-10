@@ -18,7 +18,7 @@ import { TopBar } from "@/components/TopBar";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 
-const API_HOST = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
 import { Header } from "@/components/Header";
 import {
   AccountSidebar,

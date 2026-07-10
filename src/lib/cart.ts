@@ -5,6 +5,14 @@ import { persist } from "zustand/middleware";
 import { api } from "./api";
 import { useAuth } from "./auth";
 
+const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
+
+function toImageUrl(path: string | undefined): string {
+  if (!path) return "";
+  if (path.startsWith("/uploads")) return `${API_HOST}${path}`;
+  return path;
+}
+
 export interface CartItem {
   id: string; // variantId
   quantity: number;
@@ -39,7 +47,7 @@ export const useCart = create<CartState>()(
               quantity: item.quantity,
               price: item.variant?.price,
               name: item.variant?.product?.name,
-              image: item.variant?.product?.images?.[0],
+              image: toImageUrl(item.variant?.product?.images?.[0]),
             }));
             set({ items: mapped });
           } catch (e) {
