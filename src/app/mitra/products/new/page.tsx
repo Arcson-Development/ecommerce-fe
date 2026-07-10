@@ -453,11 +453,23 @@ function PhotoSlot({
       const formData = new FormData();
       formData.append("file", file);
 
+      // Get token with same logic as api.ts
+      let token = localStorage.getItem("pasarjaya-token");
+      if (!token) {
+        const authPersist = localStorage.getItem("pasarjaya-auth");
+        if (authPersist) {
+          try {
+            const parsed = JSON.parse(authPersist);
+            token = parsed.state?.token || null;
+          } catch (e) {}
+        }
+      }
+
       const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:6670/api";
       const res = await fetch(`${BASE_URL}/uploads/image`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("pasarjaya-token")}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
