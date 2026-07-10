@@ -160,7 +160,7 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
                           // Reflect optimistic local state instead of a stale refetch.
                           const local = useCart.getState().items;
                           setCartDetails(
-                            local.map((li: any) => ({
+                            local.map((li) => ({
                               variant: { id: li.id, price: li.price, name: li.name },
                               quantity: li.quantity,
                               product: { name: li.name, images: li.image ? [li.image] : [] },
@@ -183,7 +183,7 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
                           await removeItem(variant.id);
                           const local = useCart.getState().items;
                           setCartDetails(
-                            local.map((li: any) => ({
+                            local.map((li) => ({
                               variant: { id: li.id, price: li.price, name: li.name },
                               quantity: li.quantity,
                               product: { name: li.name, images: li.image ? [li.image] : [] },
