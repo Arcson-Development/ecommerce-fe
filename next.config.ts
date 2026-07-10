@@ -1,14 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Reduce memory usage for low-RAM environments
-  experimental: {
-    webpackBuildWorker: false,
-  },
-  webpack: (config) => {
-    config.parallelism = 1;
-    return config;
-  },
+  turbopack: {},
   images: {
     remotePatterns: [
       {

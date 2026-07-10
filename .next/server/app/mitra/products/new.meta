@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/mitra/layout,_N_T_/mitra/products/layout,_N_T_/mitra/products/new/layout,_N_T_/mitra/products/new/page,_N_T_/mitra/products/new"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/mitra/products/new/__PAGE__",
+    "/mitra/products/new",
+    "/mitra/products",
+    "/mitra",
+    "/_index",
+    "/_head"
+  ]
+}
