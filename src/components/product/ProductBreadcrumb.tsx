@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 interface ProductBreadcrumbProps {
   items: string[];
@@ -21,13 +22,17 @@ export function ProductBreadcrumb({ items }: ProductBreadcrumbProps) {
             )}
             {i === items.length - 1 ? (
               <span className="font-medium text-zinc-900">{item}</span>
-            ) : (
-              <a
-                href="#"
+            ) : i === 0 ? (
+              <Link
+                href="/"
                 className="transition-colors hover:text-orange-600"
               >
                 {item}
-              </a>
+              </Link>
+            ) : (
+              <span className="transition-colors hover:text-orange-600">
+                {item}
+              </span>
             )}
           </span>
         ))}

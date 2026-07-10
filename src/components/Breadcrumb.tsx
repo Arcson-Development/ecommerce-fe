@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ChevronRight, ChevronDown, Search, X } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 import type { SortOption } from "@/types/product";
 
 interface BreadcrumbProps {
@@ -44,13 +45,17 @@ export function Breadcrumb({
             )}
             {i === items.length - 1 ? (
               <span className="font-medium text-zinc-900">{item}</span>
-            ) : (
-              <a
-                href="#"
+            ) : i === 0 ? (
+              <Link
+                href="/"
                 className="transition-colors hover:text-orange-600"
               >
                 {item}
-              </a>
+              </Link>
+            ) : (
+              <span className="transition-colors hover:text-orange-600">
+                {item}
+              </span>
             )}
           </span>
         ))}

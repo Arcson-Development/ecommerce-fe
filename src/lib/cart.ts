@@ -23,6 +23,7 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
+  syncing: boolean;
   fetchCart: () => Promise<void>;
   addItem: (productId: string, snapshot?: { price?: number; name?: string; image?: string }) => Promise<void>;
   removeItem: (variantId: string) => Promise<void>;
@@ -37,7 +38,10 @@ export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      syncing: false,
       fetchCart: async () => {
+        // Don't clobber locally-optimistic items while a mutation is in flight.
+        if (get().syncing) return;
         const isAuth = useAuth.getState().isAuthenticated;
         if (isAuth) {
           try {
@@ -93,11 +97,14 @@ export const useCart = create<CartState>()(
         set({ items: newItems });
 
         if (isAuth) {
+          set({ syncing: true });
           try {
             const quantity = existing ? existing.quantity + 1 : 1;
             await api.post("/cart/items", { variantId, quantity });
           } catch (e) {
             console.error("Failed to sync add item to db cart", e);
+          } finally {
+            set({ syncing: false });
           }
         }
       },
@@ -109,10 +116,13 @@ export const useCart = create<CartState>()(
         }));
 
         if (isAuth) {
+          set({ syncing: true });
           try {
             await api.delete(`/cart/items/${variantId}`);
           } catch (e) {
             console.error("Failed to sync remove item from db cart", e);
+          } finally {
+            set({ syncing: false });
           }
         }
       },
@@ -131,10 +141,13 @@ export const useCart = create<CartState>()(
         }));
 
         if (isAuth) {
+          set({ syncing: true });
           try {
             await api.post("/cart/items", { variantId, quantity });
           } catch (e) {
             console.error("Failed to sync update quantity to db cart", e);
+          } finally {
+            set({ syncing: false });
           }
         }
       },

@@ -157,8 +157,15 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
                         setUpdatingId(item.id);
                         try {
                           await updateQuantity(variant.id, item.quantity - 1);
-                          const dbCart = await api.get("/cart");
-                          setCartDetails(dbCart);
+                          // Reflect optimistic local state instead of a stale refetch.
+                          const local = useCart.getState().items;
+                          setCartDetails(
+                            local.map((li: any) => ({
+                              variant: { id: li.id, price: li.price, name: li.name },
+                              quantity: li.quantity,
+                              product: { name: li.name, images: li.image ? [li.image] : [] },
+                            }))
+                          );
                         } finally {
                           setUpdatingId(null);
                         }
@@ -174,8 +181,14 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
                         setUpdatingId(item.id);
                         try {
                           await removeItem(variant.id);
-                          const dbCart = await api.get("/cart");
-                          setCartDetails(dbCart);
+                          const local = useCart.getState().items;
+                          setCartDetails(
+                            local.map((li: any) => ({
+                              variant: { id: li.id, price: li.price, name: li.name },
+                              quantity: li.quantity,
+                              product: { name: li.name, images: li.image ? [li.image] : [] },
+                            }))
+                          );
                           toast.success("Item dihapus dari keranjang");
                         } catch {
                           toast.error("Gagal menghapus item");

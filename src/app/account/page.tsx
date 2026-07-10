@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Package, Truck, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
@@ -19,8 +21,39 @@ import {
 } from "@/lib/order-format";
 
 export default function AccountDashboardPage() {
+  const router = useRouter();
   const orders = useOrders((s) => s.orders);
   const user = useAuth((s) => s.user);
+  const isAuthenticated = useAuth((s) => s.isAuthenticated);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    if (useAuth.persist.hasHydrated()) setHydrated(true);
+    else {
+      const unsub = useAuth.persist.onFinishHydration(() => setHydrated(true));
+      return () => unsub();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hydrated && !isAuthenticated) router.replace("/auth");
+  }, [hydrated, isAuthenticated, router]);
+
+  if (!hydrated) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-8 text-sm text-zinc-500">
+        Memuat...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-8 text-sm text-zinc-500">
+        Mengarahkan...
+      </div>
+    );
+  }
 
   const counts = {
     processing: orders.filter((o) => o.status === "processing").length,
