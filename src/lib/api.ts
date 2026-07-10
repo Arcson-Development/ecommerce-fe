@@ -32,6 +32,17 @@ export async function request(path: string, options: RequestInit = {}) {
     headers,
   });
 
+  if (response.status === 401) {
+    // Token expired or invalid — clear auth state so guards can redirect.
+    // Imported lazily to avoid a circular import at module load.
+    try {
+      const { useAuth } = await import("./auth");
+      useAuth.getState().logout();
+    } catch {
+      /* ignore */
+    }
+  }
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || `Request failed with status ${response.status}`);

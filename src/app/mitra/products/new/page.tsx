@@ -38,6 +38,7 @@ export default function MitraProductNewPage() {
     description: "",
     category: "",
     categoryId: "",
+    unit: "Item",
   });
 
   // Fetch categories from API
@@ -71,8 +72,14 @@ export default function MitraProductNewPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.price || !form.categoryId) {
-      toast.error("Mohon lengkapi field wajib (nama, harga, kategori).");
+    if (!form.name || !form.price || !form.categoryId || !form.description.trim()) {
+      toast.error("Mohon lengkapi field wajib (nama, harga, kategori, deskripsi).");
+      return;
+    }
+
+    const uploadedPhotos = photos.filter(Boolean) as string[];
+    if (uploadedPhotos.length === 0) {
+      toast.error("Mohon unggah minimal 1 foto produk.");
       return;
     }
 
@@ -89,8 +96,8 @@ export default function MitraProductNewPage() {
       const payload = {
         name: form.name,
         description: form.description,
-        unit: "Item",
-        images: photos.filter(Boolean) as string[],
+        unit: form.unit || "Item",
+        images: uploadedPhotos,
         categoryId: form.categoryId,
         variants: variantList,
       };
@@ -261,6 +268,16 @@ export default function MitraProductNewPage() {
                     value={form.stock}
                     onChange={(e) => update("stock", e.target.value)}
                     placeholder="0"
+                    className="form-input"
+                  />
+                </Field>
+
+                <Field label="Satuan / Unit">
+                  <input
+                    type="text"
+                    value={form.unit}
+                    onChange={(e) => update("unit", e.target.value)}
+                    placeholder="mis. 1 Kg, Pcs, Ikat"
                     className="form-input"
                   />
                 </Field>

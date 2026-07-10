@@ -55,6 +55,7 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [saveAddress, setSaveAddress] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -69,6 +70,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (!hydrated) return;
     if (!isAuthenticated) {
+      toast.info("Silakan masuk untuk melanjutkan ke pembayaran.");
       router.replace("/auth?redirect=/checkout");
     } else {
       useCart.getState().fetchCart();
@@ -163,7 +165,22 @@ export default function CheckoutPage() {
       
       if (checkoutResult && checkoutResult.redirectUrl) {
         await useCart.getState().clear();
-        window.location.href = checkoutResult.redirectUrl;
+        // Open Midtrans in a new tab so the checkout page is never left blank
+        // if the payment provider fails to load. Fallback link shown below.
+        const opened = window.open(
+          checkoutResult.redirectUrl,
+          "_blank",
+          "noopener,noreferrer"
+        );
+        if (!opened) {
+          toast.warning(
+            "Popup diblokir. Klik tombol 'Bayar Sekarang' di bawah untuk membuka halaman pembayaran."
+          );
+        } else {
+          toast.success("Pesanan dibuat! Halaman pembayaran telah dibuka di tab baru.");
+        }
+        setPaymentUrl(checkoutResult.redirectUrl);
+        setIsProcessing(false);
       } else {
         toast.error("Gagal memproses link pembayaran Midtrans.");
         setIsProcessing(false);
@@ -180,6 +197,25 @@ export default function CheckoutPage() {
         <EmptyCart />
       ) : (
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_400px] lg:gap-12">
+          {paymentUrl && (
+            <div className="lg:col-span-2 rounded-sm border border-emerald-200 bg-emerald-50 p-5">
+              <h2 className="text-sm font-semibold text-emerald-900">
+                Pesanan berhasil dibuat!
+              </h2>
+              <p className="mt-1 text-sm text-emerald-800">
+                Halaman pembayaran seharusnya terbuka di tab baru. Jika tidak,
+                klik tombol di bawah ini:
+              </p>
+              <a
+                href={paymentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-block bg-emerald-600 px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-emerald-700"
+              >
+                Bayar Sekarang
+              </a>
+            </div>
+          )}
           <div>
             {/* Saved addresses */}
             {savedAddresses.length > 0 && (

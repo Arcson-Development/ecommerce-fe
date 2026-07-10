@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import { formatRupiah } from "@/lib/format-rupiah";
 import type { Product } from "@/types/product";
+import { toast } from "sonner";
 
 interface ProductInfoProps {
   product: Product;
@@ -18,9 +19,18 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
   const [isAdding, setIsAdding] = useState(false);
   const addItem = useCart((s) => s.addItem);
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     setIsAdding(true);
-    for (let i = 0; i < qty; i++) addItem(product.id);
+    try {
+      for (let i = 0; i < qty; i++) {
+        await addItem(product.id, { price: product.price, name: product.name, image: product.image });
+      }
+      toast.success(
+        `${qty} × ${product.name} ditambahkan ke keranjang`
+      );
+    } catch {
+      toast.error("Gagal menambahkan ke keranjang");
+    }
     setTimeout(() => setIsAdding(false), 600);
   };
 

@@ -8,6 +8,7 @@ import { useState } from "react";
 import type { Product } from "@/types/product";
 import { formatRupiah } from "@/lib/format-rupiah";
 import { useCart } from "@/lib/cart";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Product;
@@ -22,9 +23,11 @@ export function ProductCard({ product, index }: ProductCardProps) {
     e.stopPropagation();
     setIsAdding(true);
     try {
-      await addItem(product.id);
+      await addItem(product.id, { price: product.price, name: product.name, image: product.image });
+      toast.success(`${product.name} ditambahkan ke keranjang`);
     } catch {
       console.error("Failed to add item to cart");
+      toast.error("Gagal menambahkan ke keranjang");
     }
     setTimeout(() => setIsAdding(false), 600);
   };

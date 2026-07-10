@@ -42,16 +42,24 @@ function AuthForm() {
         await register({ username, password, email, phone, nickname });
       }
 
-      // Sync guest cart items to backend after login/register
-      await useCart.getState().syncGuestCart();
-
-      // Redirect admin to admin panel, everyone else to account page
+      // Redirect admin to admin panel, everyone else to account/destination.
+      // IMPORTANT: do this BEFORE any best-effort cart sync so a failed sync
+      // can never leave the user stranded on a blank auth screen (T5).
       const currentUser = useAuth.getState().user;
       if (currentUser?.role === "ADMIN") {
         router.push("/admin");
       } else {
         router.push(redirectTo || "/account");
       }
+
+      // Best-effort: sync guest cart in the background. Failures here must
+      // NOT block the user from reaching their destination.
+      useCart
+        .getState()
+        .syncGuestCart()
+        .catch(() => {
+          /* ignore — cart will re-sync on next fetch */
+        });
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan. Silakan coba lagi.");
     } finally {

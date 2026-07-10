@@ -24,7 +24,7 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   fetchCart: () => Promise<void>;
-  addItem: (variantId: string, price?: number, name?: string, image?: string) => Promise<void>;
+  addItem: (productId: string, snapshot?: { price?: number; name?: string; image?: string }) => Promise<void>;
   removeItem: (variantId: string) => Promise<void>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
   clear: () => Promise<void>;
@@ -55,13 +55,33 @@ export const useCart = create<CartState>()(
           }
         }
       },
-      addItem: async (variantId, price, name, image) => {
+      addItem: async (productId: string, snapshot?: { price?: number; name?: string; image?: string }) => {
         const isAuth = useAuth.getState().isAuthenticated;
-        
+
+        // Resolve a valid variantId. The cart API expects a variantId, but the
+        // product card/list only knows the productId — fetch the detail to get
+        // the first variant (falls back to productId if none/unauthenticated).
+        let variantId = productId;
+        let price = snapshot?.price;
+        let name = snapshot?.name;
+        let image = snapshot?.image;
+
+        if (isAuth) {
+          try {
+            const p: any = await api.get(`/products/${productId}`);
+            variantId = p?.variants?.[0]?.id || productId;
+            price = price ?? p?.price;
+            name = name ?? p?.name;
+            image = image ?? p?.images?.[0];
+          } catch {
+            /* use productId fallback */
+          }
+        }
+
         const currentItems = get().items;
         const existing = currentItems.find((i) => i.id === variantId);
         let newItems: CartItem[] = [];
-        
+
         if (existing) {
           newItems = currentItems.map((i) =>
             i.id === variantId ? { ...i, quantity: i.quantity + 1 } : i
@@ -69,7 +89,7 @@ export const useCart = create<CartState>()(
         } else {
           newItems = [...currentItems, { id: variantId, quantity: 1, price, name, image }];
         }
-        
+
         set({ items: newItems });
 
         if (isAuth) {

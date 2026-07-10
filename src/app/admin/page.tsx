@@ -11,6 +11,7 @@ import {
   Building2,
   Truck,
   Package,
+  CreditCard,
   ArrowRight,
   AlertTriangle,
 } from "lucide-react";
@@ -98,7 +99,14 @@ export default function AdminDashboardPage() {
       value: stats?.totalOrders ?? 0,
       icon: ShoppingBag,
       color: "bg-amber-50 text-amber-600",
-      href: "#",
+      href: "#recent-orders",
+    },
+    {
+      label: "Total Pendapatan",
+      value: `Rp ${(stats?.totalRevenue ?? 0).toLocaleString("id-ID")}`,
+      icon: CreditCard,
+      color: "bg-indigo-50 text-indigo-600",
+      href: "#recent-orders",
     },
     {
       label: "Total Produk",
@@ -199,7 +207,7 @@ export default function AdminDashboardPage() {
 
       {/* Recent Orders */}
       {stats?.recentOrders && stats.recentOrders.length > 0 && (
-        <section>
+        <section id="recent-orders">
           <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-700 mb-4">
             Pesanan Terbaru
           </h2>
