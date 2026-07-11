@@ -97,12 +97,16 @@ function HomeContent() {
         setTotalPages(pages);
 
         const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
-        const mapped = dbProducts.map((p: any) => {
+        const PLACEHOLDER = /^(produk\s*1|test)$/i;
+        const cleanProducts = dbProducts.filter(
+          (p: any) => !PLACEHOLDER.test(p.name || "")
+        );
+        const mapped = cleanProducts.map((p: any) => {
           const primaryVariant = p.variants?.[0];
           const imageUrl = p.images?.[0];
           const image = imageUrl && imageUrl.startsWith("/uploads")
             ? `${API_HOST}${imageUrl}`
-            : (imageUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80");
+            : (imageUrl || "/no-image.svg");
 
           return {
             id: primaryVariant?.id || p.id,
@@ -148,12 +152,13 @@ function HomeContent() {
 
   return (
     <>
+      <h1 className="sr-only">Pasar Jaya — Belanja Sayur Segar Online</h1>
       <TopBar />
       <Header onSearch={handleSearch} initialSearch={initialSearch} />
       {markets.length > 0 && (
         <div className="sticky top-0 z-40 border-b border-zinc-100 bg-white/95 backdrop-blur-sm">
           <div className="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto px-4 py-2.5 sm:px-6 lg:px-8">
-            <span className="hidden shrink-0 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 sm:inline">
+            <span className="hidden shrink-0 text-[11px] font-semibold uppercase tracking-widest text-zinc-500 sm:inline">
               Pasar
             </span>
             <button
@@ -161,7 +166,7 @@ function HomeContent() {
               className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${
                 !selectedMarket
                   ? "bg-zinc-900 text-white shadow-sm"
-                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                  : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
               }`}
             >
               Semua
@@ -187,6 +192,7 @@ function HomeContent() {
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
+      <main>
       <Breadcrumb
         items={["Beranda", "Toko", selectedCategory]}
         total={totalProducts}
@@ -210,6 +216,7 @@ function HomeContent() {
         <ProductGrid products={productsList} />
       )}
       <Pagination current={page} total={totalPages} onChange={setPage} />
+      </main>
     </>
   );
 }

@@ -51,7 +51,6 @@ export function ProductCard({ product, index }: ProductCardProps) {
       <Link
         href={productSlug}
         className="relative aspect-square w-full overflow-hidden rounded-sm bg-gray-50"
-        aria-label={`Lihat ${product.name} ${product.unit}`}
       >
         <motion.div
           whileHover={{ scale: 1.05 }}
@@ -81,7 +80,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
               stiffness: 400,
               damping: 20,
             }}
-            className="absolute left-3 top-3 flex h-12 w-12 items-center justify-center rounded-full bg-rose-500 text-xs font-bold text-white shadow-sm"
+            className="absolute left-3 top-3 flex h-12 w-12 items-center justify-center rounded-full bg-rose-600 text-xs font-bold text-white shadow-sm"
           >
             -{product.discount}%
           </motion.span>
@@ -91,14 +90,14 @@ export function ProductCard({ product, index }: ProductCardProps) {
       {/* Info */}
       <div className="mt-3 flex w-full flex-col items-center text-center">
         <Link href={productSlug}>
-          <h3 className="text-sm font-medium text-zinc-900 hover:underline">
-            {product.name} - {product.unit}
-          </h3>
+          <h2 className="text-sm font-medium text-zinc-900 hover:underline">
+            {product.name}
+          </h2>
         </Link>
 
         <div className="mt-1 flex items-center gap-2 text-sm">
           {product.discount && (
-            <span className="text-zinc-400 line-through">
+            <span className="text-zinc-500 line-through">
               {formatRupiah(product.originalPrice)}
             </span>
           )}
@@ -123,12 +122,10 @@ export function ProductCard({ product, index }: ProductCardProps) {
         </div>
 
         {/* Add to cart button */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.96 }}
+        <button
+          type="button"
           onClick={handleAddToCart}
-          aria-label={`Tambah ${product.name} ke keranjang`}
-          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-2.5 text-xs font-medium text-zinc-800 transition-colors hover:border-zinc-700 hover:text-zinc-900"
+          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-2.5 text-xs font-medium text-zinc-800 transition-colors hover:border-zinc-700 hover:text-zinc-900 active:scale-95"
         >
           <motion.span
             animate={
@@ -143,7 +140,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
           </motion.span>
           Tambahkan ke Keranjang
           <span className="sr-only"> {product.name}</span>
-        </motion.button>
+        </button>
       </div>
     </motion.article>
   );

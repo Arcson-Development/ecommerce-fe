@@ -76,7 +76,7 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="flex items-center gap-3"
         >
-          <Link href="/">
+          <Link href="/" aria-label="Beranda">
             <Logo />
           </Link>
           <span className="hidden text-xl font-semibold text-zinc-900 sm:inline">

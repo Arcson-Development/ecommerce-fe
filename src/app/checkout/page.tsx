@@ -69,10 +69,9 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!hydrated) return;
-    if (!isAuthenticated) {
-      toast.info("Silakan masuk untuk melanjutkan ke pembayaran.");
-      router.replace("/auth?redirect=/checkout");
-    } else {
+    // Guests may check out without an account; only load saved
+    // addresses when authenticated.
+    if (isAuthenticated) {
       useCart.getState().fetchCart();
       loadSavedAddresses();
     }
@@ -142,18 +141,13 @@ export default function CheckoutPage() {
     }
 
     const { isAuthenticated } = useAuth.getState();
-    if (!isAuthenticated) {
-      toast.error("Anda harus masuk (login) terlebih dahulu untuk membuat pesanan.");
-      router.push("/auth");
-      return;
-    }
 
     setIsProcessing(true);
     try {
-      // Include address data in checkout
+      // Guests may complete checkout; the BE creates an order
+      // linked to the email/phone they provide in the form.
       const checkoutResult = await useOrders.getState().checkout({
         ...details,
-        recipient: `${form.firstName} ${form.lastName}`.trim(),
         phone: form.phone,
         street: form.address,
         city: form.city,

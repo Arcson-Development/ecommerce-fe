@@ -28,8 +28,8 @@ export function CategoryNav({ categories, selectedCategory, onSelectCategory }: 
                 <button
                   type="button"
                   onClick={() => onSelectCategory?.(category.name)}
-                  className={`flex items-center gap-1 whitespace-nowrap transition-colors cursor-pointer hover:text-orange-600 ${
-                    isSelected ? "text-orange-600 font-bold" : "text-gray-700"
+                  className={`flex items-center gap-1 whitespace-nowrap transition-colors cursor-pointer hover:text-orange-700 ${
+                    isSelected ? "text-orange-700 font-bold" : "text-gray-700"
                   }`}
                 >
                   <span>{category.name}</span>
