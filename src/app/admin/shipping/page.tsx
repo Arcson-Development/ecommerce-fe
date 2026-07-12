@@ -93,7 +93,7 @@ export default function AdminShippingPage() {
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(!showForm); }}
-          className="flex items-center gap-1.5 text-xs font-semibold bg-zinc-950 hover:bg-zinc-800 text-white px-4 py-2 rounded-sm uppercase tracking-wider transition-colors"
+          className="flex items-center gap-1.5 text-xs font-semibold bg-primary hover:bg-primary-hover text-primary-fg px-4 py-2 rounded-sm uppercase tracking-wider transition-colors"
         >
           {showForm ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
           {showForm ? "Batal" : "Tambah Kurir"}
@@ -177,7 +177,7 @@ export default function AdminShippingPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-zinc-900 text-white text-xs font-semibold uppercase tracking-wider hover:bg-zinc-800 rounded-sm"
+                  className="px-4 py-2 bg-primary text-primary-fg text-xs font-semibold uppercase tracking-wider hover:bg-primary-hover rounded-sm"
                 >
                   {editingId ? "Simpan Perubahan" : "Simpan"}
                 </button>

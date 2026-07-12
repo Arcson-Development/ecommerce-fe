@@ -106,7 +106,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           `}
         >
           <div className="p-4 border-b border-zinc-200 flex items-center justify-between lg:justify-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center bg-zinc-900 rounded-sm text-white">
+            <div className="flex h-10 w-10 items-center justify-center bg-primary rounded-sm text-primary-fg">
               <Shield className="h-5 w-5" />
             </div>
             <div>
@@ -130,8 +130,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 text-sm font-semibold uppercase tracking-wider rounded-sm transition-colors ${
                     isActive
-                      ? "bg-zinc-900 text-white"
-                      : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
+                      ? "bg-primary text-primary-fg"
+                      : "text-zinc-500 hover:text-primary hover:bg-primary-soft"
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />

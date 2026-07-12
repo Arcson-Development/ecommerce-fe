@@ -73,8 +73,8 @@ export function MitraSidebar({ active }: MitraSidebarProps) {
                 href={item.href}
                 className={`flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-medium uppercase tracking-wide transition-colors ${
                   isActive
-                    ? "text-zinc-900"
-                    : "text-zinc-500 hover:text-zinc-900"
+                    ? "text-primary-soft-fg"
+                    : "text-zinc-500 hover:text-primary"
                 }`}
               >
                 <Icon className="h-4 w-4" strokeWidth={2} />
@@ -82,7 +82,7 @@ export function MitraSidebar({ active }: MitraSidebarProps) {
                 {isActive && (
                   <motion.span
                     layoutId="mitra-sidebar-active"
-                    className="absolute inset-x-2 -z-10 h-9 rounded-sm bg-zinc-100"
+                    className="absolute inset-x-2 -z-10 h-9 rounded-sm bg-primary-soft"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}

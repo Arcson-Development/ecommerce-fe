@@ -86,8 +86,8 @@ export function AccountSidebar({ active }: AccountSidebarProps) {
                 href={item.href}
                 className={`relative flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm transition-colors ${
                   isActive
-                    ? "bg-zinc-900 text-white"
-                    : "text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900"
+                    ? "bg-primary text-primary-fg"
+                    : "text-zinc-700 hover:bg-primary-soft hover:text-primary-soft-fg"
                 }`}
               >
                 <Icon className="h-4 w-4" strokeWidth={2} />
@@ -95,7 +95,7 @@ export function AccountSidebar({ active }: AccountSidebarProps) {
                 {isActive && (
                   <motion.span
                     layoutId="sidebar-active"
-                    className="absolute inset-0 -z-10 rounded-sm bg-zinc-900"
+                    className="absolute inset-0 -z-10 rounded-sm bg-primary"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
