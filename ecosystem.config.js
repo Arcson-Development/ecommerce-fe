@@ -1,91 +1,87 @@
 /**
- * PM2 ecosystem configuration for Snowy's Store (Next.js 16 production).
+ * PM2 ecosystem for Pasar Jaya frontend (Next.js 16).
  *
- * Usage:
- *   npm install -g pm2                # install PM2 globally
- *   npm run build                     # build production bundle
- *   pm2 start ecosystem.config.js     # start with PM2
- *   pm2 save                          # save process list for restart on boot
- *   pm2 startup                       # generate startup script
+ * PENTING — port TIDAK boleh diubah-ubah:
+ *   - Production & Dev SAMA-SAMA di PORT 6699.
+ *   - Karena port identik, JANGAN jalankan prod & dev bersamaan.
+ *     Jalankan salah satu saja via flag --only (lihat bawah).
+ *   - KEDUA app TETAP ada di PM2 list; yang tidak dipakai cukup di-STOP
+ *     (JANGAN di-delete) biar port tidak tabrakan.
  *
- * Common commands:
- *   pm2 status                        # check status
- *   pm2 logs ecommerce-fe             # tail logs
- *   pm2 restart ecommerce-fe          # restart app
- *   pm2 reload ecommerce-fe           # zero-downtime reload
- *   pm2 stop ecommerce-fe             # stop
- *   pm2 delete ecommerce-fe           # remove from PM2
- *   pm2 monit                         # live monitoring dashboard
+ *   Di laptop lokal Juniko      -> jalankan DEV   (ecommerce-fe-dev)
+ *   Di VPS (production) nanti   -> jalankan PROD  (ecommerce-fe-prod)
+ *
+ * Cara jalanin (dari folder ecommerce-fe):
+ *   pm2 start ecosystem.config.js --only ecommerce-fe-dev    # laptop ini
+ *   pm2 start ecosystem.config.js --only ecommerce-fe-prod   # VPS
+ *
+ * Switch dev <-> prod (stop yang lain, jangan delete):
+ *   pm2 stop ecommerce-fe-dev  && pm2 start ecosystem.config.js --only ecommerce-fe-prod
+ *   pm2 stop ecommerce-fe-prod && pm2 start ecosystem.config.js --only ecommerce-fe-dev
+ *
+ * Lainnya:
+ *   pm2 logs ecommerce-fe-dev      # tail dev logs
+ *   pm2 restart ecommerce-fe-dev   # restart dev
+ *   pm2 status                     # lihat semua (dev + prod, salah satu stopped)
+ *   pm2 save                        # persist list
  */
 
 module.exports = {
   apps: [
+    // ── PRODUCTION (untuk VPS) ──────────────────────────────────────
     {
-      name: "ecommerce-fe",
-      script: "node_modules/next/dist/bin/next",
-      args: "start",
-      // Run Next.js production server on port 6699 (override with PORT env)
-      env: {
-        NODE_ENV: "production",
-        PORT: 6699,
-      },
-      // Working directory — uncomment if PM2 runs from elsewhere
-      // cwd: "/var/www/ecommerce-fe",
-
-      // ─── Process management ──────────────────────────────────────
-      // Run as cluster for multi-core CPUs. Set to 1 for single instance.
-      instances: 1, // use "max" or -1 to use all CPU cores
-      exec_mode: "fork", // use "cluster" if you set instances > 1
-
-      // Auto-restart on crash
+      name: 'ecommerce-fe-prod',
+      script: 'node_modules/next/dist/bin/next',
+      args: 'start',
+      instances: 1,
+      exec_mode: 'fork',
       autorestart: true,
       max_restarts: 10,
-      min_uptime: "10s",
-      restart_delay: 1000, // 1s between restarts
-
-      // Memory limit — restart if exceeded (1GB)
-      max_memory_restart: "1G",
-
-      // ─── Logging ──────────────────────────────────────────────────
-      out_file: "./logs/out.log",
-      error_file: "./logs/error.log",
+      min_uptime: '10s',
+      restart_delay: 1000,
+      max_memory_restart: '1G',
+      out_file: './logs/prod-out.log',
+      error_file: './logs/prod-error.log',
       merge_logs: true,
-      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       log_rotation: true,
-      // Keep last 7 daily rotations, max 50MB each
-      log_type: "json",
-
-      // ─── Watch & reload (disabled for production) ────────────────
+      log_type: 'json',
       watch: false,
-      ignore_watch: ["node_modules", ".next", "logs"],
-
-      // ─── Process metadata ─────────────────────────────────────────
-      pm2_version: ">=5.0.0",
+      ignore_watch: ['node_modules', '.next', 'logs'],
       kill_timeout: 5000,
-      wait_ready: false,
       listen_timeout: 8000,
+      env: {
+        NODE_ENV: 'production',
+        PORT: 6699, // JANGAN UBAH — sama dengan dev
+      },
+    },
 
-      // ─── Environment overrides (optional) ────────────────────────
-      // env_production: {
-      //   NODE_ENV: "production",
-      //   PORT: 6699,
-      // },
+    // ── DEV (laptop Juniko) — next dev, port SAMA 6699 ──────────────
+    {
+      name: 'ecommerce-fe-dev',
+      script: 'node_modules/next/dist/bin/next',
+      args: 'dev',
+      instances: 1,
+      exec_mode: 'fork',
+      autorestart: true,
+      max_restarts: 10,
+      min_uptime: '10s',
+      restart_delay: 1000,
+      max_memory_restart: '1G',
+      out_file: './logs/dev-out.log',
+      error_file: './logs/dev-error.log',
+      merge_logs: true,
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      log_rotation: true,
+      log_type: 'json',
+      watch: false,
+      ignore_watch: ['node_modules', '.next', 'logs'],
+      kill_timeout: 5000,
+      listen_timeout: 8000,
+      env: {
+        NODE_ENV: 'development',
+        PORT: 6699, // JANGAN UBAH — sama dengan prod
+      },
     },
   ],
-
-  // ─── Deploy block (optional — for pm2 deploy) ─────────────────────
-  // Uncomment and configure if you use `pm2 deploy production` for CI/CD.
-  // deploy: {
-  //   production: {
-  //     user: "deploy",
-  //     host: ["your-server-ip"],
-  //     ref: "origin/main",
-  //     repo: "git@github.com:Arcson-Development/ecommerce-fe.git",
-  //     path: "/var/www/ecommerce-fe",
-  //     "pre-deploy-local": "",
-  //     "post-deploy":
-  //       "npm ci && npm run build && pm2 reload ecosystem.config.js",
-  //     "pre-setup": "",
-  //   },
-  // },
 };

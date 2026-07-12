@@ -1,13 +1,59 @@
 @import "tailwindcss";
 
+/* ============================================================================
+ * PASAR JAYA — BRAND DESIGN TOKENS
+ * Fresh-market identity: leafy green primary + warm harvest-orange accent.
+ * Green = freshness/produce, Orange = deals/energy (CTA & discounts).
+ * ============================================================================ */
 :root {
   --background: #ffffff;
   --foreground: #18181b;
+
+  /* Brand — leafy green (primary action, brand surfaces) */
+  --color-primary: #16a34a; /* green-600 */
+  --color-primary-hover: #15803d; /* green-700 */
+  --color-primary-fg: #ffffff;
+  --color-primary-soft: #f0fdf4; /* green-50 */
+  --color-primary-soft-fg: #166534; /* green-800 */
+
+  /* Accent — harvest orange (deals, highlights, energy) */
+  --color-accent: #ea580c; /* orange-600 */
+  --color-accent-hover: #c2410c; /* orange-700 */
+  --color-accent-fg: #ffffff;
+  --color-accent-soft: #fff7ed; /* orange-50 */
+
+  /* Feedback */
+  --color-sale: #e11d48; /* rose-600 — discount badge */
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+
+  /* Neutrals (zinc-aligned, existing UI relies on these) */
+  --color-ink: #18181b; /* zinc-900 */
+  --color-muted-ink: #52525b; /* zinc-600 — AA on white */
+  --color-line: #e4e4e7; /* zinc-200 */
+
+  --radius: 0.625rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-fg: var(--color-primary-fg);
+  --color-primary-soft: var(--color-primary-soft);
+  --color-primary-soft-fg: var(--color-primary-soft-fg);
+
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-fg: var(--color-accent-fg);
+  --color-accent-soft: var(--color-accent-soft);
+
+  --color-sale: var(--color-sale);
+  --color-success: var(--color-success);
+  --color-danger: var(--color-danger);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -20,11 +66,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hide horizontal scrollbar in category nav */
+/* Hide horizontal scrollbar in category nav (scoped, not global) */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ============================================================================
+ * REDUCED MOTION — WCAG 2.3.3. Respect OS preference. Also neutralizes
+ * framer-motion transforms by collapsing transition/animation durations.
+ * ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

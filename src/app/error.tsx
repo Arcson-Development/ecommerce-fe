@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { AlertTriangle } from "lucide-react";
 
 // Segment-level error boundary. Catches render/runtime errors in any route
 // and shows a friendly fallback instead of a blank white screen.
@@ -17,8 +18,8 @@ export default function Error({
 
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4 px-6 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-2xl">
-        ⚠️
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-danger">
+        <AlertTriangle className="h-6 w-6" aria-hidden="true" />
       </div>
       <div>
         <h2 className="text-lg font-semibold text-zinc-900">

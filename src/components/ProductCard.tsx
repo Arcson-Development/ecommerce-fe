@@ -80,7 +80,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
               stiffness: 400,
               damping: 20,
             }}
-            className="absolute left-3 top-3 flex h-12 w-12 items-center justify-center rounded-full bg-rose-600 text-xs font-bold text-white shadow-sm"
+            className="absolute left-3 top-3 flex h-12 w-12 items-center justify-center rounded-full bg-sale text-xs font-bold text-white shadow-sm"
           >
             -{product.discount}%
           </motion.span>
@@ -97,15 +97,15 @@ export function ProductCard({ product, index }: ProductCardProps) {
 
         <div className="mt-1 flex items-center gap-2 text-sm">
           {product.discount && (
-            <span className="text-zinc-500 line-through">
+            <span className="text-xs text-zinc-400 line-through">
               {formatRupiah(product.originalPrice)}
             </span>
           )}
           <span
             className={
               product.discount
-                ? "font-semibold text-zinc-900"
-                : "text-zinc-900"
+                ? "text-base font-bold text-sale"
+                : "font-semibold text-zinc-900"
             }
           >
             {formatRupiah(product.price)}
@@ -125,7 +125,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
         <button
           type="button"
           onClick={handleAddToCart}
-          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-2.5 text-xs font-medium text-zinc-800 transition-colors hover:border-zinc-700 hover:text-zinc-900 active:scale-95"
+          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-2.5 text-xs font-semibold text-primary-fg shadow-sm transition-colors hover:bg-primary-hover active:scale-95"
         >
           <motion.span
             animate={

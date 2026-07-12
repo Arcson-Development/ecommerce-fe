@@ -47,3 +47,27 @@ ecosystem.snapshot.*
 
 # core dumps
 core.*
+
+# ── AI / agent tooling junk ──
+.claude/
+.claude/**
+.opencode/
+.cursor/
+.cursorrules
+.codeium/
+.windsurf/
+.windsurfrules
+.roo/
+.gemini/
+.aider/
+.zed/
+.augment/
+.kilocode/
+.qwen/
+.kiro/
+.specify/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+CLINE.md
+RTK.md
