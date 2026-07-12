@@ -55,7 +55,7 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
         )}
         <span
           className={`text-xl font-semibold ${
-            product.discount ? "text-rose-600" : "text-zinc-900"
+            product.discount ? "text-sale" : "text-zinc-900"
           }`}
         >
           {formatRupiah(product.price)}
@@ -63,7 +63,7 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
       </div>
 
       {/* Stock */}
-      <p className="text-sm font-medium text-emerald-600">Tersedia</p>
+      <p className="text-sm font-medium text-primary">Tersedia</p>
 
       {/* Variant selector */}
       {variants.length > 0 && (
@@ -117,7 +117,7 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.96 }}
           onClick={handleAdd}
-          className="flex flex-1 items-center justify-center gap-2 rounded-sm bg-zinc-900 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 sm:flex-none sm:px-10"
+          className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary px-6 py-2.5 text-sm font-semibold text-primary-fg shadow-sm transition-colors hover:bg-primary-hover sm:flex-none sm:px-10"
         >
           <motion.span
             animate={

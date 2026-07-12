@@ -385,7 +385,7 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
           disabled={isProcessing || !shipping || !payment}
           whileHover={{ scale: isProcessing || !shipping || !payment ? 1 : 1.01 }}
           whileTap={{ scale: isProcessing || !shipping || !payment ? 1 : 0.98 }}
-          className="w-full bg-zinc-900 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+          className="w-full rounded-md bg-primary py-3.5 text-sm font-semibold uppercase tracking-wider text-primary-fg shadow-sm transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-zinc-400"
         >
           {isProcessing ? "Memproses..." : "Lanjut Pembayaran"}
         </motion.button>

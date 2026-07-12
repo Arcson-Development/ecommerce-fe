@@ -41,9 +41,9 @@ export function CheckoutSteps({ current }: CheckoutStepsProps) {
                 }}
                 className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
                   isDone
-                    ? "bg-emerald-500 text-white"
+                    ? "bg-primary text-primary-fg"
                     : isCurrent
-                      ? "bg-zinc-900 text-white"
+                      ? "bg-accent text-accent-fg"
                       : "bg-gray-200 text-zinc-500"
                 }`}
               >
