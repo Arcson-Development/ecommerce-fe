@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
+import { Hero } from "@/components/Hero";
 import { CategoryNav } from "@/components/CategoryNav";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { ProductGrid } from "@/components/ProductGrid";
@@ -155,6 +156,7 @@ function HomeContent() {
       <h1 className="sr-only">Pasar Jaya — Belanja Sayur Segar Online</h1>
       <TopBar />
       <Header onSearch={handleSearch} initialSearch={initialSearch} />
+      {selectedCategory === "Semua" && !searchQuery && !selectedMarket && <Hero />}
       {markets.length > 0 && (
         <div className="sticky top-0 z-40 border-b border-zinc-100 bg-white/95 backdrop-blur-sm">
           <div className="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto px-4 py-2.5 sm:px-6 lg:px-8">
@@ -165,7 +167,7 @@ function HomeContent() {
               onClick={() => setSelectedMarket("")}
               className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${
                 !selectedMarket
-                  ? "bg-zinc-900 text-white shadow-sm"
+                  ? "bg-primary text-primary-fg shadow-sm"
                   : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
               }`}
             >
@@ -177,7 +179,7 @@ function HomeContent() {
                 onClick={() => setSelectedMarket(m.id)}
                 className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-all duration-200 ${
                   selectedMarket === m.id
-                    ? "bg-emerald-600 text-white shadow-sm"
+                    ? "bg-primary text-primary-fg shadow-sm"
                     : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
                 }`}
               >
@@ -192,7 +194,7 @@ function HomeContent() {
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
-      <main>
+      <main id="produk">
       <Breadcrumb
         items={["Beranda", "Toko", selectedCategory]}
         total={totalProducts}

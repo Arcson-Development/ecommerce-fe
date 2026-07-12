@@ -157,7 +157,7 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                  className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-900 px-1 text-[10px] font-bold text-white"
+                  className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-sale px-1 text-[10px] font-bold text-white"
                 >
                   {cartCount}
                 </motion.span>
@@ -231,7 +231,7 @@ function Logo() {
       viewBox="0 0 48 48"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="text-zinc-900"
+      className="text-primary"
     >
       {/* Glasses */}
       <circle cx="14" cy="20" r="6" stroke="currentColor" strokeWidth="2" />
