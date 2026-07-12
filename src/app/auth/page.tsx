@@ -95,7 +95,7 @@ function AuthForm() {
                 {isLogin && (
                   <motion.div
                     layoutId="active-tab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
                   />
                 )}
               </button>
@@ -112,7 +112,7 @@ function AuthForm() {
                 {!isLogin && (
                   <motion.div
                     layoutId="active-tab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
                   />
                 )}
               </button>
@@ -250,7 +250,7 @@ function AuthForm() {
                   disabled={loading}
                   whileHover={{ scale: loading ? 1 : 1.01 }}
                   whileTap={{ scale: loading ? 1 : 0.99 }}
-                  className="w-full bg-zinc-900 py-3.5 text-sm font-semibold uppercase tracking-wider text-white hover:bg-zinc-800 disabled:bg-zinc-400 disabled:cursor-not-allowed transition-colors rounded-sm flex items-center justify-center gap-2 mt-6"
+                  className="w-full bg-primary py-3.5 text-sm font-semibold uppercase tracking-wider text-primary-fg shadow-sm hover:bg-primary-hover disabled:bg-zinc-400 disabled:cursor-not-allowed transition-colors rounded-md flex items-center justify-center gap-2 mt-6"
                 >
                   {loading && <Loader className="h-4 w-4 animate-spin" />}
                   {isLogin ? "Masuk ke Akun" : "Daftar Sekarang"}
