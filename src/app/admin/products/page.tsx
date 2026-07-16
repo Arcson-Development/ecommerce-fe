@@ -3,24 +3,34 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { Package, Search, Store, Eye } from "lucide-react";
+import { Package, Search, Store } from "lucide-react";
 import { formatRupiah } from "@/lib/format-rupiah";
+import { Pagination } from "@/components/Pagination";
+import { getImageUrl } from "@/lib/image-utils";
 
-const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
+const ITEMS_PER_PAGE = 12;
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [page]);
 
   async function loadData() {
     try {
-      const data = await api.get("/products");
-      setProducts(data || []);
+      const res = await api.get(`/products?page=${page}&limit=${ITEMS_PER_PAGE}`);
+      const data = Array.isArray(res) ? res : (res.items || []);
+      const total = Array.isArray(res) ? res.length : (res.total || data.length);
+      const pages = Array.isArray(res) ? Math.ceil(res.length / ITEMS_PER_PAGE) : (res.totalPages || 1);
+      setProducts(data);
+      setTotalItems(total);
+      setTotalPages(pages);
     } catch (e) {
       console.error("Failed to load products", e);
     } finally {
@@ -51,7 +61,7 @@ export default function AdminProductsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total Produk", value: products.length, color: "bg-zinc-900 text-white" },
+          { label: "Total Produk", value: totalItems, color: "bg-zinc-900 text-white" },
           { label: "Total Varian", value: products.reduce((sum: number, p: any) => sum + (p.variants?.length || 0), 0), color: "bg-blue-500 text-white" },
           { label: "Total Toko", value: new Set(products.map((p: any) => p.storeId)).size, color: "bg-emerald-500 text-white" },
           { label: "Total Stok", value: products.reduce((sum: number, p: any) => sum + (p.variants?.reduce((s: number, v: any) => s + (v.stock || 0), 0) || 0), 0), color: "bg-amber-500 text-white" },
@@ -94,7 +104,7 @@ export default function AdminProductsPage() {
               <div className="h-40 bg-zinc-100 relative">
                 {p.images?.[0] ? (
                   <img
-                    src={p.images[0].startsWith("/uploads") ? `${API_HOST}${p.images[0]}` : p.images[0]}
+                    src={getImageUrl(p.images[0])}
                     alt={p.name}
                     className="w-full h-full object-cover"
                   />
@@ -157,6 +167,11 @@ export default function AdminProductsPage() {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination current={page} total={totalPages} onChange={setPage} />
+      )}
     </div>
   );
 }

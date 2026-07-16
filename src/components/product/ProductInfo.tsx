@@ -23,7 +23,7 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
     setIsAdding(true);
     try {
       for (let i = 0; i < qty; i++) {
-        await addItem(product.id, { price: product.price, name: product.name, image: product.image });
+        await addItem(product.productId || product.id, { variantId: product.id, price: product.price, name: product.name, image: product.image });
       }
       toast.success(
         `${qty} × ${product.name} ditambahkan ke keranjang`

@@ -9,6 +9,7 @@ import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
 import { formatRupiah } from "@/lib/format-rupiah";
 import { api } from "@/lib/api";
+import { getImageUrl } from "@/lib/image-utils";
 import { toast } from "sonner";
 
 const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
@@ -152,10 +153,7 @@ export default function MitraOrderDetailPage() {
     0
   ) || 0;
 
-  const getFullImgUrl = (path: string) => {
-    if (!path) return "";
-    return path.startsWith("/uploads") ? `${API_HOST}${path}` : path;
-  };
+  const getFullImgUrl = (path: string) => getImageUrl(path);
 
   return (
     <MitraShell>
@@ -363,10 +361,7 @@ export default function MitraOrderDetailPage() {
             <ul className="divide-y divide-zinc-200">
               {order.items?.map((item: any, i: number) => {
                 const product = item.variant?.product;
-                const rawImg = product?.images?.[0];
-                const productImage = rawImg && rawImg.startsWith("/uploads")
-                  ? `${API_HOST}${rawImg}`
-                  : (rawImg || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80");
+                const productImage = getImageUrl(product?.images?.[0]) || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80";
 
                 return (
                   <li

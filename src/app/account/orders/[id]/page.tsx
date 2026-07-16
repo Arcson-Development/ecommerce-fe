@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { TopBar } from "@/components/TopBar";
 import { api } from "@/lib/api";
+import { getImageUrl } from "@/lib/image-utils";
 import { toast } from "sonner";
 
 const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
@@ -261,7 +262,7 @@ export default function OrderDetailPage() {
                   {order.shippingPhoto ? (
                     <div className="relative h-40 w-full overflow-hidden bg-zinc-100 border border-zinc-200">
                       <Image
-                        src={order.shippingPhoto.startsWith("/uploads") ? `${API_HOST}${order.shippingPhoto}` : order.shippingPhoto}
+                        src={getImageUrl(order.shippingPhoto)}
                         alt="Bukti Kirim Kurir"
                         fill
                         className="object-cover"
@@ -278,7 +279,7 @@ export default function OrderDetailPage() {
                   {order.recipientPhoto ? (
                     <div className="relative h-40 w-full overflow-hidden bg-zinc-100 border border-zinc-200">
                       <Image
-                        src={order.recipientPhoto.startsWith("/uploads") ? `${API_HOST}${order.recipientPhoto}` : order.recipientPhoto}
+                        src={getImageUrl(order.recipientPhoto)}
                         alt="Bukti Terima"
                         fill
                         className="object-cover"
@@ -291,7 +292,7 @@ export default function OrderDetailPage() {
                       {recipientPhotoUrl ? (
                         <div className="relative h-32 w-32 overflow-hidden bg-zinc-100 border border-zinc-200 mb-2">
                           <Image
-                            src={recipientPhotoUrl.startsWith("/uploads") ? `${API_HOST}${recipientPhotoUrl}` : recipientPhotoUrl}
+                            src={getImageUrl(recipientPhotoUrl)}
                             alt="Bukti Terima Preview"
                             fill
                             className="object-cover"

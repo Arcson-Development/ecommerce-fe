@@ -67,14 +67,16 @@ export default function CheckoutPage() {
     return () => unsub();
   }, []);
 
+  // Redirect unauthenticated users to login
   useEffect(() => {
     if (!hydrated) return;
-    // Guests may check out without an account; only load saved
-    // addresses when authenticated.
-    if (isAuthenticated) {
-      useCart.getState().fetchCart();
-      loadSavedAddresses();
+    if (!isAuthenticated) {
+      router.replace("/auth?redirect=/checkout");
+      return;
     }
+    // Authenticated: fetch cart and addresses
+    useCart.getState().fetchCart();
+    loadSavedAddresses();
   }, [hydrated, isAuthenticated, router]);
 
   async function loadSavedAddresses() {

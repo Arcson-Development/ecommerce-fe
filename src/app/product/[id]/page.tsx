@@ -12,6 +12,7 @@ import { ProductInfo } from "@/components/product/ProductInfo";
 import { ProductDescription } from "@/components/product/ProductDescription";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { api } from "@/lib/api";
+import { getImageUrl } from "@/lib/image-utils";
 import type { Product } from "@/types/product";
 
 const VEG_CATEGORIES = [
@@ -36,12 +37,8 @@ export default function ProductPage() {
       try {
         const dbProduct = await api.get(`/products/${params.id}`);
         const primaryVariant = dbProduct.variants?.[0];
-        const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
-        
-        const primaryImgUrl = dbProduct.images?.[0];
-        const primaryImage = primaryImgUrl && primaryImgUrl.startsWith("/uploads")
-          ? `${API_HOST}${primaryImgUrl}`
-          : (primaryImgUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80");
+
+        const primaryImage = getImageUrl(dbProduct.images?.[0]) || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80";
 
         const mappedProduct: Product = {
           id: primaryVariant?.id || dbProduct.id,
@@ -68,10 +65,7 @@ export default function ProductPage() {
           .slice(0, 4)
           .map((p: any) => {
             const v = p.variants?.[0];
-            const relatedImgUrl = p.images?.[0];
-            const relatedImage = relatedImgUrl && relatedImgUrl.startsWith("/uploads")
-              ? `${API_HOST}${relatedImgUrl}`
-              : (relatedImgUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80");
+            const relatedImage = getImageUrl(p.images?.[0]) || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80";
             return {
               id: v?.id || p.id,
               productId: p.id,

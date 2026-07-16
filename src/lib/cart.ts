@@ -4,14 +4,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { api } from "./api";
 import { useAuth } from "./auth";
+import { getImageUrl } from "./image-utils";
 
 const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
-
-function toImageUrl(path: string | undefined): string {
-  if (!path) return "";
-  if (path.startsWith("/uploads")) return `${API_HOST}${path}`;
-  return path;
-}
 
 export interface CartItem {
   id: string; // variantId
@@ -25,7 +20,7 @@ interface CartState {
   items: CartItem[];
   syncing: boolean;
   fetchCart: () => Promise<void>;
-  addItem: (productId: string, snapshot?: { price?: number; name?: string; image?: string }) => Promise<void>;
+  addItem: (productId: string, snapshot?: { price?: number; name?: string; image?: string; variantId?: string }) => Promise<void>;
   removeItem: (variantId: string) => Promise<void>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
   clear: () => Promise<void>;
@@ -51,7 +46,7 @@ export const useCart = create<CartState>()(
               quantity: item.quantity,
               price: item.variant?.price,
               name: item.variant?.product?.name,
-              image: toImageUrl(item.variant?.product?.images?.[0]),
+              image: getImageUrl(item.variant?.product?.images?.[0]),
             }));
             set({ items: mapped });
           } catch (e) {
@@ -59,18 +54,22 @@ export const useCart = create<CartState>()(
           }
         }
       },
-      addItem: async (productId: string, snapshot?: { price?: number; name?: string; image?: string }) => {
+      addItem: async (productId: string, snapshot?: { price?: number; name?: string; image?: string; variantId?: string }) => {
         const isAuth = useAuth.getState().isAuthenticated;
 
         // Resolve a valid variantId. The cart API expects a variantId, but the
         // product card/list only knows the productId — fetch the detail to get
         // the first variant (falls back to productId if none/unauthenticated).
-        let variantId = productId;
+        // Use variantId from snapshot if provided (avoids extra fetch).
+        // When called from ProductCard/ProductInfo, the product.id is already
+        // the variant ID because the listing API resolves it via variants?.[0]?.id.
+        let variantId = snapshot?.variantId || productId;
         let price = snapshot?.price;
         let name = snapshot?.name;
         let image = snapshot?.image;
 
-        if (isAuth) {
+        // Only fetch as fallback if no variantId was provided and user is auth'd
+        if (!snapshot?.variantId && isAuth) {
           try {
             const p: any = await api.get(`/products/${productId}`);
             variantId = p?.variants?.[0]?.id || productId;

@@ -23,7 +23,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
     e.stopPropagation();
     setIsAdding(true);
     try {
-      await addItem(product.id, { price: product.price, name: product.name, image: product.image });
+      await addItem(product.productId || product.id, { variantId: product.id, price: product.price, name: product.name, image: product.image });
       toast.success(`${product.name} ditambahkan ke keranjang`);
     } catch {
       console.error("Failed to add item to cart");

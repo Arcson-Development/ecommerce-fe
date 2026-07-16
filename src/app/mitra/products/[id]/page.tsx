@@ -9,13 +9,13 @@ import { MitraShell } from "@/components/mitra/MitraShell";
 import { MitraSidebar } from "@/components/mitra/MitraSidebar";
 import { formatRupiah } from "@/lib/format-rupiah";
 import { api } from "@/lib/api";
+import { getImageUrl } from "@/lib/image-utils";
 import { toast } from "sonner";
 
 const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
 
 function toAbsoluteUrl(path: string): string {
-  if (path.startsWith("/uploads")) return `${API_HOST}${path}`;
-  return path;
+  return getImageUrl(path);
 }
 
 const CATEGORY_META: Record<string, { bg: string; text: string }> = {

@@ -6,10 +6,9 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useCart } from "@/lib/cart";
 import { api } from "@/lib/api";
+import { getImageUrl } from "@/lib/image-utils";
 import { toast } from "sonner";
 import { formatRupiah } from "@/lib/format-rupiah";
-
-const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
 
 interface OrderSummaryProps {
   onCheckout: (details: { shippingMethod: string; shippingCost: number; paymentMethod: string }) => void;
@@ -123,10 +122,7 @@ export function OrderSummary({ onCheckout, isProcessing }: OrderSummaryProps) {
           const product = variant?.product;
           if (!product) return null;
 
-          const rawImg = product.images?.[0];
-          const image = rawImg && rawImg.startsWith("/uploads")
-            ? `${API_HOST}${rawImg}`
-            : (rawImg || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80");
+          const image = getImageUrl(product.images?.[0]) || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80";
 
           return (
             <li

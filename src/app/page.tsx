@@ -11,6 +11,7 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { Pagination } from "@/components/Pagination";
 import { products as mockProducts } from "@/data/products";
 import { api } from "@/lib/api";
+import { getImageUrl } from "@/lib/image-utils";
 import type { Product, Category, SortOption } from "@/types/product";
 
 function HomeContent() {
@@ -97,17 +98,13 @@ function HomeContent() {
         setTotalProducts(total);
         setTotalPages(pages);
 
-        const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
         const PLACEHOLDER = /^(produk\s*1|test)$/i;
         const cleanProducts = dbProducts.filter(
           (p: any) => !PLACEHOLDER.test(p.name || "")
         );
         const mapped = cleanProducts.map((p: any) => {
           const primaryVariant = p.variants?.[0];
-          const imageUrl = p.images?.[0];
-          const image = imageUrl && imageUrl.startsWith("/uploads")
-            ? `${API_HOST}${imageUrl}`
-            : (imageUrl || "/no-image.svg");
+          const image = getImageUrl(p.images?.[0]) || "/no-image.svg";
 
           return {
             id: primaryVariant?.id || p.id,
