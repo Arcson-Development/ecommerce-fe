@@ -140,7 +140,7 @@ export const useOrders = create<OrdersState>()(
         if (isAuth) {
           try {
             const dbOrders = await api.get("/orders");
-            const mapped = dbOrders.map(mapBackendOrder);
+            const mapped = (dbOrders?.items || dbOrders || []).map(mapBackendOrder);
             set({ orders: mapped });
           } catch (e) {
             console.error("Failed to fetch orders from backend", e);
