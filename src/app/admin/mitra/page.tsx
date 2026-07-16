@@ -17,7 +17,7 @@ export default function AdminMitraPage() {
   async function loadStores() {
     try {
       const data = await api.get("/admin/stores");
-      setStores(data || []);
+      setStores(data?.items || []);
     } catch (e: any) {
       console.error("Failed to load stores", e);
     } finally {
