@@ -35,7 +35,7 @@ function HomeContent() {
     async function loadMarkets() {
       try {
         const res = await api.get("/markets");
-        setMarkets(Array.isArray(res) ? res : []);
+        setMarkets(res?.items || (Array.isArray(res) ? res : []));
       } catch (_) {}
     }
     loadMarkets();
