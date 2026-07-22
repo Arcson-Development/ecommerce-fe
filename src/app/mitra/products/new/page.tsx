@@ -13,14 +13,16 @@ import { toast } from "sonner";
 interface Variant {
   type: string;
   option: string;
+  price: string;
+  stock: string;
 }
 
 export default function MitraProductNewPage() {
   const router = useRouter();
   const [openCategory, setOpenCategory] = useState(false);
-  const [hasVariants, setHasVariants] = useState(true);
+  const [hasVariants, setHasVariants] = useState(false);
   const [variants, setVariants] = useState<Variant[]>([
-    { type: "", option: "" },
+    { type: "", option: "", price: "", stock: "" },
   ]);
   const [photos, setPhotos] = useState<(string | null)[]>([
     null,
@@ -55,7 +57,7 @@ export default function MitraProductNewPage() {
   };
 
   const handleAddVariant = () => {
-    setVariants((v) => [...v, { type: "", option: "" }]);
+    setVariants((v) => [...v, { type: "", option: "", price: "", stock: "" }]);
   };
 
   const handleRemoveVariant = (i: number) => {
@@ -88,8 +90,8 @@ export default function MitraProductNewPage() {
       const variantList = hasVariants && variants.length > 0
         ? variants.filter(v => v.type || v.option).map(v => ({
             name: v.option || v.type || form.name,
-            price: parseInt(form.price),
-            stock: parseInt(form.stock) || 0,
+            price: v.price ? parseInt(v.price) : parseInt(form.price),
+            stock: v.stock ? parseInt(v.stock) || 0 : parseInt(form.stock) || 0,
           }))
         : [{ name: "Standar", price: parseInt(form.price), stock: parseInt(form.stock) || 0 }];
 
@@ -297,7 +299,7 @@ export default function MitraProductNewPage() {
                     {variants.map((variant, i) => (
                       <div
                         key={i}
-                        className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+                        className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_1fr_1fr_auto] sm:items-end"
                       >
                         <Field label="Nama jenis">
                           <input
@@ -332,6 +334,53 @@ export default function MitraProductNewPage() {
                             placeholder="Varian (ukuran atau tipe)"
                             className="form-input"
                           />
+                        </Field>
+                        <Field label="Harga per varian">
+                          <div className="relative">
+                            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500">
+                              Rp
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={variant.price}
+                              onChange={(e) =>
+                                setVariants((v) =>
+                                  v.map((x, idx) =>
+                                    idx === i
+                                      ? { ...x, price: e.target.value }
+                                      : x
+                                  )
+                                )
+                              }
+                              placeholder={form.price || "0"}
+                              className="form-input pl-10"
+                            />
+                          </div>
+                          <p className="mt-1 text-[10px] text-zinc-400">
+                            Kosongkan = pakai harga umum
+                          </p>
+                        </Field>
+                        <Field label="Stok per varian">
+                          <input
+                            type="number"
+                            min="0"
+                            value={variant.stock}
+                            onChange={(e) =>
+                              setVariants((v) =>
+                                v.map((x, idx) =>
+                                  idx === i
+                                    ? { ...x, stock: e.target.value }
+                                    : x
+                                )
+                              )
+                            }
+                            placeholder={form.stock || "0"}
+                            className="form-input"
+                          />
+                          <p className="mt-1 text-[10px] text-zinc-400">
+                            Kosongkan = pakai stok umum
+                          </p>
                         </Field>
                         {variants.length > 1 && (
                           <button
