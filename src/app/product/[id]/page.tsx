@@ -30,6 +30,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [variantsList, setVariantsList] = useState<string[]>([]);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,6 +57,11 @@ export default function ProductPage() {
 
         setProduct(mappedProduct);
         setVariantsList(dbProduct.variants?.map((v: any) => v.name) || [dbProduct.unit]);
+        setGalleryImages(
+          dbProduct.images?.length
+            ? dbProduct.images.map((img: string) => getImageUrl(img))
+            : [primaryImage],
+        );
 
         // Fetch related products (e.g. all products except this one)
         const allProductsRes = await api.get("/products?limit=50");
@@ -116,8 +122,6 @@ export default function ProductPage() {
       </>
     );
   }
-
-  const galleryImages = [product.image, product.image, product.image];
 
   return (
     <>
