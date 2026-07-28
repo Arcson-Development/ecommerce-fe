@@ -485,7 +485,7 @@ export default function MitraProductDetailPage() {
 															</button>
 														)}
 													</div>
-													<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+													<div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2">
 														<Field label="Nama jenis">
 															<input
 																type="text"
@@ -493,11 +493,23 @@ export default function MitraProductDetailPage() {
 																onChange={(e) =>
 																	updateVariant(i, "name", e.target.value)
 																}
-																placeholder="Contoh: Ukuran Besar"
+																placeholder="Contoh: Besar"
 																className="input"
 															/>
 														</Field>
-														<Field label="Harga">
+														<Field label="Stok">
+															<input
+																type="number"
+																min="0"
+																value={v.stock}
+																onChange={(e) =>
+																	updateVariant(i, "stock", e.target.value)
+																}
+																placeholder="0"
+																className="input"
+															/>
+														</Field>
+														<Field label="Harga Jual">
 															<div className="relative">
 																<span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-zinc-500">
 																	Rp
@@ -534,18 +546,6 @@ export default function MitraProductDetailPage() {
 																	className="input pl-12"
 																/>
 															</div>
-														</Field>
-														<Field label="Stok">
-															<input
-																type="number"
-																min="0"
-																value={v.stock}
-																onChange={(e) =>
-																	updateVariant(i, "stock", e.target.value)
-																}
-																placeholder="0"
-																className="input"
-															/>
 														</Field>
 													</div>
 												</div>
@@ -643,15 +643,16 @@ export default function MitraProductDetailPage() {
 				<style jsx>{`
 					.input {
 						width: 100%;
-						border: 1px solid #e4e4e7;
+						border: 1px solid #d4d4d8;
 						background: #fafafa;
-						padding: 0.75rem 1rem;
-						font-size: 0.9375rem;
+						padding: 0.875rem 1.125rem;
+						font-size: 1rem;
+						line-height: 1.5;
 						color: #18181b;
 						transition: border-color 0.15s, background 0.15s;
 					}
 					.input::placeholder {
-						color: #a1a1aa;
+						color: #c0c0c5;
 					}
 					.input:hover:not(:disabled) {
 						border-color: #a1a1aa;
