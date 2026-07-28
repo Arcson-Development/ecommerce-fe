@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
 	ChevronLeft,
 	MapPin,
@@ -13,6 +13,8 @@ import {
 	Phone,
 	Home,
 	Loader2,
+	Trash2,
+	Star,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { MitraShell } from "@/components/mitra/MitraShell";
@@ -36,6 +38,23 @@ const LeafletMap = dynamic(() => import("@/components/mitra/LeafletMap"), {
 	),
 });
 
+interface AddressItem {
+	id: string;
+	label: string;
+	recipient: string;
+	phone: string;
+	street: string;
+	province: string;
+	city: string;
+	district: string;
+	village: string | null;
+	postalCode: string;
+	lat: number | null;
+	lng: number | null;
+	notes: string | null;
+	isPrimary: boolean;
+}
+
 interface AddressForm {
 	label: string;
 	recipient: string;
@@ -56,7 +75,7 @@ interface RegionItem {
 	name: string;
 }
 
-const DEFAULT_FORM: AddressForm = {
+const EMPTY_FORM: AddressForm = {
 	label: "Toko Utama",
 	recipient: "",
 	phone: "",
@@ -74,9 +93,9 @@ const DEFAULT_FORM: AddressForm = {
 export default function MitraAddressPage() {
 	const router = useRouter();
 	const [loading, setLoading] = useState(true);
-	const [editing, setEditing] = useState(false);
-	const [form, setForm] = useState<AddressForm>(DEFAULT_FORM);
-	const [savedAddresses, setSavedAddresses] = useState<AddressForm[]>([]);
+	const [addresses, setAddresses] = useState<AddressItem[]>([]);
+	const [editingId, setEditingId] = useState<string | null>(null); // null = not editing, "new" = creating
+	const [form, setForm] = useState<AddressForm>(EMPTY_FORM);
 
 	const [provinces, setProvinces] = useState<RegionItem[]>([]);
 	const [cities, setCities] = useState<RegionItem[]>([]);
@@ -92,67 +111,24 @@ export default function MitraAddressPage() {
 	const districtSelect = useSelectState(false);
 	const villageSelect = useSelectState(false);
 
-	// Fetch provinces on mount
+	const loadAddresses = useCallback(async () => {
+		try {
+			const data = await api.get("/mitra/addresses");
+			setAddresses(data || []);
+		} catch {
+			// might be empty
+		}
+	}, []);
+
+	// Fetch provinces and addresses on mount
 	useEffect(() => {
 		async function init() {
 			try {
-				const [provincesData, profile] = await Promise.all([
+				const [provincesData] = await Promise.all([
 					api.get("/regions/provinces"),
-					api.get("/mitra/profile").catch(() => null),
+					loadAddresses(),
 				]);
 				setProvinces(provincesData || []);
-
-				if (profile) {
-					// Parse address back into fields
-					const addr: AddressForm = {
-						label: "Toko Utama",
-						recipient: profile.name || "",
-						phone: "",
-						street: profile.address || "",
-						province: profile.province || "",
-						city: profile.city || "",
-						district: profile.district || "",
-						village: profile.village || "",
-						postalCode: profile.postalCode || "",
-						notes: profile.notes || "",
-						lat: profile.lat ?? -6.2,
-						lng: profile.lng ?? 106.8,
-					};
-					setForm(addr);
-					setSavedAddresses([addr]);
-
-					// Load dependent data
-					if (addr.province) {
-						const p = provincesData?.find(
-							(x: any) => x.name === addr.province || x.id === addr.province,
-						);
-						if (p) {
-							const c = await api.get(`/regions/provinces/${p.id}/cities`);
-							setCities(c || []);
-							if (addr.city) {
-								const ct = c?.find(
-									(x: any) => x.name === addr.city || x.id === addr.city,
-								);
-								if (ct) {
-									const d = await api.get(`/regions/cities/${ct.id}/districts`);
-									setDistricts(d || []);
-									if (addr.district) {
-										const ds = d?.find(
-											(x: any) =>
-												x.name === addr.district || x.id === addr.district,
-										);
-										if (ds) {
-											const v = await api.get(
-												`/regions/districts/${ds.id}/villages`,
-											);
-											setVillages(v || []);
-										}
-									}
-								}
-							}
-						}
-					}
-				}
 			} catch (e) {
 				console.error("Failed to load data", e);
 			} finally {
@@ -160,9 +136,9 @@ export default function MitraAddressPage() {
 			}
 		}
 		init();
-	}, []);
+	}, [loadAddresses]);
 
-	// Load cities when province changes
+	// ── Cascading dropdowns ──
 	useEffect(() => {
 		if (!form.province) {
 			setCities([]);
@@ -182,7 +158,6 @@ export default function MitraAddressPage() {
 			.finally(() => setLoadingCities(false));
 	}, [form.province]);
 
-	// Load districts when city changes
 	useEffect(() => {
 		if (!form.city) {
 			setDistricts([]);
@@ -199,7 +174,6 @@ export default function MitraAddressPage() {
 			.finally(() => setLoadingDistricts(false));
 	}, [form.city]);
 
-	// Load villages when district changes
 	useEffect(() => {
 		if (!form.district) {
 			setVillages([]);
@@ -229,11 +203,37 @@ export default function MitraAddressPage() {
 				next.district = "";
 				next.village = "";
 			}
-			if (field === "district") {
-				next.village = "";
-			}
+			if (field === "district") next.village = "";
 			return next;
 		});
+	};
+
+	const startEdit = (address?: AddressItem) => {
+		if (address) {
+			setForm({
+				label: address.label,
+				recipient: address.recipient,
+				phone: address.phone,
+				street: address.street,
+				province: address.province,
+				city: address.city,
+				district: address.district,
+				village: address.village || "",
+				postalCode: address.postalCode,
+				notes: address.notes || "",
+				lat: address.lat ?? -6.2,
+				lng: address.lng ?? 106.8,
+			});
+			setEditingId(address.id);
+		} else {
+			setForm({ ...EMPTY_FORM });
+			setEditingId("new");
+		}
+	};
+
+	const cancelEdit = () => {
+		setEditingId(null);
+		setForm(EMPTY_FORM);
 	};
 
 	const handleSave = async () => {
@@ -241,32 +241,56 @@ export default function MitraAddressPage() {
 			toast.error("Mohon lengkapi field wajib.");
 			return;
 		}
+
+		const payload = {
+			label: form.label,
+			recipient: form.recipient,
+			phone: form.phone,
+			street: form.street,
+			province: form.province,
+			city: form.city,
+			district: form.district,
+			village: form.village || undefined,
+			postalCode: form.postalCode,
+			lat: form.lat,
+			lng: form.lng,
+			notes: form.notes || undefined,
+		};
+
 		try {
-			await api.put("/mitra/profile", {
-				name: form.recipient,
-				address: form.street,
-				province: form.province,
-				city: form.city,
-				district: form.district,
-				village: form.village,
-				postalCode: form.postalCode,
-				lat: form.lat,
-				lng: form.lng,
-				notes: form.notes,
-			});
-			setSavedAddresses((prev) => {
-				const idx = prev.findIndex((a) => a.label === "Toko Utama");
-				if (idx >= 0) {
-					const next = [...prev];
-					next[idx] = form;
-					return next;
-				}
-				return [...prev, form];
-			});
-			setEditing(false);
-			toast.success("Alamat berhasil disimpan!");
+			if (editingId === "new") {
+				await api.post("/mitra/addresses", payload);
+				toast.success("Alamat baru berhasil ditambahkan!");
+			} else {
+				await api.put(`/mitra/addresses/${editingId}`, payload);
+				toast.success("Alamat berhasil diperbarui!");
+			}
+			await loadAddresses();
+			cancelEdit();
 		} catch (e: any) {
 			toast.error(e.message || "Gagal menyimpan alamat.");
+		}
+	};
+
+	const handleDelete = async (address: AddressItem) => {
+		if (!confirm(`Hapus alamat "${address.label}"?`)) return;
+		try {
+			await api.delete(`/mitra/addresses/${address.id}`);
+			toast.success("Alamat berhasil dihapus");
+			await loadAddresses();
+		} catch (e: any) {
+			toast.error(e.message || "Gagal menghapus alamat");
+		}
+	};
+
+	const handleSetPrimary = async (address: AddressItem) => {
+		if (address.isPrimary) return;
+		try {
+			await api.put(`/mitra/addresses/${address.id}`, { isPrimary: true });
+			toast.success("Alamat utama berhasil diubah");
+			await loadAddresses();
+		} catch (e: any) {
+			toast.error(e.message || "Gagal mengubah alamat utama");
 		}
 	};
 
@@ -294,6 +318,10 @@ export default function MitraAddressPage() {
 		setForm((f) => ({ ...f, lat, lng }));
 	};
 
+	const getRegionName = (list: RegionItem[], idOrName: string) =>
+		list.find((r) => r.id === idOrName || r.name === idOrName)?.name ||
+		idOrName;
+
 	if (loading) {
 		return (
 			<MitraShell>
@@ -304,9 +332,7 @@ export default function MitraAddressPage() {
 		);
 	}
 
-	const getRegionName = (list: RegionItem[], idOrName: string) =>
-		list.find((r) => r.id === idOrName || r.name === idOrName)?.name ||
-		idOrName;
+	const isEditing = editingId !== null;
 
 	return (
 		<MitraShell>
@@ -332,40 +358,63 @@ export default function MitraAddressPage() {
 					</div>
 
 					<div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_22rem]">
-						{/* Left: form / saved addresses */}
+						{/* ─── Left: Address List / Form ─── */}
 						<div className="space-y-4">
 							<div className="flex flex-wrap items-center justify-between gap-3">
 								<h2 className="text-base font-semibold text-zinc-900">
-									Alamat Toko
+									Daftar Alamat ({addresses.length})
 								</h2>
-								{!editing && (
+								{!isEditing && (
 									<motion.button
 										whileHover={{ scale: 1.02 }}
 										whileTap={{ scale: 0.97 }}
-										onClick={() => setEditing(true)}
+										onClick={() => startEdit()}
 										className="flex items-center gap-1.5 border border-zinc-300 bg-white px-3 py-2 text-xs font-medium text-zinc-800 transition-colors hover:border-zinc-700 hover:text-zinc-900"
 									>
-										<Edit3 className="h-3.5 w-3.5" strokeWidth={2} />
-										Edit Alamat
+										<Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+										Tambah Alamat
 									</motion.button>
 								)}
 							</div>
 
-							{/* Read mode */}
-							{!editing && (
+							{/* ── Read mode: list addresses ── */}
+							{!isEditing && (
 								<motion.div
 									initial={{ opacity: 0, y: 10 }}
 									animate={{ opacity: 1, y: 0 }}
 									className="space-y-3"
 								>
-									{savedAddresses.map((addr) => (
+									{addresses.length === 0 && (
+										<div className="rounded-sm border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center">
+											<MapPin className="mx-auto h-8 w-8 text-zinc-300" strokeWidth={1.5} />
+											<p className="mt-3 text-sm text-zinc-500">
+												Belum ada alamat toko. Tambahkan alamat pertama Anda.
+											</p>
+											<button
+												type="button"
+												onClick={() => startEdit()}
+												className="mt-3 inline-flex items-center gap-1.5 bg-zinc-900 px-4 py-2 text-xs font-medium text-white hover:bg-zinc-800"
+											>
+												<Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+												Tambah Alamat
+											</button>
+										</div>
+									)}
+
+									{addresses.map((addr) => (
 										<div
-											key={addr.label}
-											className="rounded-sm border border-zinc-200 bg-white p-5"
+											key={addr.id}
+											className="rounded-sm border border-zinc-200 bg-white p-5 hover:border-zinc-300"
 										>
 											<div className="flex items-start justify-between gap-3">
 												<div className="flex items-start gap-3">
-													<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-emerald-50 text-emerald-700">
+													<div
+														className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-sm ${
+															addr.isPrimary
+																? "bg-emerald-50 text-emerald-700"
+																: "bg-zinc-100 text-zinc-500"
+														}`}
+													>
 														<Home className="h-4 w-4" strokeWidth={2} />
 													</div>
 													<div>
@@ -373,8 +422,9 @@ export default function MitraAddressPage() {
 															<p className="text-sm font-semibold text-zinc-900">
 																{addr.label}
 															</p>
-															{addr.label === "Toko Utama" && (
-																<span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+															{addr.isPrimary && (
+																<span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+																	<Star className="h-2.5 w-2.5" fill="currentColor" strokeWidth={1} />
 																	Utama
 																</span>
 															)}
@@ -400,22 +450,45 @@ export default function MitraAddressPage() {
 														)}
 													</div>
 												</div>
+
+												<div className="flex shrink-0 items-center gap-1">
+													{!addr.isPrimary && (
+														<button
+															type="button"
+															onClick={() => handleSetPrimary(addr)}
+															className="rounded p-1.5 text-zinc-400 transition-colors hover:bg-emerald-50 hover:text-emerald-700"
+															title="Jadikan utama"
+														>
+															<Star className="h-3.5 w-3.5" strokeWidth={1.5} />
+														</button>
+													)}
+													<button
+														type="button"
+														onClick={() => startEdit(addr)}
+														className="rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+														title="Edit alamat"
+													>
+														<Edit3 className="h-3.5 w-3.5" strokeWidth={1.5} />
+													</button>
+													{addresses.length > 1 && (
+														<button
+															type="button"
+															onClick={() => handleDelete(addr)}
+															className="rounded p-1.5 text-zinc-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+															title="Hapus alamat"
+														>
+															<Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+														</button>
+													)}
+												</div>
 											</div>
 										</div>
 									))}
-									<button
-										type="button"
-										onClick={() => setEditing(true)}
-										className="flex w-full items-center justify-center gap-2 rounded-sm border border-dashed border-zinc-300 bg-zinc-50 py-3 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-500 hover:text-zinc-900"
-									>
-										<Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-										Tambah Alamat Baru
-									</button>
 								</motion.div>
 							)}
 
-							{/* Edit form */}
-							{editing && (
+							{/* ── Edit Form ── */}
+							{isEditing && (
 								<motion.form
 									initial={{ opacity: 0, y: 10 }}
 									animate={{ opacity: 1, y: 0 }}
@@ -427,10 +500,12 @@ export default function MitraAddressPage() {
 								>
 									<div className="border-b border-zinc-200 px-5 py-4">
 										<h3 className="text-sm font-semibold text-zinc-900">
-											Edit Alamat Toko
+											{editingId === "new" ? "Tambah Alamat Baru" : "Edit Alamat"}
 										</h3>
 										<p className="mt-0.5 text-xs text-zinc-500">
-											Perbarui informasi alamat untuk pengiriman pesanan.
+											{editingId === "new"
+												? "Tambahkan alamat toko baru."
+												: "Perbarui informasi alamat."}
 										</p>
 									</div>
 
@@ -441,7 +516,7 @@ export default function MitraAddressPage() {
 												required
 												value={form.label}
 												onChange={(e) => update("label", e.target.value)}
-												placeholder="Contoh: Toko Utama"
+												placeholder="Contoh: Toko Utama, Gudang, Cabang"
 												className={inputClass}
 											/>
 										</Field>
@@ -480,7 +555,6 @@ export default function MitraAddressPage() {
 											/>
 										</Field>
 
-										{/* Province */}
 										<Field label="Provinsi" required>
 											<SelectInput
 												value={getRegionName(provinces, form.province)}
@@ -496,7 +570,6 @@ export default function MitraAddressPage() {
 											/>
 										</Field>
 
-										{/* City */}
 										<Field label="Kota / Kabupaten" required>
 											<SelectInput
 												value={getRegionName(cities, form.city)}
@@ -514,7 +587,6 @@ export default function MitraAddressPage() {
 											/>
 										</Field>
 
-										{/* District */}
 										<Field label="Kecamatan">
 											<SelectInput
 												value={getRegionName(districts, form.district)}
@@ -532,7 +604,6 @@ export default function MitraAddressPage() {
 											/>
 										</Field>
 
-										{/* Village */}
 										<Field label="Desa / Kelurahan">
 											<SelectInput
 												value={getRegionName(villages, form.village)}
@@ -550,7 +621,6 @@ export default function MitraAddressPage() {
 											/>
 										</Field>
 
-										{/* Postal code */}
 										<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 											<Field label="Kode Pos" required>
 												<input
@@ -578,9 +648,7 @@ export default function MitraAddressPage() {
 									<div className="flex flex-wrap items-center justify-end gap-2 border-t border-zinc-200 bg-zinc-50 px-5 py-3">
 										<button
 											type="button"
-											onClick={() => {
-												setEditing(false);
-											}}
+											onClick={cancelEdit}
 											className="border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-800 transition-colors hover:border-zinc-700 hover:text-zinc-900"
 										>
 											Batal
@@ -590,14 +658,14 @@ export default function MitraAddressPage() {
 											className="flex items-center gap-1.5 bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
 										>
 											<Save className="h-3.5 w-3.5" strokeWidth={2.5} />
-											Simpan Alamat
+											{editingId === "new" ? "Tambah Alamat" : "Simpan Perubahan"}
 										</button>
 									</div>
 								</motion.form>
 							)}
 						</div>
 
-						{/* Right: Map */}
+						{/* ─── Right: Map ─── */}
 						<motion.aside
 							initial={{ opacity: 0, x: 10 }}
 							animate={{ opacity: 1, x: 0 }}
@@ -607,45 +675,60 @@ export default function MitraAddressPage() {
 								Titik Lokasi di Peta
 							</h2>
 
-							<LeafletMap
-								lat={form.lat}
-								lng={form.lng}
-								onMapClick={handleMapClick}
-							/>
-
-							<button
-								type="button"
-								onClick={handleUseCurrentLocation}
-								className="flex w-full items-center justify-center gap-2 rounded-sm border border-zinc-300 bg-white px-4 py-2.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-700 hover:text-zinc-900"
-							>
-								<Crosshair className="h-3.5 w-3.5" strokeWidth={2} />
-								Gunakan Lokasi Saat Ini
-							</button>
-
-							<div className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-600">
-								<p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-700">
-									Alamat Lengkap
-								</p>
-								<p className="mt-1 text-sm text-zinc-900">{form.street}</p>
-								<p className="text-sm text-zinc-900">
-									{form.village && `${getRegionName(villages, form.village)}, `}
-									{getRegionName(districts, form.district)},{" "}
-									{getRegionName(cities, form.city)},{" "}
-									{getRegionName(provinces, form.province)} {form.postalCode}
-								</p>
-								{form.phone && (
-									<div className="mt-3 flex items-center gap-2 border-t border-zinc-100 pt-3 text-zinc-500">
-										<Phone className="h-3 w-3" strokeWidth={2} />
-										<span>{form.phone}</span>
+							{isEditing ? (
+								<>
+									<LeafletMap
+										lat={form.lat}
+										lng={form.lng}
+										onMapClick={handleMapClick}
+									/>
+									<button
+										type="button"
+										onClick={handleUseCurrentLocation}
+										className="flex w-full items-center justify-center gap-2 rounded-sm border border-zinc-300 bg-white px-4 py-2.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-700 hover:text-zinc-900"
+									>
+										<Crosshair className="h-3.5 w-3.5" strokeWidth={2} />
+										Gunakan Lokasi Saat Ini
+									</button>
+								</>
+							) : (
+								<div className="flex aspect-[4/3] items-center justify-center rounded-sm border border-dashed border-zinc-300 bg-zinc-50">
+									<div className="text-center text-zinc-400">
+										<MapPin className="mx-auto h-8 w-8" strokeWidth={1.5} />
+										<p className="mt-2 text-xs">
+											Pilih alamat atau klik "Tambah Alamat" untuk melihat peta
+										</p>
 									</div>
-								)}
-								<div className="mt-1 flex items-center gap-2 text-zinc-400">
-									<MapPin className="h-3 w-3" strokeWidth={2} />
-									<span className="font-mono">
-										{form.lat.toFixed(4)}, {form.lng.toFixed(4)}
-									</span>
 								</div>
-							</div>
+							)}
+
+							{isEditing && (
+								<div className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-600">
+									<p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-700">
+										Pratinjau Alamat
+									</p>
+									<p className="mt-1 text-sm text-zinc-900">{form.street}</p>
+									<p className="text-sm text-zinc-900">
+										{form.village &&
+											`${getRegionName(villages, form.village)}, `}
+										{getRegionName(districts, form.district)},{" "}
+										{getRegionName(cities, form.city)},{" "}
+										{getRegionName(provinces, form.province)} {form.postalCode}
+									</p>
+									{form.phone && (
+										<div className="mt-3 flex items-center gap-2 border-t border-zinc-100 pt-3 text-zinc-500">
+											<Phone className="h-3 w-3" strokeWidth={2} />
+											<span>{form.phone}</span>
+										</div>
+									)}
+									<div className="mt-1 flex items-center gap-2 text-zinc-400">
+										<MapPin className="h-3 w-3" strokeWidth={2} />
+										<span className="font-mono">
+											{form.lat.toFixed(4)}, {form.lng.toFixed(4)}
+										</span>
+									</div>
+								</div>
+							)}
 
 							<p className="text-[10px] leading-relaxed text-zinc-500">
 								<span className="font-semibold">Catatan:</span> Klik pada peta
