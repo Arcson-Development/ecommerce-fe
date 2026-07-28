@@ -29,7 +29,7 @@ export default function MitraOrdersPage() {
   async function loadOrders() {
     try {
       const data = await api.get("/mitra/orders");
-      setOrders(data || []);
+      setOrders(data?.items || data || []);
     } catch (e) {
       console.error("Failed to load mitra orders", e);
     } finally {

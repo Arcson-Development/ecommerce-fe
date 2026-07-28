@@ -111,7 +111,10 @@ export default function MitraProductDetailPage() {
 		setEditMode(true);
 		setTimeout(() => {
 			if (focusPhoto && photoSectionRef.current) {
-				photoSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+				photoSectionRef.current.scrollIntoView({
+					behavior: "smooth",
+					block: "start",
+				});
 			}
 		}, 100);
 	};
@@ -176,7 +179,9 @@ export default function MitraProductDetailPage() {
 				try {
 					const parsed = JSON.parse(authPersist);
 					token = parsed.state?.token || null;
-				} catch { /* ignore */ }
+				} catch {
+					/* ignore */
+				}
 			}
 		}
 
@@ -333,7 +338,11 @@ export default function MitraProductDetailPage() {
 														: "border-zinc-200 hover:border-zinc-400"
 												}`}
 											>
-												<span className={form.category ? "text-zinc-900" : "text-zinc-400"}>
+												<span
+													className={
+														form.category ? "text-zinc-900" : "text-zinc-400"
+													}
+												>
 													{form.category || "Pilih Kategori"}
 												</span>
 												<motion.span
@@ -345,14 +354,19 @@ export default function MitraProductDetailPage() {
 											</button>
 											{openCategory && (
 												<>
-													<div className="fixed inset-0 z-10" onClick={() => setOpenCategory(false)} />
+													<div
+														className="fixed inset-0 z-10"
+														onClick={() => setOpenCategory(false)}
+													/>
 													<motion.ul
 														initial={{ opacity: 0, y: -4 }}
 														animate={{ opacity: 1, y: 0 }}
 														className="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-auto border border-zinc-200 bg-white shadow-lg"
 													>
 														{categories.length === 0 ? (
-															<li className="px-4 py-3 text-sm text-zinc-400">Memuat kategori...</li>
+															<li className="px-4 py-3 text-sm text-zinc-400">
+																Memuat kategori...
+															</li>
 														) : (
 															categories
 																.filter((c: any) => c.isActive !== false)
@@ -361,11 +375,17 @@ export default function MitraProductDetailPage() {
 																		<button
 																			type="button"
 																			onClick={() => {
-																				setForm((f) => ({ ...f, category: c.name, categoryId: c.id }));
+																				setForm((f) => ({
+																					...f,
+																					category: c.name,
+																					categoryId: c.id,
+																				}));
 																				setOpenCategory(false);
 																			}}
 																			className={`w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-zinc-50 ${
-																				c.id === form.categoryId ? "bg-zinc-50 font-medium text-zinc-900" : "text-zinc-700"
+																				c.id === form.categoryId
+																					? "bg-zinc-50 font-medium text-zinc-900"
+																					: "text-zinc-700"
 																			}`}
 																		>
 																			{c.name}
@@ -398,7 +418,9 @@ export default function MitraProductDetailPage() {
 														type="number"
 														required
 														value={variants[0]?.price || ""}
-														onChange={(e) => updateVariant(0, "price", e.target.value)}
+														onChange={(e) =>
+															updateVariant(0, "price", e.target.value)
+														}
 														placeholder="0"
 														className="input pl-12"
 													/>
@@ -409,7 +431,9 @@ export default function MitraProductDetailPage() {
 													type="number"
 													min="0"
 													value={variants[0]?.stock || "0"}
-													onChange={(e) => updateVariant(0, "stock", e.target.value)}
+													onChange={(e) =>
+														updateVariant(0, "stock", e.target.value)
+													}
 													placeholder="0"
 													className="input"
 												/>
@@ -421,7 +445,9 @@ export default function MitraProductDetailPage() {
 										<input
 											type="text"
 											value={form.unit}
-											onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
+											onChange={(e) =>
+												setForm((f) => ({ ...f, unit: e.target.value }))
+											}
 											placeholder="mis. 1 Kg, Pcs, Ikat"
 											className="input"
 										/>
@@ -464,7 +490,9 @@ export default function MitraProductDetailPage() {
 															<input
 																type="text"
 																value={v.name}
-																onChange={(e) => updateVariant(i, "name", e.target.value)}
+																onChange={(e) =>
+																	updateVariant(i, "name", e.target.value)
+																}
 																placeholder="Contoh: Ukuran Besar"
 																className="input"
 															/>
@@ -478,7 +506,9 @@ export default function MitraProductDetailPage() {
 																	type="number"
 																	min="0"
 																	value={v.price}
-																	onChange={(e) => updateVariant(i, "price", e.target.value)}
+																	onChange={(e) =>
+																		updateVariant(i, "price", e.target.value)
+																	}
 																	placeholder="0"
 																	className="input pl-12"
 																/>
@@ -493,7 +523,13 @@ export default function MitraProductDetailPage() {
 																	type="number"
 																	min="0"
 																	value={v.originalPrice}
-																	onChange={(e) => updateVariant(i, "originalPrice", e.target.value)}
+																	onChange={(e) =>
+																		updateVariant(
+																			i,
+																			"originalPrice",
+																			e.target.value,
+																		)
+																	}
 																	placeholder="0"
 																	className="input pl-12"
 																/>
@@ -504,7 +540,9 @@ export default function MitraProductDetailPage() {
 																type="number"
 																min="0"
 																value={v.stock}
-																onChange={(e) => updateVariant(i, "stock", e.target.value)}
+																onChange={(e) =>
+																	updateVariant(i, "stock", e.target.value)
+																}
 																placeholder="0"
 																className="input"
 															/>
@@ -526,7 +564,10 @@ export default function MitraProductDetailPage() {
 							</div>
 
 							{/* ── FOTO PRODUK (always visible) ── */}
-							<div ref={photoSectionRef} className="border-t border-zinc-200 px-6 py-6">
+							<div
+								ref={photoSectionRef}
+								className="border-t border-zinc-200 px-6 py-6"
+							>
 								<div className="mb-4 flex items-center justify-between">
 									<p className="text-xs font-semibold uppercase tracking-wider text-zinc-700">
 										Foto Produk
