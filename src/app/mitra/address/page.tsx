@@ -386,7 +386,10 @@ export default function MitraAddressPage() {
 								>
 									{addresses.length === 0 && (
 										<div className="rounded-sm border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center">
-											<MapPin className="mx-auto h-8 w-8 text-zinc-300" strokeWidth={1.5} />
+											<MapPin
+												className="mx-auto h-8 w-8 text-zinc-300"
+												strokeWidth={1.5}
+											/>
 											<p className="mt-3 text-sm text-zinc-500">
 												Belum ada alamat toko. Tambahkan alamat pertama Anda.
 											</p>
@@ -424,7 +427,11 @@ export default function MitraAddressPage() {
 															</p>
 															{addr.isPrimary && (
 																<span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-																	<Star className="h-2.5 w-2.5" fill="currentColor" strokeWidth={1} />
+																	<Star
+																		className="h-2.5 w-2.5"
+																		fill="currentColor"
+																		strokeWidth={1}
+																	/>
 																	Utama
 																</span>
 															)}
@@ -477,7 +484,10 @@ export default function MitraAddressPage() {
 															className="rounded p-1.5 text-zinc-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
 															title="Hapus alamat"
 														>
-															<Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+															<Trash2
+																className="h-3.5 w-3.5"
+																strokeWidth={1.5}
+															/>
 														</button>
 													)}
 												</div>
@@ -500,7 +510,9 @@ export default function MitraAddressPage() {
 								>
 									<div className="border-b border-zinc-200 px-5 py-4">
 										<h3 className="text-sm font-semibold text-zinc-900">
-											{editingId === "new" ? "Tambah Alamat Baru" : "Edit Alamat"}
+											{editingId === "new"
+												? "Tambah Alamat Baru"
+												: "Edit Alamat"}
 										</h3>
 										<p className="mt-0.5 text-xs text-zinc-500">
 											{editingId === "new"
@@ -658,7 +670,9 @@ export default function MitraAddressPage() {
 											className="flex items-center gap-1.5 bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
 										>
 											<Save className="h-3.5 w-3.5" strokeWidth={2.5} />
-											{editingId === "new" ? "Tambah Alamat" : "Simpan Perubahan"}
+											{editingId === "new"
+												? "Tambah Alamat"
+												: "Simpan Perubahan"}
 										</button>
 									</div>
 								</motion.form>

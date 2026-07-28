@@ -151,7 +151,7 @@ export default function MitraAccountPage() {
     }
     loadData();
     // Load markets list
-    api.get("/markets").then(setMarkets).catch(console.error);
+    api.get("/markets").then((data) => setMarkets(data?.items || data || [])).catch(console.error);
   }, [user]);
 
   const update = (field: keyof AccountForm, value: string) => {
