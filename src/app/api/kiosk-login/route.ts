@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
       cache: "no-store",
     });
     const data = await res.json();
-    if (!res.ok || !data?.data?.accessToken) {
+    const body = data?.data ?? data;
+    if (!res.ok || !body?.access_token) {
       return NextResponse.json(
         { message: data?.message || "Kiosk login gagal" },
         { status: 502 },
@@ -29,8 +30,8 @@ export async function POST(req: NextRequest) {
     }
     // Hanya return token + user — kredensial tidak pernah keluar dari server
     return NextResponse.json({
-      token: data.data.accessToken,
-      user: data.data.user ?? null,
+      token: body.access_token,
+      user: body.user ?? null,
     });
   } catch {
     return NextResponse.json(
