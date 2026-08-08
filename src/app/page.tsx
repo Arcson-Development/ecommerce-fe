@@ -46,6 +46,7 @@ interface Product {
   name: string;
   image?: string;
   price: number;
+  variantId?: string;  // WAJIB untuk addToCart
   unit?: string;
   store?: { name: string };
 }
@@ -210,6 +211,7 @@ export default function HomePage() {
           name: p.name,
           image: p.images?.[0] || "/no-image.svg",
           price: p.variants?.[0]?.price ?? 0,
+          variantId: p.variants?.[0]?.id ?? "",  // WAJIB — cart/items butuh variantId valid
           unit: p.unit || "Item",
           store: p.store,
         }));
@@ -226,7 +228,7 @@ export default function HomePage() {
   );
 
   const addToCart = (p: Product) => {
-    const variantId = p.id;
+    const variantId = p.variantId || p.id;  // variantId ASLI (dari p.variants[0].id) — jangan pakai product.id!
     setCart((prev) => {
       const existing = prev.find((i) => i.variantId === variantId);
       if (existing) {
