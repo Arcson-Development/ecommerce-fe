@@ -17,7 +17,7 @@ export default function AdminMitraPage() {
   async function loadStores() {
     try {
       const data = await api.get("/admin/stores");
-      setStores(data?.items || []);
+      setStores(Array.isArray(data) ? data : data?.items || []);
     } catch (e: any) {
       console.error("Failed to load stores", e);
     } finally {
@@ -48,7 +48,7 @@ export default function AdminMitraPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] text-sm text-zinc-500">
+      <div className="flex items-center justify-center min-h-[60vh] text-sm text-muted-ink">
         Memuat data mitra...
       </div>
     );
@@ -58,8 +58,8 @@ export default function AdminMitraPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900">Kelola Mitra Toko</h1>
-        <p className="text-sm text-zinc-500 mt-1">Kelola pendaftaran & status toko mitra</p>
+        <h1 className="text-2xl font-semibold text-ink">Kelola Mitra Toko</h1>
+        <p className="text-sm text-muted-ink mt-1">Kelola pendaftaran & status toko mitra</p>
       </div>
 
       {/* Alert for pending */}
@@ -84,11 +84,11 @@ export default function AdminMitraPage() {
         {[
           { label: "Total Toko", value: stores.length, color: "bg-zinc-900 text-white" },
           { label: "Disetujui", value: stores.filter((s) => s.status === "APPROVED").length, color: "bg-emerald-500 text-white" },
-          { label: "Ditolak", value: stores.filter((s) => s.status === "REJECTED").length, color: "bg-rose-500 text-white" },
+          { label: "Ditolak", value: stores.filter((s) => s.status === "REJECTED").length, color: "bg-danger text-white" },
         ].map((item) => (
           <div key={item.label} className={`rounded-sm p-4 ${item.color}`}>
             <p className="text-2xl font-bold">{item.value}</p>
-            <p className="text-[10px] uppercase tracking-wider opacity-80 mt-0.5">{item.label}</p>
+            <p className="text-xs uppercase tracking-wider opacity-80 mt-0.5">{item.label}</p>
           </div>
         ))}
       </div>
@@ -96,21 +96,21 @@ export default function AdminMitraPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-ink" />
           <input
             type="text"
             placeholder="Cari nama toko, pemilik, atau no. HP..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-zinc-200 rounded-sm text-sm focus:border-zinc-900 focus:outline-none bg-white"
+            className="w-full pl-10 pr-4 py-2.5 border border-line rounded-sm text-sm focus:border-zinc-900 focus:outline-none bg-white"
           />
         </div>
         <div className="relative">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-ink" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="pl-10 pr-8 py-2.5 border border-zinc-200 rounded-sm text-sm focus:border-zinc-900 focus:outline-none bg-white appearance-none"
+            className="pl-10 pr-8 py-2.5 border border-line rounded-sm text-sm focus:border-zinc-900 focus:outline-none bg-white appearance-none"
           >
             <option value="ALL">Semua Status</option>
             <option value="REVIEW">Perlu Review</option>
@@ -121,11 +121,11 @@ export default function AdminMitraPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-zinc-200 rounded-sm overflow-hidden">
+      <div className="bg-white border border-line rounded-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-zinc-700">
+          <table className="w-full text-left text-sm text-ink">
             <thead>
-              <tr className="bg-zinc-50 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 border-b border-zinc-200">
+              <tr className="bg-zinc-50 text-xs font-semibold uppercase tracking-wider text-muted-ink border-b border-line">
                 <th className="px-6 py-3">Nama Toko</th>
                 <th className="px-6 py-3">Pemilik</th>
                 <th className="px-6 py-3">Alamat</th>
@@ -135,10 +135,10 @@ export default function AdminMitraPage() {
                 <th className="px-6 py-3 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200">
+            <tbody className="divide-y divide-line">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-zinc-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-muted-ink">
                     {search || statusFilter !== "ALL"
                       ? "Tidak ada toko yang cocok dengan filter."
                       : "Belum ada pendaftaran toko."}
@@ -150,12 +150,12 @@ export default function AdminMitraPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-sm bg-zinc-100 flex items-center justify-center">
-                          <Store className="h-4 w-4 text-zinc-500" />
+                          <Store className="h-4 w-4 text-muted-ink" />
                         </div>
                         <div>
-                          <p className="font-semibold text-zinc-900">{s.name}</p>
+                          <p className="font-semibold text-ink">{s.name}</p>
                           {s.description && (
-                            <p className="text-xs text-zinc-500 mt-0.5 max-w-48 truncate">
+                            <p className="text-xs text-muted-ink mt-0.5 max-w-48 truncate">
                               {s.description}
                             </p>
                           )}
@@ -163,14 +163,14 @@ export default function AdminMitraPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-medium text-zinc-800">{s.user?.nickname || s.user?.username}</p>
-                      <p className="text-xs text-zinc-500">{s.user?.phone}</p>
-                      <p className="text-xs text-zinc-400">{s.user?.email}</p>
+                      <p className="font-medium text-ink">{s.user?.nickname || s.user?.username}</p>
+                      <p className="text-xs text-muted-ink">{s.user?.phone}</p>
+                      <p className="text-xs text-muted-ink">{s.user?.email}</p>
                     </td>
-                    <td className="px-6 py-4 text-xs text-zinc-600 max-w-48 truncate">
+                    <td className="px-6 py-4 text-xs text-muted-ink max-w-48 truncate">
                       {s.address || "-"}
                     </td>
-                    <td className="px-6 py-4 text-xs text-zinc-600">{s.market?.name || "-"}</td>
+                    <td className="px-6 py-4 text-xs text-muted-ink">{s.market?.name || "-"}</td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -178,13 +178,13 @@ export default function AdminMitraPage() {
                             ? "bg-emerald-50 text-emerald-700"
                             : s.status === "REVIEW"
                             ? "bg-amber-50 text-amber-700"
-                            : "bg-rose-50 text-rose-700"
+                            : "bg-danger/10 text-danger"
                         }`}
                       >
                         {s.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs text-zinc-500">
+                    <td className="px-6 py-4 text-xs text-muted-ink">
                       {new Date(s.createdAt).toLocaleDateString("id-ID")}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -199,14 +199,14 @@ export default function AdminMitraPage() {
                           </button>
                           <button
                             onClick={() => handleUpdateStatus(s.id, "REJECTED")}
-                            className="flex h-8 w-8 items-center justify-center bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-sm"
+                            className="flex h-8 w-8 items-center justify-center bg-danger/10 text-danger hover:bg-danger/20 rounded-sm"
                             title="Tolak"
                           >
                             <X className="h-4 w-4" />
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[10px] text-zinc-400 italic uppercase tracking-wider">
+                        <span className="text-xs text-muted-ink italic uppercase tracking-wider">
                           {s.status === "APPROVED" ? "Aktif" : "Ditolak"}
                         </span>
                       )}

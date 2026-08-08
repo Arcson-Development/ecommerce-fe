@@ -1,4 +1,4 @@
-import type { Product, Category } from "@/types/product";
+import type { Product, Subsector } from "@/types/product";
 
 // Using Unsplash for product images (free, high-quality)
 const IMG = {
@@ -12,7 +12,7 @@ const IMG = {
     "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=600&q=80",
 };
 
-export const categories: Category[] = [
+export const categories: Subsector[] = [
   { name: "SALE" },
   { name: "ACCESSORIES", hasDropdown: true },
   { name: "ENAMEL PIN" },

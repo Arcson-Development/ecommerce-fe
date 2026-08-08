@@ -68,5 +68,5 @@ export function LeafletMap({ lat, lng, onSelectLocation, height = "300px", reado
     }
   }, [lat, lng]);
 
-  return <div ref={mapRef} style={{ height, width: "100%", borderRadius: "4px", zIndex: 0 }} />;
+  return <div ref={mapRef} style={{ height, width: "100%", borderRadius: "10px", zIndex: 0 }} />;
 }

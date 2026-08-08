@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 /**
  * Layout untuk halaman Mitra Mode.
- * Mockup: pakai TopBar (min belanja) + Header (logo, akun, search) — tanpa CategoryNav.
+ * Mockup: pakai TopBar (min belanja) + Header (logo, akun, search) — tanpa SubsectorNav.
  * Konten halaman di-wrap dengan sidebar di dalamnya.
  */
 export function MitraShell({ children }: { children: ReactNode }) {

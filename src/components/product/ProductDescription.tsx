@@ -10,7 +10,7 @@ interface ProductDescriptionProps {
 }
 
 const DEFAULT_DESCRIPTION =
-  "Brokoli organik segar pilihan, dipanen langsung dari kebun lokal. Kaya akan vitamin C, K, dan serat. Cocok untuk ditumis, dikukus, atau sebagai campuran sup sehat. Disimpan di suhu dingin untuk menjaga kesegaran dan kandungan nutrisinya.";
+  "Produk karya kreatif pilihan dengan kualitas terbaik. Setiap produk dibuat oleh pelaku ekonomi kreatif Indonesia yang telah melalui kurasi. Cocok untuk hadiah, koleksi, atau kebutuhan sehari-hari dengan sentuhan karya anak bangsa.";
 
 export function ProductDescription({
   title = "Detail Produk",
@@ -33,11 +33,11 @@ export function ProductDescription({
         viewport={{ once: true, amount: 0.1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        <h2 className="text-base font-semibold text-zinc-900 sm:text-lg">
+        <h2 className="text-base font-semibold text-ink sm:text-lg">
           {title}
         </h2>
         <p
-          className={`mt-3 text-sm leading-relaxed text-zinc-600 sm:text-base ${
+          className={`mt-3 text-sm leading-relaxed text-muted-ink sm:text-base ${
             !expanded && isLong ? "" : ""
           }`}
         >
@@ -47,7 +47,7 @@ export function ProductDescription({
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={() => setExpanded((e) => !e)}
-            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-zinc-700 transition-colors hover:text-zinc-900"
+            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-ink transition-colors hover:text-ink"
           >
             {expanded ? "Sembunyikan" : "Selengkapnya"}
             <motion.span

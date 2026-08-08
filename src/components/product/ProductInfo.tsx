@@ -42,20 +42,20 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
       className="flex flex-col gap-5"
     >
       {/* Name */}
-      <h1 className="text-2xl font-medium text-zinc-900 sm:text-3xl">
+      <h1 className="text-2xl font-medium text-ink sm:text-3xl">
         {product.name} - {product.unit.replace(" ", "")}
       </h1>
 
       {/* Price */}
       <div className="flex items-baseline gap-3">
         {product.discount && (
-          <span className="text-base text-zinc-400 line-through">
+          <span className="text-base text-muted-ink line-through">
             {formatRupiah(product.originalPrice)}
           </span>
         )}
         <span
           className={`text-xl font-semibold ${
-            product.discount ? "text-sale" : "text-zinc-900"
+            product.discount ? "text-sale" : "text-ink"
           }`}
         >
           {formatRupiah(product.price)}
@@ -70,7 +70,7 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
         <div>
           <label
             htmlFor="variant"
-            className="mb-2 block text-xs uppercase tracking-wide text-zinc-500"
+            className="mb-2 block text-xs uppercase tracking-wide text-muted-ink"
           >
             Pilih Kategori
           </label>
@@ -78,7 +78,7 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
             id="variant"
             value={variant}
             onChange={(e) => setVariant(e.target.value)}
-            className="w-full appearance-none rounded-sm border border-gray-300 bg-white px-3 py-2.5 text-sm text-zinc-800 transition-colors hover:border-gray-400 focus:border-zinc-900 focus:outline-none"
+            className="w-full appearance-none rounded-sm border border-gray-300 bg-white px-3 py-2.5 text-sm text-ink transition-colors hover:border-gray-400 focus:border-zinc-900 focus:outline-none"
           >
             {variants.map((v) => (
               <option key={v} value={v}>
@@ -95,18 +95,18 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setQty((q) => Math.max(1, q - 1))}
-            className="flex h-10 w-10 items-center justify-center border border-r-0 border-gray-300 bg-white text-zinc-700 transition-colors hover:bg-gray-50"
+            className="flex h-10 w-10 items-center justify-center border border-r-0 border-gray-300 bg-white text-ink transition-colors hover:bg-gray-50"
             aria-label="Kurangi jumlah"
           >
             <ChevronLeft className="h-4 w-4" />
           </motion.button>
-          <div className="flex h-10 w-12 items-center justify-center border-y border-gray-300 bg-white text-sm font-medium text-zinc-900">
+          <div className="flex h-10 w-12 items-center justify-center border-y border-gray-300 bg-white text-sm font-medium text-ink">
             {qty}
           </div>
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setQty((q) => q + 1)}
-            className="flex h-10 w-10 items-center justify-center border border-l-0 border-gray-300 bg-white text-zinc-700 transition-colors hover:bg-gray-50"
+            className="flex h-10 w-10 items-center justify-center border border-l-0 border-gray-300 bg-white text-ink transition-colors hover:bg-gray-50"
             aria-label="Tambah jumlah"
           >
             <ChevronRight className="h-4 w-4" />
@@ -142,7 +142,7 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
         className="mt-4 flex items-center gap-3"
       >
         <div className="h-10 w-10 shrink-0 rounded-full bg-gray-200" />
-        <span className="text-sm text-zinc-800">{product.store}</span>
+        <span className="text-sm text-ink">{product.store}</span>
       </motion.div>
     </motion.div>
   );

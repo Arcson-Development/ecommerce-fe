@@ -16,10 +16,10 @@ export default function NotFound() {
           <h1 className="text-9xl font-bold text-zinc-200">404</h1>
           
           {/* Message */}
-          <h2 className="mt-4 text-2xl font-semibold text-zinc-900">
+          <h2 className="mt-4 text-2xl font-semibold text-ink">
             Halaman Tidak Ditemukan
           </h2>
-          <p className="mt-2 text-zinc-500">
+          <p className="mt-2 text-muted-ink">
             Maaf, halaman yang Anda cari tidak tersedia atau sudah dipindahkan.
           </p>
           
@@ -33,16 +33,16 @@ export default function NotFound() {
             </Link>
             <Link
               href="/account"
-              className="inline-flex items-center justify-center px-6 py-3 bg-white text-zinc-900 font-medium rounded-lg border border-zinc-300 hover:bg-zinc-50 transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 bg-white text-ink font-medium rounded-lg border border-line hover:bg-zinc-50 transition-colors"
             >
               Lihat Akun Saya
             </Link>
           </div>
           
           {/* Help */}
-          <p className="mt-8 text-sm text-zinc-400">
+          <p className="mt-8 text-sm text-muted-ink">
             Butuh bantuan?{" "}
-            <Link href="/" className="text-orange-600 hover:underline">
+            <Link href="/" className="text-accent hover:underline">
               Hubungi kami
             </Link>
           </p>

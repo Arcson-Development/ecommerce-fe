@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pasar Jaya — Sayur Segar Online",
+  title: "EKRAF Kiosk — Marketplace Ekonomi Kreatif",
   description:
-    "Belanja sayur segar online dengan ongkir hemat. Dikirim langsung dari toko sayur terpercaya.",
+    "Jelajahi produk unggulan ekonomi kreatif Indonesia — kuliner, fesyen, kriya, game, dan lainnya dari 17 subsektor resmi Kemenkraf.",
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-zinc-900`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-ink`}
       >
         {children}
         <Toaster

@@ -72,7 +72,7 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] text-sm text-zinc-500">
+      <div className="flex items-center justify-center min-h-[60vh] text-sm text-muted-ink">
         Memuat Dashboard...
       </div>
     );
@@ -83,7 +83,7 @@ export default function AdminDashboardPage() {
       label: "Total Users",
       value: stats?.totalUsers ?? 0,
       icon: Users,
-      color: "bg-blue-50 text-blue-600",
+      color: "bg-primary-soft text-primary-soft-fg",
       href: "/admin/users",
     },
     {
@@ -126,7 +126,7 @@ export default function AdminDashboardPage() {
       label: "Kurir Aktif",
       value: stats?.activeShippings ?? 0,
       icon: Truck,
-      color: "bg-rose-50 text-rose-600",
+      color: "bg-danger/10 text-danger",
       href: "/admin/shipping",
     },
   ];
@@ -135,9 +135,9 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900">Dashboard</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          Selamat datang kembali, <span className="font-semibold text-zinc-700">{user?.username}</span>. Berikut ringkasan sistem Pasar Jaya.
+        <h1 className="text-2xl font-semibold text-ink">Dashboard</h1>
+        <p className="text-sm text-muted-ink mt-1">
+          Selamat datang kembali, <span className="font-semibold text-ink">{user?.username}</span>. Berikut ringkasan sistem EKRAF Kiosk.
         </p>
       </div>
 
@@ -151,17 +151,17 @@ export default function AdminDashboardPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="bg-white border border-zinc-200 rounded-sm p-5 hover:shadow-md hover:border-zinc-300 transition-all group cursor-pointer"
+                className="bg-white border border-line rounded-sm p-5 hover:shadow-md hover:border-line transition-all group cursor-pointer"
               >
                 <div className="flex items-start justify-between">
                   <div className={`p-2.5 rounded-sm ${card.color}`}>
                     <Icon className="h-5 w-5" />
                   </div>
-                  <ArrowRight className="h-4 w-4 text-zinc-300 group-hover:text-zinc-500 transition-colors" />
+                  <ArrowRight className="h-4 w-4 text-zinc-300 group-hover:text-muted-ink transition-colors" />
                 </div>
                 <div className="mt-4">
-                  <p className="text-3xl font-bold text-zinc-900">{card.value}</p>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mt-1">
+                  <p className="text-3xl font-bold text-ink">{card.value}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-ink mt-1">
                     {card.label}
                   </p>
                   {card.sub && (
@@ -178,14 +178,14 @@ export default function AdminDashboardPage() {
 
       {/* Quick Actions */}
       <section>
-        <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-700 mb-4">Akses Cepat</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-ink mb-4">Akses Cepat</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {[
             { label: "Manage Users", href: "/admin/users", icon: Users, desc: "Ubah role & data user" },
             { label: "Kelola Mitra", href: "/admin/mitra", icon: Store, desc: "Approval toko mitra" },
             { label: "Master Kurir", href: "/admin/shipping", icon: Truck, desc: "Kelola pengiriman" },
             { label: "Master Pasar", href: "/admin/markets", icon: Building2, desc: "Data pasar" },
-            { label: "Kategori", href: "/admin/categories", icon: Package, desc: "Master kategori" },
+            { label: "Kategori", href: "/admin/subsectors", icon: Package, desc: "Master kategori" },
             { label: "Pembayaran", href: "/admin/payments", icon: ShoppingBag, desc: "Metode bayar" },
             { label: "Master Produk", href: "/admin/products", icon: Package, desc: "Semua produk" },
           ].map((item) => {
@@ -194,11 +194,11 @@ export default function AdminDashboardPage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="bg-white border border-zinc-200 rounded-sm p-4 hover:border-zinc-900 hover:shadow-sm transition-all group"
+                className="bg-white border border-line rounded-sm p-4 hover:border-zinc-900 hover:shadow-sm transition-all group"
               >
-                <Icon className="h-5 w-5 text-zinc-400 group-hover:text-zinc-900 mb-2" />
-                <p className="text-sm font-semibold text-zinc-800 group-hover:text-zinc-900">{item.label}</p>
-                <p className="text-xs text-zinc-500 mt-0.5">{item.desc}</p>
+                <Icon className="h-5 w-5 text-muted-ink group-hover:text-ink mb-2" />
+                <p className="text-sm font-semibold text-ink group-hover:text-ink">{item.label}</p>
+                <p className="text-xs text-muted-ink mt-0.5">{item.desc}</p>
               </Link>
             );
           })}
@@ -208,32 +208,32 @@ export default function AdminDashboardPage() {
       {/* Recent Orders */}
       {stats?.recentOrders && stats.recentOrders.length > 0 && (
         <section id="recent-orders">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-700 mb-4">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-ink mb-4">
             Pesanan Terbaru
           </h2>
-          <div className="bg-white border border-zinc-200 rounded-sm overflow-hidden">
-            <table className="w-full text-left text-sm text-zinc-700">
+          <div className="bg-white border border-line rounded-sm overflow-hidden">
+            <table className="w-full text-left text-sm text-ink">
               <thead>
-                <tr className="bg-zinc-50 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 border-b border-zinc-200">
+                <tr className="bg-zinc-50 text-xs font-semibold uppercase tracking-wider text-muted-ink border-b border-line">
                   <th className="px-6 py-3">Order #</th>
                   <th className="px-6 py-3">Status</th>
                   <th className="px-6 py-3">Total</th>
                   <th className="px-6 py-3">Tanggal</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200">
+              <tbody className="divide-y divide-line">
                 {stats.recentOrders.map((order: any) => (
                   <tr key={order.id} className="hover:bg-zinc-50">
-                    <td className="px-6 py-4 font-semibold text-zinc-900">
+                    <td className="px-6 py-4 font-semibold text-ink">
                       #{order.orderNumber || order.id.slice(0, 8)}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         order.status === "COMPLETED" ? "bg-emerald-50 text-emerald-700" :
-                        order.status === "PROCESSING" ? "bg-blue-50 text-blue-700" :
+                        order.status === "PROCESSING" ? "bg-primary-soft text-primary-soft-fg" :
                         order.status === "SHIPPED" ? "bg-amber-50 text-amber-700" :
-                        order.status === "CANCELLED" ? "bg-rose-50 text-rose-700" :
-                        "bg-zinc-50 text-zinc-600"
+                        order.status === "CANCELLED" ? "bg-danger/10 text-danger" :
+                        "bg-zinc-50 text-muted-ink"
                       }`}>
                         {order.status}
                       </span>
@@ -241,7 +241,7 @@ export default function AdminDashboardPage() {
                     <td className="px-6 py-4 font-medium">
                       Rp {order.total?.toLocaleString("id-ID")}
                     </td>
-                    <td className="px-6 py-4 text-xs text-zinc-500">
+                    <td className="px-6 py-4 text-xs text-muted-ink">
                       {new Date(order.createdAt).toLocaleDateString("id-ID")}
                     </td>
                   </tr>

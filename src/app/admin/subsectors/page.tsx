@@ -20,7 +20,7 @@ export default function AdminCategoriesPage() {
 
   async function loadData() {
     try {
-      const data = await api.get("/categories");
+      const data = await api.get("/subsectors");
       setCategories(data || []);
     } catch (e) {
       console.error("Failed to load categories", e);
@@ -39,9 +39,9 @@ export default function AdminCategoriesPage() {
     e.preventDefault();
     try {
       if (editingId) {
-        await api.put(`/categories/${editingId}`, form);
+        await api.put(`/subsectors/${editingId}`, form);
       } else {
-        await api.post("/categories", form);
+        await api.post("/subsectors", form);
       }
       resetForm();
       await loadData();
@@ -53,7 +53,7 @@ export default function AdminCategoriesPage() {
 
   const handleToggle = async (id: string, currentActive: boolean) => {
     try {
-      await api.put(`/categories/${id}`, { isActive: !currentActive });
+      await api.put(`/subsectors/${id}`, { isActive: !currentActive });
       await loadData();
       toast.success(`Kategori ${!currentActive ? "diaktifkan" : "dinonaktifkan"}!`);
     } catch (e: any) {
@@ -64,7 +64,7 @@ export default function AdminCategoriesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Hapus kategori ini? Tindakan ini tidak dapat dibatalkan.")) return;
     try {
-      await api.delete(`/categories/${id}`);
+      await api.delete(`/subsectors/${id}`);
       await loadData();
       toast.success("Kategori berhasil dihapus!");
     } catch (e: any) {
@@ -84,7 +84,7 @@ export default function AdminCategoriesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] text-sm text-zinc-500">
+      <div className="flex items-center justify-center min-h-[60vh] text-sm text-muted-ink">
         Memuat data kategori...
       </div>
     );
@@ -95,8 +95,8 @@ export default function AdminCategoriesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900">Master Kategori</h1>
-          <p className="text-sm text-zinc-500 mt-1">Kelola kategori produk</p>
+          <h1 className="text-2xl font-semibold text-ink">Master Kategori</h1>
+          <p className="text-sm text-muted-ink mt-1">Kelola kategori produk</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(!showForm); }}
@@ -116,13 +116,13 @@ export default function AdminCategoriesPage() {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <form onSubmit={handleSubmit} className="bg-white border border-zinc-200 rounded-sm p-6 space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+            <form onSubmit={handleSubmit} className="bg-white border border-line rounded-sm p-6 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-ink">
                 {editingId ? "Edit Kategori" : "Tambah Kategori Baru"}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-ink mb-1">
                     Nama Kategori
                   </label>
                   <input
@@ -131,11 +131,11 @@ export default function AdminCategoriesPage() {
                     required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full border border-zinc-200 bg-white px-3 py-2 text-sm rounded-sm focus:border-zinc-900 focus:outline-none"
+                    className="w-full border border-line bg-white px-3 py-2 text-sm rounded-sm focus:border-zinc-900 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-ink mb-1">
                     Icon (opsional)
                   </label>
                   <input
@@ -143,7 +143,7 @@ export default function AdminCategoriesPage() {
                     placeholder="Nama icon"
                     value={form.icon}
                     onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                    className="w-full border border-zinc-200 bg-white px-3 py-2 text-sm rounded-sm focus:border-zinc-900 focus:outline-none"
+                    className="w-full border border-line bg-white px-3 py-2 text-sm rounded-sm focus:border-zinc-900 focus:outline-none"
                   />
                 </div>
                 <div className="flex items-end pb-2">
@@ -152,9 +152,9 @@ export default function AdminCategoriesPage() {
                       type="checkbox"
                       checked={form.hasDropdown}
                       onChange={(e) => setForm({ ...form, hasDropdown: e.target.checked })}
-                      className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
+                      className="h-4 w-4 rounded border-line text-ink focus:ring-zinc-900"
                     />
-                    <span className="text-xs font-semibold text-zinc-700">Memiliki Dropdown</span>
+                    <span className="text-xs font-semibold text-ink">Memiliki Dropdown</span>
                   </label>
                 </div>
               </div>
@@ -162,7 +162,7 @@ export default function AdminCategoriesPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 border border-zinc-300 text-zinc-700 text-xs font-semibold uppercase tracking-wider hover:bg-zinc-100 rounded-sm"
+                  className="px-4 py-2 border border-line text-ink text-xs font-semibold uppercase tracking-wider hover:bg-zinc-100 rounded-sm"
                 >
                   Batal
                 </button>
@@ -183,33 +183,33 @@ export default function AdminCategoriesPage() {
         {[
           { label: "Total Kategori", value: categories.length, color: "bg-zinc-900 text-white" },
           { label: "Aktif", value: categories.filter((c) => c.isActive).length, color: "bg-emerald-500 text-white" },
-          { label: "Dropdown", value: categories.filter((c) => c.hasDropdown).length, color: "bg-blue-500 text-white" },
+          { label: "Dropdown", value: categories.filter((c) => c.hasDropdown).length, color: "bg-primary text-primary-fg" },
         ].map((item) => (
           <div key={item.label} className={`rounded-sm p-4 ${item.color}`}>
             <p className="text-2xl font-bold">{item.value}</p>
-            <p className="text-[10px] uppercase tracking-wider opacity-80 mt-0.5">{item.label}</p>
+            <p className="text-xs uppercase tracking-wider opacity-80 mt-0.5">{item.label}</p>
           </div>
         ))}
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-ink" />
         <input
           type="text"
           placeholder="Cari kategori..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 border border-zinc-200 rounded-sm text-sm focus:border-zinc-900 focus:outline-none bg-white"
+          className="w-full pl-10 pr-4 py-2.5 border border-line rounded-sm text-sm focus:border-zinc-900 focus:outline-none bg-white"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-zinc-200 rounded-sm overflow-hidden">
+      <div className="bg-white border border-line rounded-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-zinc-700">
+          <table className="w-full text-left text-sm text-ink">
             <thead>
-              <tr className="bg-zinc-50 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 border-b border-zinc-200">
+              <tr className="bg-zinc-50 text-xs font-semibold uppercase tracking-wider text-muted-ink border-b border-line">
                 <th className="px-6 py-3">Nama</th>
                 <th className="px-6 py-3">Icon</th>
                 <th className="px-6 py-3 text-center">Dropdown</th>
@@ -217,10 +217,10 @@ export default function AdminCategoriesPage() {
                 <th className="px-6 py-3 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200">
+            <tbody className="divide-y divide-line">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
+                  <td colSpan={5} className="px-6 py-12 text-center text-muted-ink">
                     {search ? "Tidak ada kategori yang cocok." : "Belum ada kategori."}
                   </td>
                 </tr>
@@ -230,12 +230,12 @@ export default function AdminCategoriesPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-sm bg-zinc-100 flex items-center justify-center">
-                          <Tag className="h-4 w-4 text-zinc-500" />
+                          <Tag className="h-4 w-4 text-muted-ink" />
                         </div>
-                        <span className="font-semibold text-zinc-900">{c.name}</span>
+                        <span className="font-semibold text-ink">{c.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs text-zinc-500 font-mono">{c.icon || "-"}</td>
+                    <td className="px-6 py-4 text-xs text-muted-ink font-mono">{c.icon || "-"}</td>
                     <td className="px-6 py-4 text-center">
                       {c.hasDropdown ? (
                         <Check className="h-4 w-4 text-emerald-600 inline" />
@@ -261,14 +261,14 @@ export default function AdminCategoriesPage() {
                       <div className="inline-flex gap-1">
                         <button
                           onClick={() => handleEdit(c)}
-                          className="flex h-8 w-8 items-center justify-center bg-zinc-100 text-zinc-600 hover:bg-zinc-200 rounded-sm"
+                          className="flex h-8 w-8 items-center justify-center bg-zinc-100 text-muted-ink hover:bg-zinc-200 rounded-sm"
                           title="Edit"
                         >
                           <Edit3 className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete(c.id)}
-                          className="flex h-8 w-8 items-center justify-center bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-sm"
+                          className="flex h-8 w-8 items-center justify-center bg-danger/10 text-danger hover:bg-danger/20 rounded-sm"
                           title="Hapus"
                         >
                           <Trash2 className="h-3.5 w-3.5" />

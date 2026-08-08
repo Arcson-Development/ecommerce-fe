@@ -91,13 +91,13 @@ export function Select({
         aria-label={placeholder}
         className={`flex w-full items-center justify-between border bg-zinc-50 px-4 py-3 text-left text-sm transition-colors ${
           disabled
-            ? "cursor-not-allowed border-zinc-200 text-zinc-400"
+            ? "cursor-not-allowed border-line text-muted-ink"
             : open
-              ? "border-zinc-900 bg-white text-zinc-900"
-              : "border-zinc-200 text-zinc-700 hover:border-zinc-400"
+              ? "border-zinc-900 bg-white text-ink"
+              : "border-line text-ink hover:border-zinc-400"
         }`}
       >
-        <span className={value ? "text-zinc-900" : "text-zinc-400"}>
+        <span className={value ? "text-ink" : "text-muted-ink"}>
           {value || placeholder}
         </span>
         <motion.span
@@ -123,7 +123,7 @@ export function Select({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.15 }}
-            className="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-auto border border-zinc-200 bg-white shadow-lg"
+            className="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-auto border border-line bg-white shadow-lg"
           >
             {options.map((opt, i) => (
               <li
@@ -140,8 +140,8 @@ export function Select({
                     i === focusIndex ? "bg-zinc-100" : ""
                   } ${
                     opt === value
-                      ? "bg-zinc-50 font-medium text-zinc-900"
-                      : "text-zinc-700"
+                      ? "bg-zinc-50 font-medium text-ink"
+                      : "text-ink"
                   }`}
                 >
                   {opt}

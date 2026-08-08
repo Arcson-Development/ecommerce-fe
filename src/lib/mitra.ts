@@ -52,7 +52,7 @@ export const useMitra = create<MitraState>()(
           const res = await api.post("/mitra/register", {
             name: a.storeName,
             address: `${a.address}, ${a.district}, ${a.city}, ${a.province} ${a.postalCode}`,
-            description: `${a.storeType} - Mitra baru Pasar Jaya`,
+            description: `${a.storeType} - Mitra baru EKRAF Kiosk`,
           });
           
           set({ 
@@ -89,7 +89,7 @@ export const useMitra = create<MitraState>()(
       getApplication: (id) =>
         get().applications.find((x) => x.id === id),
     }),
-    { name: "pasarjaya-mitra" }
+    { name: "ekraf-mitra" }
   )
 );
 

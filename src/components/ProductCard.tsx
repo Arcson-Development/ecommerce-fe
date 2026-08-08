@@ -90,14 +90,14 @@ export function ProductCard({ product, index }: ProductCardProps) {
       {/* Info */}
       <div className="mt-3 flex w-full flex-col items-center text-center">
         <Link href={productSlug}>
-          <h2 className="text-sm font-medium text-zinc-900 hover:underline">
+          <h2 className="text-sm font-medium text-ink hover:underline">
             {product.name}
           </h2>
         </Link>
 
         <div className="mt-1 flex items-center gap-2 text-sm">
           {product.discount && (
-            <span className="text-xs text-zinc-400 line-through">
+            <span className="text-xs text-muted-ink line-through">
               {formatRupiah(product.originalPrice)}
             </span>
           )}
@@ -105,14 +105,14 @@ export function ProductCard({ product, index }: ProductCardProps) {
             className={
               product.discount
                 ? "text-base font-bold text-sale"
-                : "font-semibold text-zinc-900"
+                : "font-semibold text-ink"
             }
           >
             {formatRupiah(product.price)}
           </span>
         </div>
 
-        <div className="mt-3 flex items-center gap-2 text-xs text-zinc-600">
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-ink">
           <span
             className="h-2 w-2 shrink-0 rounded-full bg-zinc-300"
             role="presentation"

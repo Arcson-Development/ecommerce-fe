@@ -186,6 +186,6 @@ export const useCart = create<CartState>()(
   getTotal: () =>
     get().items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0),
 }),
-    { name: "pasarjaya-cart" }
+    { name: "ekraf-cart" }
   )
 );

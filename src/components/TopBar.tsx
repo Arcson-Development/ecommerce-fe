@@ -14,7 +14,7 @@ export function TopBar() {
       aria-live="polite"
     >
       <p className="font-semibold">Min. Belanja Rp. 80.000</p>
-      <p className="flex items-center justify-center gap-1.5 text-green-50">
+      <p className="flex items-center justify-center gap-1.5 text-primary-fg/80">
         <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
         Diskon ongkir maks. Rp20.000 untuk pembelian ≥ Rp200.000
         <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />

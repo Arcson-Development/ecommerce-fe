@@ -99,7 +99,7 @@ export function ProductGallery({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={prev}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-zinc-700 transition-colors hover:border-zinc-700"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-ink transition-colors hover:border-zinc-700"
             aria-label="Gambar sebelumnya"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -108,7 +108,7 @@ export function ProductGallery({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={next}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-zinc-700 transition-colors hover:border-zinc-700"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-ink transition-colors hover:border-zinc-700"
             aria-label="Gambar berikutnya"
           >
             <ChevronRight className="h-4 w-4" />

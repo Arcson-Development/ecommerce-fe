@@ -53,7 +53,7 @@ export const useAuth = create<AuthState>()(
       },
     }),
     {
-      name: "pasarjaya-auth",
+      name: "ekraf-auth",
     }
   )
 );

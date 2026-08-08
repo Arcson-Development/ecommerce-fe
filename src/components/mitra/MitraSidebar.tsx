@@ -52,18 +52,18 @@ export function MitraSidebar({ active }: MitraSidebarProps) {
   return (
     <aside className="w-full lg:w-64 lg:shrink-0">
       {/* Header card */}
-      <div className="rounded-sm border border-zinc-200 bg-white">
+      <div className="rounded-sm border border-line bg-white">
         <div className="px-5 py-5 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-3xl">
             🐤
           </div>
-          <p className="mt-3 text-sm font-semibold text-zinc-900">
+          <p className="mt-3 text-sm font-semibold text-ink">
             {storeName}
           </p>
-          {storeId && <p className="mt-0.5 text-xs text-zinc-500">{storeId}</p>}
+          {storeId && <p className="mt-0.5 text-xs text-muted-ink">{storeId}</p>}
         </div>
 
-        <nav className="border-t border-zinc-200 p-2">
+        <nav className="border-t border-line p-2">
           {MENU.map((item) => {
             const Icon = item.icon;
             const isActive = item.key === active;
@@ -74,7 +74,7 @@ export function MitraSidebar({ active }: MitraSidebarProps) {
                 className={`flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-medium uppercase tracking-wide transition-colors ${
                   isActive
                     ? "text-primary-soft-fg"
-                    : "text-zinc-500 hover:text-primary"
+                    : "text-muted-ink hover:text-primary"
                 }`}
               >
                 <Icon className="h-4 w-4" strokeWidth={2} />
@@ -91,7 +91,7 @@ export function MitraSidebar({ active }: MitraSidebarProps) {
           })}
         </nav>
 
-        <div className="border-t border-zinc-200 p-2">
+        <div className="border-t border-line p-2">
           <Link
             href="/account"
             className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm font-medium uppercase tracking-wide text-rose-600 transition-colors hover:bg-rose-50"
@@ -109,22 +109,22 @@ export function MitraLayoutHeader({ title, subtitle }: { title: string; subtitle
   const pathname = usePathname();
   return (
     <div className="mb-6">
-      <nav className="flex items-center gap-1.5 text-xs text-zinc-500">
-        <Link href="/mitra" className="hover:text-orange-600">
+      <nav className="flex items-center gap-1.5 text-xs text-muted-ink">
+        <Link href="/mitra" className="hover:text-accent">
           Mitra
         </Link>
         {pathname !== "/mitra" && pathname !== "/mitra/orders" && (
           <>
             <span>›</span>
-            <span className="font-medium text-zinc-900">{title}</span>
+            <span className="font-medium text-ink">{title}</span>
           </>
         )}
       </nav>
-      <h1 className="mt-2 text-2xl font-semibold text-zinc-900 sm:text-3xl">
+      <h1 className="mt-2 text-2xl font-semibold text-ink sm:text-3xl">
         {title}
       </h1>
       {subtitle && (
-        <p className="mt-1 text-xs font-medium uppercase tracking-wider text-zinc-500">
+        <p className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-ink">
           {subtitle}
         </p>
       )}

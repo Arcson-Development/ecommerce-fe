@@ -1,13 +1,13 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:6670/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:6673/api";
 
 export async function request(path: string, options: RequestInit = {}) {
   let token: string | null = null;
   
   if (typeof window !== "undefined") {
     // Try to get token from localStorage directly or from zustand persist
-    token = localStorage.getItem("pasarjaya-token");
+    token = localStorage.getItem("ekraf-token");
     if (!token) {
-      const authPersist = localStorage.getItem("pasarjaya-auth");
+      const authPersist = localStorage.getItem("ekraf-auth");
       if (authPersist) {
         try {
           const parsed = JSON.parse(authPersist);
@@ -45,10 +45,18 @@ export async function request(path: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `Request failed with status ${response.status}`);
+    const msg = Array.isArray(errorData.message)
+      ? errorData.message.join(", ")
+      : errorData.message || `Request failed with status ${response.status}`;
+    throw new Error(msg);
   }
 
-  return response.json();
+  // Envelope standar: { success, message, data, meta? } — return .data langsung
+  const json = await response.json();
+  if (json && typeof json === "object" && "success" in json && "data" in json) {
+    return json.data;
+  }
+  return json;
 }
 
 export const api = {

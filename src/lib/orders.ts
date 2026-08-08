@@ -198,7 +198,7 @@ export const useOrders = create<OrdersState>()(
       },
     }),
     {
-      name: "pasarjaya-orders",
+      name: "ekraf-orders",
       partialize: (state) => ({
         orders: state.orders.slice(0, MAX_STORED_ORDERS),
       }),

@@ -34,26 +34,26 @@ export function Breadcrumb({
   return (
     <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-3 px-4 py-4 text-sm sm:flex-row sm:items-center sm:px-6 lg:px-8">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-zinc-500 flex-wrap">
+      <nav className="flex items-center gap-1.5 text-muted-ink flex-wrap">
         {items.map((item, i) => (
           <span key={item} className="flex items-center gap-1.5">
             {i > 0 && (
               <ChevronRight
-                className="h-3.5 w-3.5 text-zinc-500"
+                className="h-3.5 w-3.5 text-muted-ink"
                 strokeWidth={2}
               />
             )}
             {i === items.length - 1 ? (
-              <span className="font-medium text-zinc-900">{item}</span>
+              <span className="font-medium text-ink">{item}</span>
             ) : i === 0 ? (
               <Link
                 href="/"
-                className="transition-colors hover:text-orange-600"
+                className="transition-colors hover:text-accent"
               >
                 {item}
               </Link>
             ) : (
-              <span className="transition-colors hover:text-orange-600">
+              <span className="transition-colors hover:text-accent">
                 {item}
               </span>
             )}
@@ -62,12 +62,12 @@ export function Breadcrumb({
         {searchQuery && (
           <>
             <ChevronRight
-              className="h-3.5 w-3.5 text-zinc-400"
+              className="h-3.5 w-3.5 text-muted-ink"
               strokeWidth={2}
             />
-            <span className="flex items-center gap-1.5 bg-orange-50 px-2 py-1 rounded-full">
-              <Search className="h-3 w-3 text-orange-600" />
-              <span className="font-medium text-orange-700 text-xs">"{searchQuery}"</span>
+            <span className="flex items-center gap-1.5 bg-accent-soft px-2 py-1 rounded-full">
+              <Search className="h-3 w-3 text-accent" />
+              <span className="font-medium text-accent-hover text-xs">"{searchQuery}"</span>
             </span>
           </>
         )}
@@ -75,7 +75,7 @@ export function Breadcrumb({
 
       {/* Right side: result count + sort */}
       <div className="flex items-center gap-4">
-        <p className="text-zinc-500">
+        <p className="text-muted-ink">
           Menampilkan 1–{showCount} dari {total} hasil
         </p>
         <SortDropdown value={sortBy} onChange={onSortChange} />
@@ -98,7 +98,7 @@ function SortDropdown({
       <motion.button
         whileTap={{ scale: 0.97 }}
         onClick={() => setOpen(!open)}
-        className="flex min-w-[220px] items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-gray-400"
+        className="flex min-w-[220px] items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-ink transition-colors hover:border-gray-400"
       >
         <span>{sortLabels[value]}</span>
         <motion.span
@@ -131,8 +131,8 @@ function SortDropdown({
                   }}
                   className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-gray-50 ${
                     key === value
-                      ? "bg-orange-50 font-medium text-orange-700"
-                      : "text-zinc-700"
+                      ? "bg-accent-soft font-medium text-accent-hover"
+                      : "text-ink"
                   }`}
                 >
                   {sortLabels[key]}

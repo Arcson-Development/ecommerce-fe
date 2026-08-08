@@ -44,7 +44,7 @@ export function CheckoutSteps({ current }: CheckoutStepsProps) {
                     ? "bg-primary text-primary-fg"
                     : isCurrent
                       ? "bg-accent text-accent-fg"
-                      : "bg-gray-200 text-zinc-500"
+                      : "bg-gray-200 text-muted-ink"
                 }`}
               >
                 {isDone ? (
@@ -55,7 +55,7 @@ export function CheckoutSteps({ current }: CheckoutStepsProps) {
               </motion.span>
               <span
                 className={`text-sm font-medium sm:text-base ${
-                  isCurrent || isDone ? "text-zinc-900" : "text-zinc-400"
+                  isCurrent || isDone ? "text-ink" : "text-muted-ink"
                 }`}
               >
                 {step.label}

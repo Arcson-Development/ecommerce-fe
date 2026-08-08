@@ -14,7 +14,7 @@ export function Field({
 }) {
 	return (
 		<label className="block">
-			<span className="mb-1.5 block text-sm text-zinc-800">
+			<span className="mb-1.5 block text-sm text-ink">
 				{label}
 				{required && <span className="text-rose-500">*</span>}
 			</span>
@@ -37,7 +37,7 @@ interface SelectInputProps {
 export function SelectInput(props: SelectInputProps) {
 	if (props.loading) {
 		return (
-			<div className="flex w-full items-center gap-2 border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-400">
+			<div className="flex w-full items-center gap-2 border border-line bg-zinc-50 px-4 py-3 text-sm text-muted-ink">
 				<svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
 					<circle
 						className="opacity-25"
@@ -71,4 +71,4 @@ export function useSelectState(initial = false) {
 
 // Common input style
 export const inputClass =
-	"w-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 transition-colors placeholder:text-zinc-400 hover:border-zinc-400 focus:border-zinc-900 focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400";
+	"w-full border border-line bg-zinc-50 px-4 py-3 text-sm text-ink transition-colors placeholder:text-muted-ink hover:border-zinc-400 focus:border-zinc-900 focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:border-line disabled:bg-zinc-100 disabled:text-muted-ink";

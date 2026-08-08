@@ -66,7 +66,7 @@ export function Pagination({ current, total, onChange }: PaginationProps) {
           page === "..." ? (
             <li
               key={`ellipsis-${i}`}
-              className="flex h-9 w-9 items-center justify-center text-zinc-400"
+              className="flex h-9 w-9 items-center justify-center text-muted-ink"
             >
               <MoreHorizontal className="h-4 w-4" />
             </li>
@@ -79,7 +79,7 @@ export function Pagination({ current, total, onChange }: PaginationProps) {
                 className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-colors ${
                   current === page
                     ? "bg-zinc-900 text-white"
-                    : "border border-gray-300 bg-white text-zinc-700 hover:border-zinc-700"
+                    : "border border-gray-300 bg-white text-ink hover:border-zinc-700"
                 }`}
                 aria-current={current === page ? "page" : undefined}
                 aria-label={`Halaman ${page}`}
@@ -94,7 +94,7 @@ export function Pagination({ current, total, onChange }: PaginationProps) {
             whileHover={{ scale: 1.08, x: 2 }}
             whileTap={{ scale: 0.92 }}
             onClick={() => onChange(Math.min(current + 1, total))}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-zinc-700 transition-colors hover:border-zinc-700"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-ink transition-colors hover:border-zinc-700"
             aria-label="Halaman berikutnya"
           >
             <ChevronRight className="h-4 w-4" />

@@ -22,10 +22,10 @@ export default function Error({
         <AlertTriangle className="h-6 w-6" aria-hidden="true" />
       </div>
       <div>
-        <h2 className="text-lg font-semibold text-zinc-900">
+        <h2 className="text-lg font-semibold text-ink">
           Halaman gagal dimuat
         </h2>
-        <p className="mt-1 max-w-sm text-sm text-zinc-500">
+        <p className="mt-1 max-w-sm text-sm text-muted-ink">
           Terjadi kendala saat menampilkan halaman ini. Kamu bisa coba lagi atau
           kembali ke beranda.
         </p>
@@ -39,7 +39,7 @@ export default function Error({
         </button>
         <a
           href="/"
-          className="rounded-sm border border-zinc-300 bg-white px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-zinc-700 transition-colors hover:border-zinc-700 hover:text-zinc-900"
+          className="rounded-sm border border-line bg-white px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-ink transition-colors hover:border-zinc-700 hover:text-ink"
         >
           Ke Beranda
         </a>

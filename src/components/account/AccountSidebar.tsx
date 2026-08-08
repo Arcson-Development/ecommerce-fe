@@ -60,19 +60,19 @@ export function AccountSidebar({ active }: AccountSidebarProps) {
 
   return (
     <aside className="w-full lg:w-64 lg:shrink-0">
-      <div className="rounded-sm border border-zinc-200 bg-white">
-        <div className="flex items-center gap-3 border-b border-zinc-200 px-5 py-4">
+      <div className="rounded-sm border border-line bg-white">
+        <div className="flex items-center gap-3 border-b border-line px-5 py-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-sm font-semibold text-white">
             {initials}
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-ink">
               Akun Saya
             </p>
-            <p className="mt-0.5 truncate text-sm font-semibold text-zinc-900">
+            <p className="mt-0.5 truncate text-sm font-semibold text-ink">
               {user?.nickname || user?.username || "Pelanggan"}
             </p>
-            <p className="truncate text-xs text-zinc-500">{user?.email || ""}</p>
+            <p className="truncate text-xs text-muted-ink">{user?.email || ""}</p>
           </div>
         </div>
 
@@ -87,7 +87,7 @@ export function AccountSidebar({ active }: AccountSidebarProps) {
                 className={`relative flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm transition-colors ${
                   isActive
                     ? "bg-primary text-primary-fg"
-                    : "text-zinc-700 hover:bg-primary-soft hover:text-primary-soft-fg"
+                    : "text-ink hover:bg-primary-soft hover:text-primary-soft-fg"
                 }`}
               >
                 <Icon className="h-4 w-4" strokeWidth={2} />
@@ -104,7 +104,7 @@ export function AccountSidebar({ active }: AccountSidebarProps) {
           })}
         </nav>
 
-        <div className="border-t border-zinc-200 p-2">
+        <div className="border-t border-line p-2">
           <button
             type="button"
             onClick={() => router.push("/")}
@@ -123,22 +123,22 @@ export function AccountLayoutHeader({ title }: { title: string }) {
   const pathname = usePathname();
   return (
     <div className="mb-6">
-      <nav className="flex items-center gap-1.5 text-xs text-zinc-500">
-        <Link href="/" className="hover:text-orange-600">
+      <nav className="flex items-center gap-1.5 text-xs text-muted-ink">
+        <Link href="/" className="hover:text-accent">
           Beranda
         </Link>
         <span>›</span>
-        <Link href="/account" className="hover:text-orange-600">
+        <Link href="/account" className="hover:text-accent">
           Akun Saya
         </Link>
         {pathname !== "/account" && (
           <>
             <span>›</span>
-            <span className="font-medium text-zinc-900">{title}</span>
+            <span className="font-medium text-ink">{title}</span>
           </>
         )}
       </nav>
-      <h1 className="mt-2 text-2xl font-semibold text-zinc-900 sm:text-3xl">
+      <h1 className="mt-2 text-2xl font-semibold text-ink sm:text-3xl">
         {title}
       </h1>
     </div>

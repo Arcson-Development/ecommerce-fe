@@ -18,7 +18,7 @@ export function BarChart({ data }: BarChartProps) {
             key={d.day}
             className="flex h-full flex-1 flex-col items-center justify-end gap-2"
           >
-            <span className="hidden text-[10px] font-medium text-zinc-500 sm:inline">
+            <span className="hidden text-xs font-medium text-muted-ink sm:inline">
               {(d.value / 1000).toFixed(0)}k
             </span>
             <motion.div
@@ -31,7 +31,7 @@ export function BarChart({ data }: BarChartProps) {
               }}
               className="w-full rounded-t-sm bg-gradient-to-t from-zinc-900 to-zinc-600"
             />
-            <span className="text-xs font-medium text-zinc-600">{d.day}</span>
+            <span className="text-xs font-medium text-muted-ink">{d.day}</span>
           </div>
         );
       })}

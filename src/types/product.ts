@@ -10,7 +10,7 @@ export interface Product {
   unit: string;
 }
 
-export interface Category {
+export interface Subsector {
   name: string;
   hasDropdown?: boolean;
 }

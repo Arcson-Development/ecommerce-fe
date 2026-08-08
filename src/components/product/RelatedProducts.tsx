@@ -18,7 +18,7 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.1 }}
         transition={{ duration: 0.4 }}
-        className="mb-8 text-lg font-semibold text-zinc-900 sm:text-xl"
+        className="mb-8 text-lg font-semibold text-ink sm:text-xl"
       >
         Produk Terkait
       </motion.h2>

@@ -79,8 +79,8 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
           <Link href="/" aria-label="Beranda">
             <Logo />
           </Link>
-          <span className="hidden text-xl font-semibold text-zinc-900 sm:inline">
-            Pasar Jaya
+          <span className="hidden text-xl font-semibold text-ink sm:inline">
+            EKRAF Kiosk
           </span>
         </motion.div>
 
@@ -92,20 +92,20 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
           className="hidden md:flex flex-1 max-w-xl"
         >
           <form onSubmit={handleSearch} className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" aria-hidden="true" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-ink" aria-hidden="true" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari sayur, buah, daging, seafood..."
+              placeholder="Cari produk kreatif, subsektor, atau toko..."
               aria-label="Cari produk"
-              className="w-full border border-gray-300 bg-gray-50 pl-12 pr-12 py-3 text-sm rounded-lg focus:border-orange-500 focus:bg-white focus:outline-none transition-colors"
+              className="w-full border border-gray-300 bg-gray-50 pl-12 pr-12 py-3 text-sm rounded-lg focus:border-accent focus:bg-white focus:outline-none transition-colors"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={clearSearch}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-ink hover:text-muted-ink"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -121,16 +121,16 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
           className="flex items-center gap-4 sm:gap-6"
         >
           <Link
-            href={isAuthenticated ? "/account" : "/auth"}
-            className="hidden text-sm text-zinc-700 transition-colors hover:text-orange-600 sm:inline"
+            href="/admin/login"
+            className="hidden text-sm text-ink transition-colors hover:text-accent sm:inline"
           >
-            {isAuthenticated && user ? `Hai, ${user.nickname || user.username}` : "Masuk / Daftar"}
+            Admin
           </Link>
           <span className="hidden h-5 w-px bg-gray-300 sm:inline-block" />
 
           <Link
             href="/checkout"
-            className="hidden text-sm text-zinc-700 transition-colors hover:text-orange-600 md:inline"
+            className="hidden text-sm text-ink transition-colors hover:text-accent md:inline"
           >
             Keranjang &gt;{" "}
             <span className="font-semibold">{formatRupiah(mounted ? cartTotal : 0)}</span>
@@ -148,7 +148,7 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
               className="relative"
             >
               <ShoppingBag
-                className="h-6 w-6 text-zinc-800"
+                className="h-6 w-6 text-ink"
                 strokeWidth={1.75}
               />
               {mounted && cartCount > 0 && (
@@ -157,7 +157,7 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 500, damping: 20 }}
-                  className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-sale px-1 text-[10px] font-bold text-white"
+                  className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-sale px-1 text-xs font-bold text-white"
                 >
                   {cartCount}
                 </motion.span>
@@ -171,7 +171,7 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
             whileTap={{ scale: 0.92 }}
             onClick={() => setSearchOpen(true)}
             aria-label="Cari"
-            className="md:hidden text-zinc-800"
+            className="md:hidden text-ink"
           >
             <Search className="h-6 w-6" strokeWidth={1.75} />
           </motion.button>
@@ -197,20 +197,20 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
               onClick={(e) => e.stopPropagation()}
             >
               <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" aria-hidden="true" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-ink" aria-hidden="true" />
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari sayur, buah, daging, seafood..."
+                  placeholder="Cari produk kreatif, subsektor, atau toko..."
                   aria-label="Cari produk"
-                  className="w-full border border-gray-300 bg-gray-50 pl-12 pr-12 py-3 text-sm rounded-lg focus:border-orange-500 focus:bg-white focus:outline-none transition-colors"
+                  className="w-full border border-gray-300 bg-gray-50 pl-12 pr-12 py-3 text-sm rounded-lg focus:border-accent focus:bg-white focus:outline-none transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setSearchOpen(false)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-ink hover:text-muted-ink"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -225,41 +225,12 @@ export function Header({ onSearch, initialSearch = "" }: HeaderProps) {
 
 function Logo() {
   return (
-    <svg
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="text-primary"
-    >
-      {/* Glasses */}
-      <circle cx="14" cy="20" r="6" stroke="currentColor" strokeWidth="2" />
-      <circle cx="34" cy="20" r="6" stroke="currentColor" strokeWidth="2" />
-      <path d="M20 20H28" stroke="currentColor" strokeWidth="2" />
-      {/* Eyes */}
-      <circle cx="14" cy="20" r="1.5" fill="currentColor" />
-      <circle cx="34" cy="20" r="1.5" fill="currentColor" />
-      {/* Smile */}
-      <path
-        d="M18 30C18 30 21 33 24 33C27 33 30 30 30 30"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      {/* Hair tufts */}
-      <path
-        d="M10 14C10 14 12 11 14 13"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M38 14C38 14 36 11 34 13"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
+    <img
+      src="/ekraf-logo.png"
+      alt="EKRAF Kiosk"
+      width={48}
+      height={48}
+      className="h-12 w-12 object-contain"
+    />
   );
 }

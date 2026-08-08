@@ -86,7 +86,7 @@ export function CheckoutForm({ data, onChange }: CheckoutFormProps) {
     >
       {/* BILLING & SHIPPING */}
       <section>
-        <h2 className="mb-6 text-sm font-semibold uppercase tracking-wider text-zinc-900">
+        <h2 className="mb-6 text-sm font-semibold uppercase tracking-wider text-ink">
           Penagihan &amp; Pengiriman
         </h2>
 
@@ -214,7 +214,7 @@ export function CheckoutForm({ data, onChange }: CheckoutFormProps) {
 
       {/* ADDITIONAL INFO */}
       <section>
-        <h2 className="mb-6 text-sm font-semibold uppercase tracking-wider text-zinc-900">
+        <h2 className="mb-6 text-sm font-semibold uppercase tracking-wider text-ink">
           Informasi Tambahan
         </h2>
         <Field label="Catatan Pesanan (Opsional)">
@@ -266,7 +266,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm text-zinc-800">
+      <span className="mb-1.5 block text-sm text-ink">
         {label}
         {required && <span className="text-rose-500">*</span>}
       </span>

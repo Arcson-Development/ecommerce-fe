@@ -89,7 +89,7 @@ export default function AdminMarketsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] text-sm text-zinc-500">
+      <div className="flex items-center justify-center min-h-[60vh] text-sm text-muted-ink">
         Memuat data pasar...
       </div>
     );
@@ -100,8 +100,8 @@ export default function AdminMarketsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900">Master Pasar</h1>
-          <p className="text-sm text-zinc-500 mt-1">Kelola data pasar tradisional</p>
+          <h1 className="text-2xl font-semibold text-ink">Master Pasar</h1>
+          <p className="text-sm text-muted-ink mt-1">Kelola data pasar tradisional</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(!showForm); }}
@@ -121,13 +121,13 @@ export default function AdminMarketsPage() {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <form onSubmit={handleSubmit} className="bg-white border border-zinc-200 rounded-sm p-6 space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+            <form onSubmit={handleSubmit} className="bg-white border border-line rounded-sm p-6 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-ink">
                 {editingId ? "Edit Pasar" : "Tambah Pasar Baru"}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-ink mb-1">
                     Nama Pasar
                   </label>
                   <input
@@ -136,11 +136,11 @@ export default function AdminMarketsPage() {
                     required
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full border border-zinc-200 bg-white px-3 py-2 text-sm rounded-sm focus:border-zinc-900 focus:outline-none"
+                    className="w-full border border-line bg-white px-3 py-2 text-sm rounded-sm focus:border-zinc-900 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-ink mb-1">
                     Alamat
                   </label>
                   <input
@@ -149,15 +149,15 @@ export default function AdminMarketsPage() {
                     required
                     value={form.address}
                     onChange={(e) => setForm({ ...form, address: e.target.value })}
-                    className="w-full border border-zinc-200 bg-white px-3 py-2 text-sm rounded-sm focus:border-zinc-900 focus:outline-none"
+                    className="w-full border border-line bg-white px-3 py-2 text-sm rounded-sm focus:border-zinc-900 focus:outline-none"
                   />
                 </div>
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-ink mb-2">
                   Pilih Lokasi di Peta
                 </p>
-                <div className="h-64 border border-zinc-200 rounded-sm overflow-hidden">
+                <div className="h-64 border border-line rounded-sm overflow-hidden">
                   <LeafletMap
                     lat={form.lat}
                     lng={form.lng}
@@ -169,7 +169,7 @@ export default function AdminMarketsPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 border border-zinc-300 text-zinc-700 text-xs font-semibold uppercase tracking-wider hover:bg-zinc-100 rounded-sm"
+                  className="px-4 py-2 border border-line text-ink text-xs font-semibold uppercase tracking-wider hover:bg-zinc-100 rounded-sm"
                 >
                   Batal
                 </button>
@@ -190,34 +190,34 @@ export default function AdminMarketsPage() {
         {[
           { label: "Total Pasar", value: markets.length, color: "bg-zinc-900 text-white" },
           { label: "Aktif", value: markets.filter((m) => m.isActive).length, color: "bg-emerald-500 text-white" },
-          { label: "Nonaktif", value: markets.filter((m) => !m.isActive).length, color: "bg-zinc-300 text-zinc-700" },
-          { label: "Total Toko", value: markets.reduce((sum: number, m: any) => sum + (m.stores?.length || 0), 0), color: "bg-blue-500 text-white" },
+          { label: "Nonaktif", value: markets.filter((m) => !m.isActive).length, color: "bg-zinc-300 text-ink" },
+          { label: "Total Toko", value: markets.reduce((sum: number, m: any) => sum + (m.stores?.length || 0), 0), color: "bg-primary text-primary-fg" },
         ].map((item) => (
           <div key={item.label} className={`rounded-sm p-4 ${item.color}`}>
             <p className="text-2xl font-bold">{item.value}</p>
-            <p className="text-[10px] uppercase tracking-wider opacity-80 mt-0.5">{item.label}</p>
+            <p className="text-xs uppercase tracking-wider opacity-80 mt-0.5">{item.label}</p>
           </div>
         ))}
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-ink" />
         <input
           type="text"
           placeholder="Cari pasar..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 border border-zinc-200 rounded-sm text-sm focus:border-zinc-900 focus:outline-none bg-white"
+          className="w-full pl-10 pr-4 py-2.5 border border-line rounded-sm text-sm focus:border-zinc-900 focus:outline-none bg-white"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-zinc-200 rounded-sm overflow-hidden">
+      <div className="bg-white border border-line rounded-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-zinc-700">
+          <table className="w-full text-left text-sm text-ink">
             <thead>
-              <tr className="bg-zinc-50 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 border-b border-zinc-200">
+              <tr className="bg-zinc-50 text-xs font-semibold uppercase tracking-wider text-muted-ink border-b border-line">
                 <th className="px-6 py-3">Nama Pasar</th>
                 <th className="px-6 py-3">Alamat</th>
                 <th className="px-6 py-3">Koordinat</th>
@@ -226,10 +226,10 @@ export default function AdminMarketsPage() {
                 <th className="px-6 py-3 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200">
+            <tbody className="divide-y divide-line">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-muted-ink">
                     {search ? "Tidak ada pasar yang cocok." : "Belum ada data pasar."}
                   </td>
                 </tr>
@@ -239,21 +239,21 @@ export default function AdminMarketsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-sm bg-zinc-100 flex items-center justify-center">
-                          <Building2 className="h-4 w-4 text-zinc-500" />
+                          <Building2 className="h-4 w-4 text-muted-ink" />
                         </div>
-                        <span className="font-semibold text-zinc-900">{m.name}</span>
+                        <span className="font-semibold text-ink">{m.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs text-zinc-600 max-w-60 truncate">
+                    <td className="px-6 py-4 text-xs text-muted-ink max-w-60 truncate">
                       <div className="flex items-start gap-1">
-                        <MapPin className="h-3 w-3 text-zinc-400 mt-0.5 shrink-0" />
+                        <MapPin className="h-3 w-3 text-muted-ink mt-0.5 shrink-0" />
                         <span>{m.address || "-"}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs font-mono text-zinc-500">
+                    <td className="px-6 py-4 text-xs font-mono text-muted-ink">
                       {m.lat ? `${m.lat.toFixed(4)}, ${m.lng.toFixed(4)}` : "-"}
                     </td>
-                    <td className="px-6 py-4 text-center text-sm font-medium text-zinc-800">
+                    <td className="px-6 py-4 text-center text-sm font-medium text-ink">
                       {m.stores?.length || 0}
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -274,14 +274,14 @@ export default function AdminMarketsPage() {
                       <div className="inline-flex gap-1">
                         <button
                           onClick={() => handleEdit(m)}
-                          className="flex h-8 w-8 items-center justify-center bg-zinc-100 text-zinc-600 hover:bg-zinc-200 rounded-sm"
+                          className="flex h-8 w-8 items-center justify-center bg-zinc-100 text-muted-ink hover:bg-zinc-200 rounded-sm"
                           title="Edit"
                         >
                           <Edit3 className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete(m.id)}
-                          className="flex h-8 w-8 items-center justify-center bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-sm"
+                          className="flex h-8 w-8 items-center justify-center bg-danger/10 text-danger hover:bg-danger/20 rounded-sm"
                           title="Hapus"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
