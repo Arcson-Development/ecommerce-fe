@@ -1,4 +1,4 @@
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api').replace('/api', '');
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6673/api').replace('/api', '');
 
 /**
  * Resolve a full image URL from a relative upload path or external URL.

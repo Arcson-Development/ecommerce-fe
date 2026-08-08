@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import QrDisplay from "@/components/QrDisplay";
 import {
   ArrowLeft,
   ArrowRight,
@@ -316,10 +317,6 @@ export default function HomePage() {
       setCheckoutLoading(false);
     }
   };
-
-  const qrImageUrl = qrisContent
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=360x360&data=${encodeURIComponent(qrisContent)}`
-    : "";
 
   // ---- Transfer cart kiosk → mobile ("Lanjutkan di HP") ----
   const handleTransferToPhone = async () => {
@@ -837,13 +834,7 @@ export default function HomePage() {
           </p>
           <div className="rounded-3xl bg-white p-6 shadow-lg">
             {transferQr ? (
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(transferQr)}`}
-                alt="QR Lanjutkan di HP"
-                className="h-[320px] w-[320px] rounded-2xl"
-                width={320}
-                height={320}
-              />
+              <QrDisplay data={transferQr} size={320} />
             ) : (
               <div className="flex h-[320px] w-[320px] items-center justify-center text-muted-ink">
                 <Loader2 className="h-10 w-10 animate-spin" />
@@ -907,14 +898,8 @@ export default function HomePage() {
                 Buka aplikasi pembayaran (GoPay, OVO, DANA, m-Banking) lalu scan QRIS
               </p>
               <div className="rounded-3xl bg-white p-6 shadow-lg">
-                {qrImageUrl ? (
-                  <img
-                    src={qrImageUrl}
-                    alt="QRIS"
-                    className="h-[360px] w-[360px] rounded-2xl"
-                    width={360}
-                    height={360}
-                  />
+                {qrisContent ? (
+                  <QrDisplay data={qrisContent} size={360} />
                 ) : (
                   <div className="flex h-[360px] w-[360px] items-center justify-center text-muted-ink">
                     <Loader2 className="h-10 w-10 animate-spin" />

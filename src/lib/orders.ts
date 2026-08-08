@@ -6,7 +6,7 @@ import { api } from "./api";
 import { useAuth } from "./auth";
 import { getImageUrl } from "./image-utils";
 
-const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api").replace("/api", "");
+const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:6673/api").replace("/api", "");
 
 export type OrderStatus = "pending" | "processing" | "shipped" | "completed" | "cancelled";
 
