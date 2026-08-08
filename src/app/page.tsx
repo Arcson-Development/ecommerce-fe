@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import QrDisplay from "@/components/QrDisplay";
+import SubsectorIcon from "@/components/SubsectorIcon";
 import {
   ArrowLeft,
   ArrowRight,
@@ -377,22 +378,30 @@ export default function HomePage() {
       onPointerDown={() => (lastActivity.current = Date.now())}
     >
       {/* Header */}
-      <header className="flex items-center justify-between bg-primary px-6 py-4 text-primary-fg">
-        <div className="flex items-center gap-3">
-          <img src="/ekraf-logo.png" alt="EKRAF" className="h-10 w-10 object-contain" />
+      <header className="flex items-center justify-between bg-primary px-6 py-5 text-primary-fg sm:px-10">
+        <div className="flex items-center gap-4">
+          <img src="/ekraf-logo.png" alt="EKRAF" className="h-12 w-12 object-contain sm:h-14 sm:w-14" />
           <div>
-            <h1 className="text-xl font-bold leading-tight">EKRAF Kiosk</h1>
-            <p className="text-sm opacity-80">Marketplace Ekonomi Kreatif</p>
+            <h1 className="text-2xl font-bold leading-tight sm:text-3xl">EKRAF Kiosk</h1>
+            <p className="text-base opacity-80 sm:text-lg">Marketplace Ekonomi Kreatif</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 rounded-full bg-primary-fg/10 px-4 py-2 text-sm font-semibold">
-          <ShoppingBag className="h-5 w-5" />
-          {cartCount} item
-        </div>
+        <button
+          onClick={() => cartCount > 0 && setStep("checkout")}
+          className={`flex items-center gap-3 rounded-full px-5 py-3 text-lg font-bold transition-colors ${
+            cartCount > 0
+              ? "bg-accent text-[#5c3a05] shadow-md hover:bg-accent-hover"
+              : "bg-primary-fg/10 text-primary-fg"
+          }`}
+          aria-label={`Keranjang: ${cartCount} item`}
+        >
+          <ShoppingBag className="h-6 w-6" />
+          <span>{cartCount} item</span>
+        </button>
       </header>
 
       {/* Progress indicator 4 langkah (critique P1) */}
-      <div className="flex items-center gap-2 bg-white/60 px-6 py-2">
+      <div className="flex items-center gap-3 bg-white/70 px-6 py-3 sm:px-10">
         {[
           { key: "subsector", label: "Kategori" },
           { key: "region", label: "Wilayah" },
@@ -407,7 +416,7 @@ export default function HomePage() {
           return (
             <div key={s.key} className="flex flex-1 items-center gap-2">
               <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base font-bold ${
                   state === "done"
                     ? "bg-success text-white"
                     : state === "current"
@@ -418,13 +427,13 @@ export default function HomePage() {
                 {state === "done" ? "✓" : i + 1}
               </div>
               <span
-                className={`hidden text-sm font-semibold sm:block ${
+                className={`text-base font-bold sm:text-lg ${
                   state === "current" ? "text-primary-soft-fg" : "text-muted-ink"
                 }`}
               >
                 {s.label}
               </span>
-              {i < 3 && <div className={`h-1 flex-1 rounded ${cur < active ? "bg-success" : "bg-zinc-200"}`} />}
+              {i < 3 && <div className={`h-1.5 flex-1 rounded ${cur < active ? "bg-success" : "bg-zinc-200"}`} />}
             </div>
           );
         })}
@@ -464,10 +473,10 @@ export default function HomePage() {
       {/* Step 1: Subsector */}
       {step === "subsector" && (
         <main className="flex flex-1 flex-col p-6 sm:p-10">
-          <h2 className="mb-2 text-3xl font-bold text-primary-soft-fg sm:text-4xl">
+          <h2 className="mb-2 text-4xl font-bold text-primary-soft-fg sm:text-5xl">
             Apa yang kamu cari?
           </h2>
-          <p className="mb-8 text-lg text-muted-ink">
+          <p className="mb-8 text-xl text-muted-ink">
             Pilih salah satu dari 17 subsektor ekonomi kreatif
           </p>
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
@@ -475,10 +484,12 @@ export default function HomePage() {
               <button
                 key={s.id}
                 onClick={() => selectSubsector(s)}
-                className="flex min-h-[140px] flex-col items-center justify-center gap-3 rounded-2xl bg-white p-6 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 active:scale-[0.98]"
+                className="group flex min-h-[150px] flex-col items-center justify-center gap-4 rounded-2xl bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg active:scale-[0.98]"
               >
-                <span className="text-5xl">{s.icon || "🎨"}</span>
-                <span className="text-center text-lg font-semibold text-ink">
+                <span className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary-soft text-primary-soft-fg transition-colors group-hover:bg-primary group-hover:text-primary-fg">
+                  <SubsectorIcon name={s.name} className="h-10 w-10" strokeWidth={2.2} />
+                </span>
+                <span className="text-center text-xl font-semibold text-ink">
                   {s.name}
                 </span>
               </button>
@@ -492,28 +503,33 @@ export default function HomePage() {
         <main className="flex flex-1 flex-col p-6 sm:p-10">
           <div className="mb-6 flex items-center gap-4">
             {backBtn(() => setStep("subsector"))}
-            <div>
-              <h2 className="text-3xl font-bold text-primary-soft-fg">
-                {selectedSubsector?.icon} {selectedSubsector?.name}
-              </h2>
-              <p className="text-muted-ink">
-                {selectedProvince
-                  ? "Sekarang pilih kota/kabupaten"
-                  : "Pilih provinsi tempat kamu berada"}
-              </p>
+            <div className="flex items-center gap-3">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary-soft-fg">
+                <SubsectorIcon name={selectedSubsector?.name} className="h-7 w-7" />
+              </span>
+              <div>
+                <h2 className="text-3xl font-bold text-primary-soft-fg sm:text-4xl">
+                  {selectedSubsector?.name}
+                </h2>
+                <p className="text-lg text-muted-ink">
+                  {selectedProvince
+                    ? "Sekarang pilih kota/kabupaten"
+                    : "Pilih provinsi tempat kamu berada"}
+                </p>
+              </div>
             </div>
           </div>
 
           {!selectedProvince ? (
             <>
-              <div className="mb-4 flex items-center gap-3 rounded-2xl bg-white px-5 py-3 shadow-sm">
-                <Search className="h-6 w-6 text-muted-ink" />
+              <div className="mb-4 flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-sm">
+                <Search className="h-7 w-7 text-muted-ink" />
                 <input
                   type="text"
                   value={regionSearch}
                   onChange={(e) => setRegionSearch(e.target.value)}
                   placeholder="Cari provinsi..."
-                  className="w-full bg-transparent text-lg text-ink placeholder:text-muted-ink focus:outline-none"
+                  className="w-full bg-transparent text-xl text-ink placeholder:text-muted-ink focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
@@ -523,24 +539,27 @@ export default function HomePage() {
                     <button
                       key={p.id}
                       onClick={() => selectProvince(p)}
-                      className="flex min-h-[90px] items-center justify-between gap-3 rounded-2xl bg-white p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 active:scale-[0.98]"
+                      className="flex min-h-[110px] items-center justify-between gap-3 rounded-2xl bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md active:scale-[0.98]"
                     >
-                      <span className="text-left text-lg font-semibold text-ink">{p.name}</span>
-                      <ChevronRight className="h-6 w-6 shrink-0 text-muted-ink" />
+                      <span className="flex items-center gap-3">
+                        <MapPin className="h-7 w-7 shrink-0 text-primary" />
+                        <span className="text-left text-xl font-semibold text-ink">{p.name}</span>
+                      </span>
+                      <ChevronRight className="h-7 w-7 shrink-0 text-muted-ink" />
                     </button>
                   ))}
               </div>
             </>
           ) : (
             <>
-              <div className="mb-4 flex items-center gap-3 rounded-2xl bg-white px-5 py-3 shadow-sm">
-                <Search className="h-6 w-6 text-muted-ink" />
+              <div className="mb-4 flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-sm">
+                <Search className="h-7 w-7 text-muted-ink" />
                 <input
                   type="text"
                   value={regionSearch}
                   onChange={(e) => setRegionSearch(e.target.value)}
                   placeholder="Cari kota/kabupaten..."
-                  className="w-full bg-transparent text-lg text-ink placeholder:text-muted-ink focus:outline-none"
+                  className="w-full bg-transparent text-xl text-ink placeholder:text-muted-ink focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -550,9 +569,12 @@ export default function HomePage() {
                     <button
                       key={c.id}
                       onClick={() => selectCity(c)}
-                      className="flex min-h-[90px] items-center justify-between gap-3 rounded-2xl bg-white p-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-1 active:scale-[0.98]"
+                      className="flex min-h-[100px] items-center justify-between gap-3 rounded-2xl bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md active:scale-[0.98]"
                     >
-                      <span className="text-left text-lg font-semibold text-ink">{c.name}</span>
+                      <span className="flex items-center gap-3">
+                        <MapPin className="h-6 w-6 shrink-0 text-primary" />
+                        <span className="text-left text-lg font-semibold text-ink">{c.name}</span>
+                      </span>
                       <ChevronRight className="h-6 w-6 shrink-0 text-muted-ink" />
                     </button>
                   ))}
@@ -567,13 +589,18 @@ export default function HomePage() {
         <main className="flex flex-1 flex-col p-6 sm:p-10">
           <div className="mb-6 flex items-center gap-4">
             {backBtn(() => setStep("region"))}
-            <div>
-              <h2 className="text-3xl font-bold text-primary-soft-fg">
-                {selectedSubsector?.icon} {selectedSubsector?.name}
-              </h2>
-              <p className="flex items-center gap-1 text-muted-ink">
-                <MapPin className="h-4 w-4" /> {selectedProvince?.name} · {selectedCity?.name}
-              </p>
+            <div className="flex items-center gap-3">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary-soft-fg">
+                <SubsectorIcon name={selectedSubsector?.name} className="h-7 w-7" />
+              </span>
+              <div>
+                <h2 className="text-3xl font-bold text-primary-soft-fg sm:text-4xl">
+                  {selectedSubsector?.name}
+                </h2>
+                <p className="flex items-center gap-1 text-lg text-muted-ink">
+                  <MapPin className="h-5 w-5" /> {selectedProvince?.name} · {selectedCity?.name}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -596,23 +623,23 @@ export default function HomePage() {
                 <button
                   key={p.id}
                   onClick={() => addToCart(p)}
-                  className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
+                  className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg active:scale-[0.98]"
                 >
-                  <div className="relative h-48 w-full overflow-hidden bg-primary-soft">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-primary-soft">
                     <img
                       src={p.image}
                       alt={p.name}
                       loading="lazy"
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
-                    <span className="absolute right-3 top-3 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-[#5c3a05] shadow-lg transition-transform group-hover:scale-110">
-                      <Plus className="h-7 w-7" strokeWidth={3} />
+                    <span className="absolute bottom-3 right-3 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-[#5c3a05] shadow-lg transition-transform group-hover:scale-110 active:scale-95">
+                      <Plus className="h-8 w-8" strokeWidth={3} />
                     </span>
                   </div>
-                  <div className="p-5 text-left">
-                    <h3 className="line-clamp-1 text-lg font-semibold text-ink">{p.name}</h3>
+                  <div className="flex flex-1 flex-col p-5 text-left">
+                    <h3 className="line-clamp-1 text-xl font-semibold text-ink">{p.name}</h3>
                     <p className="mt-1 text-base text-muted-ink">{p.store?.name || "Toko Kreatif"}</p>
-                    <p className="mt-2 text-2xl font-bold text-primary-soft-fg">
+                    <p className="mt-3 text-2xl font-extrabold text-primary-soft-fg">
                       Rp{p.price.toLocaleString("id-ID")}
                     </p>
                   </div>
@@ -623,27 +650,27 @@ export default function HomePage() {
 
           {/* Cart bar */}
           {cartCount > 0 && (
-            <div className="sticky bottom-6 mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-primary px-6 py-4 text-primary-fg shadow-lg">
+            <div className="sticky bottom-6 mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-primary px-6 py-5 text-primary-fg shadow-xl">
               <div>
-                <p className="text-base opacity-80">{cartCount} item dipilih</p>
-                <p className="text-3xl font-bold">Rp{cartTotal.toLocaleString("id-ID")}</p>
+                <p className="text-lg opacity-80">{cartCount} item dipilih</p>
+                <p className="text-4xl font-extrabold">Rp{cartTotal.toLocaleString("id-ID")}</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <button
                   onClick={() => {
                     setTransferQr(null);
                     handleTransferToPhone();
                     setStep("transfer");
                   }}
-                  className="flex items-center gap-2 rounded-xl bg-white/15 px-5 py-4 text-lg font-bold text-primary-fg transition-colors hover:bg-white/25"
+                  className="flex min-h-[56px] items-center gap-2 rounded-xl bg-white/15 px-6 py-4 text-xl font-bold text-primary-fg transition-colors hover:bg-white/25"
                 >
-                  <Smartphone className="h-6 w-6" /> Lanjutkan di HP
+                  <Smartphone className="h-7 w-7" /> Lanjutkan di HP
                 </button>
                 <button
                   onClick={() => setStep("checkout")}
-                  className="flex items-center gap-2 rounded-xl bg-accent px-6 py-4 text-xl font-bold text-[#5c3a05] transition-colors hover:bg-accent-hover"
+                  className="flex min-h-[56px] items-center gap-2 rounded-xl bg-accent px-8 py-4 text-2xl font-bold text-[#5c3a05] transition-colors hover:bg-accent-hover active:scale-[0.98]"
                 >
-                  Lanjut <ArrowRight className="h-6 w-6" />
+                  Lanjut <ArrowRight className="h-7 w-7" />
                 </button>
               </div>
             </div>
@@ -724,32 +751,32 @@ export default function HomePage() {
 
             {/* Shipping form */}
             <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-ink">
-                <MapPin className="h-5 w-5 text-primary" /> Data Pengiriman
+              <h3 className="mb-4 flex items-center gap-2 text-2xl font-bold text-ink">
+                <MapPin className="h-6 w-6 text-primary" /> Data Pengiriman
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-ink">Nama Penerima</label>
+                  <label className="mb-1.5 block text-base font-medium text-ink">Nama Penerima</label>
                   <input
                     type="text"
                     value={form.recipient}
                     onChange={(e) => setForm({ ...form, recipient: e.target.value })}
                     placeholder="Nama lengkap"
-                    className="w-full rounded-xl border border-line px-4 py-3 text-base focus:border-accent focus:outline-none"
+                    className="w-full rounded-xl border border-line px-4 py-3.5 text-lg focus:border-accent focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-ink">No. HP</label>
+                  <label className="mb-1.5 block text-base font-medium text-ink">No. HP</label>
                   <input
                     type="tel"
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     placeholder="08xxxxxxxxxx"
-                    className="w-full rounded-xl border border-line px-4 py-3 text-base focus:border-accent focus:outline-none"
+                    className="w-full rounded-xl border border-line px-4 py-3.5 text-lg focus:border-accent focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-ink">
+                  <label className="mb-1.5 block text-base font-medium text-ink">
                     No. HP Akun EKRAF <span className="font-normal text-muted-ink">(opsional)</span>
                   </label>
                   <input
@@ -757,61 +784,61 @@ export default function HomePage() {
                     value={form.buyerPhone}
                     onChange={(e) => setForm({ ...form, buyerPhone: e.target.value })}
                     placeholder="08xxxxxxxxxx — untuk melacak pesanan di aplikasi EKRAF"
-                    className="w-full rounded-xl border border-line px-4 py-3 text-base focus:border-accent focus:outline-none"
+                    className="w-full rounded-xl border border-line px-4 py-3.5 text-lg focus:border-accent focus:outline-none"
                   />
-                  <p className="mt-1 text-sm text-muted-ink">
+                  <p className="mt-1 text-base text-muted-ink">
                     Kalau nomor terdaftar di aplikasi EKRAF, pesanan ini otomatis muncul di riwayat akun kamu.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-ink">Provinsi</label>
+                    <label className="mb-1.5 block text-base font-medium text-ink">Provinsi</label>
                     <input
                       type="text"
                       value={form.province || selectedProvince?.name || ""}
                       onChange={(e) => setForm({ ...form, province: e.target.value })}
                       placeholder="Provinsi"
-                      className="w-full rounded-xl border border-line px-4 py-3 text-base focus:border-accent focus:outline-none"
+                      className="w-full rounded-xl border border-line px-4 py-3.5 text-lg focus:border-accent focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-ink">Kota/Kabupaten</label>
+                    <label className="mb-1.5 block text-base font-medium text-ink">Kota/Kabupaten</label>
                     <input
                       type="text"
                       value={form.city || selectedCity?.name || ""}
                       onChange={(e) => setForm({ ...form, city: e.target.value })}
                       placeholder="Kota"
-                      className="w-full rounded-xl border border-line px-4 py-3 text-base focus:border-accent focus:outline-none"
+                      className="w-full rounded-xl border border-line px-4 py-3.5 text-lg focus:border-accent focus:outline-none"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-ink">Alamat Lengkap</label>
+                  <label className="mb-1.5 block text-base font-medium text-ink">Alamat Lengkap</label>
                   <textarea
                     value={form.street}
                     onChange={(e) => setForm({ ...form, street: e.target.value })}
                     placeholder="Jalan, nomor rumah, patokan"
                     rows={3}
-                    className="w-full rounded-xl border border-line px-4 py-3 text-base focus:border-accent focus:outline-none"
+                    className="w-full rounded-xl border border-line px-4 py-3.5 text-lg focus:border-accent focus:outline-none"
                   />
                 </div>
 
                 {checkoutError && (
-                  <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-danger">{checkoutError}</p>
+                  <p className="rounded-xl bg-red-50 px-4 py-3 text-lg text-danger">{checkoutError}</p>
                 )}
 
                 <button
                   onClick={handleCheckout}
                   disabled={checkoutLoading}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-lg font-bold text-[#5c3a05] transition-colors hover:bg-accent-hover disabled:opacity-50"
+                  className="flex min-h-[64px] w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-4 text-2xl font-bold text-[#5c3a05] transition-colors hover:bg-accent-hover active:scale-[0.98] disabled:opacity-50"
                 >
                   {checkoutLoading ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin" /> Memproses...
+                      <Loader2 className="h-7 w-7 animate-spin" /> Memproses...
                     </>
                   ) : (
                     <>
-                      Bayar dengan QRIS <ArrowRight className="h-5 w-5" />
+                      Bayar dengan QRIS <ArrowRight className="h-7 w-7" />
                     </>
                   )}
                 </button>
@@ -908,10 +935,10 @@ export default function HomePage() {
                   </div>
                 )}
               </div>
-              <p className="text-lg font-semibold text-ink">
+              <p className="text-3xl font-extrabold text-ink">
                 Total: Rp{(cartTotal + 10000).toLocaleString("id-ID")}
               </p>
-              <p className="text-base text-muted-ink">
+              <p className="text-xl text-muted-ink">
                 Termasuk ongkir Rp10.000 · {cartTotal.toLocaleString("id-ID")}
               </p>
               <button

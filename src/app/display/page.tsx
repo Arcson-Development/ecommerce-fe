@@ -114,12 +114,15 @@ export default function DisplayPage() {
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : (
-        <div className="flex flex-col items-center gap-6 p-10 text-center text-primary-fg">
-          <img src="/ekraf-logo.png" alt="EKRAF" className="h-32 w-32 object-contain" />
-          <h1 className="text-6xl font-bold tracking-tight sm:text-8xl">{current.title}</h1>
-          <p className="max-w-2xl text-2xl sm:text-3xl opacity-90">
+        <div className="flex flex-col items-center gap-8 bg-gradient-to-br from-primary via-primary to-primary-hover p-10 text-center text-primary-fg">
+          <img src="/ekraf-logo.png" alt="EKRAF" className="h-36 w-36 object-contain drop-shadow-lg" />
+          <h1 className="text-7xl font-bold tracking-tight sm:text-9xl">{current.title}</h1>
+          <p className="max-w-3xl text-3xl opacity-90 sm:text-4xl">
             Marketplace Ekonomi Kreatif Indonesia
           </p>
+          <div className="mt-4 flex items-center gap-3 rounded-full bg-primary-fg/10 px-8 py-4 text-2xl font-semibold">
+            <Hand className="h-8 w-8" /> Sentuh layar untuk mulai
+          </div>
         </div>
       )}
 
@@ -147,9 +150,9 @@ export default function DisplayPage() {
       </div>
 
       {/* Touch hint */}
-      <div className="absolute right-8 top-8 flex items-center gap-2 rounded-full bg-black/40 px-5 py-3 text-white backdrop-blur-sm">
-        <Hand className="h-5 w-5" />
-        <span className="text-lg font-semibold">Sentuh untuk mulai</span>
+      <div className="absolute right-8 top-8 flex items-center gap-2 rounded-full bg-black/40 px-6 py-3.5 text-white backdrop-blur-sm">
+        <Hand className="h-6 w-6" />
+        <span className="text-xl font-semibold">Sentuh untuk mulai</span>
       </div>
 
       <div className="absolute bottom-6 right-8 flex items-center gap-2 text-white/80">
