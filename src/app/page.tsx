@@ -104,7 +104,7 @@ export default function HomePage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ---- Auto-login kiosk (shared device account) ----
-  // Kredensial TIDAK di bundle — FE minta token dari route API server-side (/api/kiosk-login)
+  // Kredensial TIDAK di bundle — FE minta token dari route server-side (/kiosk-login)
   useEffect(() => {
     async function ensureAuth() {
       if (isAuthenticated) {
@@ -112,7 +112,7 @@ export default function HomePage() {
         return;
       }
       try {
-        const res = await fetch("/api/kiosk-login", { method: "POST" });
+        const res = await fetch("/kiosk-login", { method: "POST" });
         const data = await res.json();
         if (!res.ok || !data?.token) {
           throw new Error(data?.message || "Gagal autentikasi kiosk");
