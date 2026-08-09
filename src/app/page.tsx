@@ -427,7 +427,7 @@ export default function HomePage() {
                 {state === "done" ? "✓" : i + 1}
               </div>
               <span
-                className={`text-base font-bold sm:text-lg ${
+                className={`hidden text-base font-bold sm:block sm:text-lg ${
                   state === "current" ? "text-primary-soft-fg" : "text-muted-ink"
                 }`}
               >
@@ -539,13 +539,15 @@ export default function HomePage() {
                     <button
                       key={p.id}
                       onClick={() => selectProvince(p)}
-                      className="flex min-h-[110px] items-center justify-between gap-3 rounded-2xl bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md active:scale-[0.98]"
+                      className="flex min-h-[110px] items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md active:scale-[0.98] sm:p-5"
                     >
-                      <span className="flex items-center gap-3">
-                        <MapPin className="h-7 w-7 shrink-0 text-primary" />
-                        <span className="text-left text-xl font-semibold text-ink">{p.name}</span>
+                      <span className="flex min-w-0 items-center gap-3">
+                        <MapPin className="h-6 w-6 shrink-0 text-primary sm:h-7 sm:w-7" />
+                        <span className="text-left text-base font-semibold leading-snug text-ink sm:text-xl">
+                          {p.name}
+                        </span>
                       </span>
-                      <ChevronRight className="h-7 w-7 shrink-0 text-muted-ink" />
+                      <ChevronRight className="h-6 w-6 shrink-0 text-muted-ink sm:h-7 sm:w-7" />
                     </button>
                   ))}
               </div>
@@ -569,13 +571,15 @@ export default function HomePage() {
                     <button
                       key={c.id}
                       onClick={() => selectCity(c)}
-                      className="flex min-h-[100px] items-center justify-between gap-3 rounded-2xl bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md active:scale-[0.98]"
+                      className="flex min-h-[100px] items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md active:scale-[0.98] sm:p-5"
                     >
-                      <span className="flex items-center gap-3">
-                        <MapPin className="h-6 w-6 shrink-0 text-primary" />
-                        <span className="text-left text-lg font-semibold text-ink">{c.name}</span>
+                      <span className="flex min-w-0 items-center gap-3">
+                        <MapPin className="h-6 w-6 shrink-0 text-primary sm:h-7 sm:w-7" />
+                        <span className="text-left text-base font-semibold leading-snug text-ink sm:text-lg">
+                          {c.name}
+                        </span>
                       </span>
-                      <ChevronRight className="h-6 w-6 shrink-0 text-muted-ink" />
+                      <ChevronRight className="h-6 w-6 shrink-0 text-muted-ink sm:h-7 sm:w-7" />
                     </button>
                   ))}
               </div>

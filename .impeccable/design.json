@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-03T00:00:00.000Z",
+  "title": "Design System: EKRAF Kiosk",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Langit Cerah",
+        "canonical": "#6fb6e2",
+        "tonalRamp": ["#1a4a6e", "#265e87", "#2f6f9e", "#3b81b5", "#4f95c9", "#62a8d8", "#7cc0e8", "#9fd4f0"]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Langit Dalam",
+        "canonical": "#559ed0",
+        "tonalRamp": ["#1a4a6e", "#265e87", "#2f6f9e", "#3b81b5", "#4f95c9", "#559ed0", "#7cc0e8", "#9fd4f0"]
+      },
+      "primary-fg": {
+        "role": "primary",
+        "displayName": "Tinta Laut",
+        "canonical": "#0b3a5c",
+        "tonalRamp": ["#051c2d", "#0b3a5c", "#114f7d", "#17649e", "#1d79bf", "#2f8ed4", "#55a8e2", "#8cc8ee"]
+      },
+      "primary-soft": {
+        "role": "primary",
+        "displayName": "Embun Langit",
+        "canonical": "#eaf4fc",
+        "tonalRamp": ["#0e2f4a", "#17466d", "#1f5d90", "#2a74b4", "#3f8cc8", "#6fb0de", "#a8d0ee", "#eaf4fc"]
+      },
+      "primary-soft-fg": {
+        "role": "primary",
+        "displayName": "Tinta Langit",
+        "canonical": "#155e93",
+        "tonalRamp": ["#051c2d", "#0b3a5c", "#114f7d", "#155e93", "#1d79bf", "#2f8ed4", "#55a8e2", "#8cc8ee"]
+      },
+      "accent": {
+        "role": "accent",
+        "displayName": "Amber Sorotan",
+        "canonical": "#f59e0b",
+        "tonalRamp": ["#5c3a05", "#7a4f07", "#96610a", "#b3740c", "#d0860e", "#f59e0b", "#f7b13d", "#fac77a"]
+      },
+      "accent-hover": {
+        "role": "accent",
+        "displayName": "Amber Dalam",
+        "canonical": "#d97706",
+        "tonalRamp": ["#5c3a05", "#7a4f07", "#96610a", "#b3740c", "#c06e05", "#d97706", "#f59e0b", "#fac77a"]
+      },
+      "accent-fg": {
+        "role": "accent",
+        "displayName": "Putih Sorotan",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#f5f5f4", "#fafaf9", "#fcfcfb", "#fefefe", "#ffffff", "#ffffff", "#ffffff", "#ffffff"]
+      },
+      "accent-soft": {
+        "role": "accent",
+        "displayName": "Embun Amber",
+        "canonical": "#fffbeb",
+        "tonalRamp": ["#5c3a05", "#7a4f07", "#96610a", "#b3740c", "#d0860e", "#f0b429", "#ffd97a", "#fffbeb"]
+      },
+      "sale": {
+        "role": "feedback",
+        "displayName": "Mawar Diskon",
+        "canonical": "#e11d48",
+        "tonalRamp": ["#5c0a1e", "#7a0d28", "#961032", "#b4133c", "#c8184a", "#e11d48", "#e94d70", "#f7a3b5"]
+      },
+      "success": {
+        "role": "feedback",
+        "displayName": "Hijau Sukses",
+        "canonical": "#16a34a",
+        "tonalRamp": ["#0a2e15", "#0d3d1d", "#114d26", "#145d2e", "#167a3c", "#16a34a", "#3fbf6a", "#a7e6c0"]
+      },
+      "danger": {
+        "role": "feedback",
+        "displayName": "Merah Bahaya",
+        "canonical": "#dc2626",
+        "tonalRamp": ["#5c0a0a", "#7a0d0d", "#961010", "#b41313", "#c81818", "#dc2626", "#e55050", "#f5a3a3"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#18181b",
+        "tonalRamp": ["#0a0a0b", "#101012", "#18181b", "#27272a", "#3f3f46", "#52525b", "#71717a", "#d4d4d8"]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Tinta Redup",
+        "canonical": "#52525b",
+        "tonalRamp": ["#0a0a0b", "#18181b", "#27272a", "#3f3f46", "#52525b", "#71717a", "#a1a1aa", "#d4d4d8"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Garis",
+        "canonical": "#e4e4e7",
+        "tonalRamp": ["#3f3f46", "#52525b", "#71717a", "#a1a1aa", "#c8c8ce", "#d4d4d8", "#e4e4e7", "#f4f4f5"]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Putih Latar",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#a1a1aa", "#c8c8ce", "#d4d4d8", "#e4e4e7", "#f4f4f5", "#fafafa", "#fdfdfd", "#ffffff"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Judul hero kiosk — hanya satu per halaman." },
+      "headline": { "displayName": "Headline", "purpose": "Judul section & judul produk." },
+      "body": { "displayName": "Body", "purpose": "Teks utama & deskripsi produk." },
+      "label": { "displayName": "Label", "purpose": "Tombol, chip, breadcrumb — uppercase, letter-spacing lebar." }
+    },
+    "shadows": [
+      { "name": "ambient-low", "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)", "purpose": "Kartu saat istirahat (shadow-sm)." },
+      { "name": "ambient-mid", "value": "0 4px 6px -1px rgb(0 0 0 / 0.1)", "purpose": "Kartu hover, dropdown, modal (shadow-md)." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Easing default transisi state (150–200ms)." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Aksi utama brand — Langit Cerah dengan teks Tinta Laut.",
+      "html": "<button class=\"ds-btn-primary\">MULAI JELAJAH</button>",
+      "css": ".ds-btn-primary { background: #6fb6e2; color: #0b3a5c; padding: 12px 20px; border-radius: 10px; border: none; font-family: Geist, system-ui, sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.15s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background: #559ed0; } .ds-btn-primary:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Accent Button",
+      "kind": "button",
+      "refersTo": "button-accent",
+      "description": "Aksi transaksi/deal — Amber, hanya untuk CTA utama.",
+      "html": "<button class=\"ds-btn-accent\">BAYAR SEKARANG</button>",
+      "css": ".ds-btn-accent { background: #f59e0b; color: #ffffff; padding: 12px 20px; border-radius: 10px; border: none; font-family: Geist, system-ui, sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.15s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-accent:hover { background: #d97706; } .ds-btn-accent:focus-visible { outline: 2px solid #0b3a5c; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Aksi sekunder — putih dengan border biru tipis.",
+      "html": "<button class=\"ds-btn-ghost\">LIHAT KATEGORI</button>",
+      "css": ".ds-btn-ghost { background: #ffffff; color: #155e93; padding: 12px 20px; border-radius: 10px; border: 1px solid rgba(111, 182, 226, 0.3); font-family: Geist, system-ui, sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.15s cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-ghost:hover { background: #eaf4fc; } .ds-btn-ghost:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Subsector Chip (selected)",
+      "kind": "chip",
+      "refersTo": "chip-selected",
+      "description": "Chip subsektor terpilih di navigasi kiosk.",
+      "html": "<button class=\"ds-chip-sel\">KULINER</button>",
+      "css": ".ds-chip-sel { background: #6fb6e2; color: #0b3a5c; padding: 6px 16px; border-radius: 9999px; border: none; font-family: Geist, system-ui, sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; } .ds-chip-sel:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Subsector Chip (unselected)",
+      "kind": "chip",
+      "refersTo": "chip-unselected",
+      "description": "Chip subsektor istirahat — zinc lembut, bisa digulir.",
+      "html": "<button class=\"ds-chip-un\">KRIYA</button>",
+      "css": ".ds-chip-un { background: #f4f4f5; color: #52525b; padding: 6px 16px; border-radius: 9999px; border: none; font-family: Geist, system-ui, sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.15s; } .ds-chip-un:hover { background: #e4e4e7; } .ds-chip-un:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Kartu produk — putih, radius 16px, shadow halus.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-img\"></div><h3 class=\"ds-card-title\">Batik Nusantara</h3><p class=\"ds-card-price\">Rp250.000</p></article>",
+      "css": ".ds-card { background: #ffffff; border-radius: 16px; padding: 16px; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); font-family: Geist, system-ui, sans-serif; transition: box-shadow 0.2s, transform 0.2s; } .ds-card:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); transform: translateY(-2px); } .ds-card-img { background: #eaf4fc; height: 160px; border-radius: 10px; margin-bottom: 12px; } .ds-card-title { font-size: 16px; font-weight: 600; color: #18181b; margin: 0 0 4px; } .ds-card-price { font-size: 14px; font-weight: 600; color: #0b3a5c; margin: 0; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Field input — zinc lembut, border berubah amber saat focus.",
+      "html": "<input class=\"ds-input\" placeholder=\"Cari produk kreatif...\" />",
+      "css": ".ds-input { background: #fafafa; color: #18181b; padding: 12px; border-radius: 10px; border: 1px solid #e4e4e7; font-family: Geist, system-ui, sans-serif; font-size: 14px; width: 100%; transition: border-color 0.15s, background 0.15s; } .ds-input::placeholder { color: #a1a1aa; } .ds-input:hover { border-color: #d4d4d8; } .ds-input:focus { outline: none; border-color: #f59e0b; background: #ffffff; } .ds-input:focus-visible { outline: 2px solid #f59e0b; outline-offset: 1px; }"
+    },
+    {
+      "name": "Top Bar",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Bar info brand — Langit Cerah penuh dengan teks Tinta Laut.",
+      "html": "<div class=\"ds-topbar\"><p>Min. Belanja Rp80.000 · Diskon ongkir maks Rp20.000</p></div>",
+      "css": ".ds-topbar { background: #6fb6e2; color: #0b3a5c; padding: 10px 16px; text-align: center; font-family: Geist, system-ui, sans-serif; font-size: 13px; font-weight: 500; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Panggung Karya Nusantara",
+    "overview": "EKRAF Kiosk adalah panggung terang untuk karya ekonomi kreatif Indonesia: langit biru cerah (#6fb6e2) sebagai panggung yang menenangkan, amber hangat (#f59e0b) sebagai sorotan yang mengundang aksi. Sistem ini sengaja dibuat terang, lapang, dan ramah publik — bukan toko online yang padat, melainkan etalase yang mengajak orang berhenti dan menyentuh. Personality: cerah dan percaya diri, tanpa berteriak. Density rendah-sedang — kiosk 43\" harus mudah dipindai dari jarak 1–2 m, jadi ruang kosong adalah fitur, bukan kemewahan. Teks navy di atas langit biru memberi keterbacaan tinggi tanpa kehilangan kehangatan.",
+    "keyCharacteristics": [
+      "Langit biru sebagai rumah — primary #6fb6e2 di surfaces utama (TopBar, tombol, chip aktif), bukan sekadar aksen",
+      "Amber sebagai sorotan — hanya untuk aksi/deals, tidak pernah mengisi permukaan besar",
+      "Flat dengan kedalaman halus — kartu terangkat lewat tonal layering & shadow ringan, bukan bayangan dramatis",
+      "Bentuk ramah — radius 10px di tombol, 16px di kartu, chip pill; tidak ada sudut tajam",
+      "Tipografi Geist — sans geometris modern, tegas untuk judul, ringan untuk body"
+    ],
+    "rules": [
+      { "name": "The Sky-As-Home Rule", "body": "Primary #6fb6e2 adalah rumah, bukan aksen — ia memenuhi permukaan brand (TopBar, tombol primer, chip aktif). Jangan menurunkannya jadi garis tepi tipis.", "section": "colors" },
+      { "name": "The Amber Spotlight Rule", "body": "Amber #f59e0b maksimal pada elemen aksi & deal (≤10% layar). Rarity-nya yang membuatnya menarik — jangan isi background dengan amber.", "section": "colors" },
+      { "name": "The Navy-On-Sky Rule", "body": "Teks di atas #6fb6e2 selalu #0b3a5c, tidak pernah putih (kontras 2:1 gagal AA).", "section": "colors" },
+      { "name": "The Kiosk Legibility Rule", "body": "Ukuran teks minimum untuk konten kiosk adalah 0.875rem di web; judul hero jangan di bawah 1.875rem. Kiosk dibaca dari 1–2 m — legibility menang atas density.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Permukaan datar saat istirahat; bayangan muncul sebagai respons state (hover, focus). Kiosk yang terang tidak butuh drama.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do pakai #6fb6e2 sebagai permukaan brand utama — TopBar, tombol primer, chip aktif.",
+      "Do pakai Tinta Laut #0b3a5c untuk teks di atas Langit Cerah.",
+      "Do batasi amber pada aksi & deal — sorotan, bukan background.",
+      "Do pertahankan radius ramah (10px tombol, 16px kartu, pill chip).",
+      "Do jaga jarak baca kiosk: teks ≥0.875rem, judul hero ≥1.875rem."
+    ],
+    "donts": [
+      "Don't pakai warna di luar token globals.css — semua warna lewat --color-* tokens (no hardcoded orange-*, green-*, dst).",
+      "Don't teks putih di atas #6fb6e2 (gagal AA) — selalu navy.",
+      "Don't menghidupkan kembali branding 'Pasar Jaya' — nama, warna, atau mock data sayuran.",
+      "Don't pakai shadow dramatis — sistem flat dengan kedalaman halus.",
+      "Don't menaruh amber pada permukaan luas (mis. background section penuh)."
+    ]
+  }
+}

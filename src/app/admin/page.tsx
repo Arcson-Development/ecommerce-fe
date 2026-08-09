@@ -211,8 +211,8 @@ export default function AdminDashboardPage() {
           <h2 className="text-sm font-bold uppercase tracking-wider text-ink mb-4">
             Pesanan Terbaru
           </h2>
-          <div className="bg-white border border-line rounded-sm overflow-hidden">
-            <table className="w-full text-left text-sm text-ink">
+          <div className="bg-white border border-line rounded-sm overflow-x-auto">
+            <table className="w-full text-left text-sm text-ink whitespace-nowrap">
               <thead>
                 <tr className="bg-zinc-50 text-xs font-semibold uppercase tracking-wider text-muted-ink border-b border-line">
                   <th className="px-6 py-3">Order #</th>
