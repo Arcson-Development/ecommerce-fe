@@ -543,7 +543,7 @@ export default function HomePage() {
                     >
                       <span className="flex min-w-0 items-center gap-3">
                         <MapPin className="h-6 w-6 shrink-0 text-primary sm:h-7 sm:w-7" />
-                        <span className="min-w-0 text-left text-base font-semibold leading-snug text-ink sm:text-xl">
+                        <span className="min-w-0 break-words text-left text-base font-semibold leading-snug text-ink sm:text-xl">
                           {p.name}
                         </span>
                       </span>
@@ -575,7 +575,7 @@ export default function HomePage() {
                     >
                       <span className="flex min-w-0 items-center gap-3">
                         <MapPin className="h-6 w-6 shrink-0 text-primary sm:h-7 sm:w-7" />
-                        <span className="min-w-0 text-left text-base font-semibold leading-snug text-ink sm:text-lg">
+                        <span className="min-w-0 break-words text-left text-base font-semibold leading-snug text-ink sm:text-lg">
                           {c.name}
                         </span>
                       </span>
