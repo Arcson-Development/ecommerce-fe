@@ -115,7 +115,7 @@ export default function AdminProductsPage() {
                 )}
                 <div className="absolute top-2 right-2">
                   <span className="bg-white/90 text-[10px] font-semibold px-2 py-0.5 rounded-sm uppercase tracking-wider text-zinc-600">
-                    {p.category?.name || "Uncategorized"}
+                    {p.subSector?.name || p.category?.name || "Uncategorized"}
                   </span>
                 </div>
               </div>

@@ -100,7 +100,7 @@ export default function MitraProductNewPage() {
         description: form.description,
         unit: form.unit || "Item",
         images: uploadedPhotos,
-        categoryId: form.categoryId,
+        subSectorId: form.categoryId,
         variants: variantList,
       };
 

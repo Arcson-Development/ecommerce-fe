@@ -79,7 +79,7 @@ function HomeContent() {
         queryParams.append("limit", "12");
         
         if (selectedCategory !== "Semua") {
-          queryParams.append("categoryName", selectedCategory);
+          queryParams.append("subSectorName", selectedCategory);
         }
         
         if (selectedMarket) {
@@ -118,7 +118,7 @@ function HomeContent() {
               : undefined,
             store: p.store?.name || "Toko Sayur",
             unit: p.unit || "1 Kg",
-            categoryName: p.category?.name || "Lainnya",
+            categoryName: p.subSector?.name || p.category?.name || "Lainnya",
           };
         });
 

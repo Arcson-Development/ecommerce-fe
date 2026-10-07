@@ -38,10 +38,17 @@ export default function AdminCategoriesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Backend (subsectors) mewajibkan slug — generate dari nama bila kosong.
+      const slug = form.name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const payload = { ...form, slug };
       if (editingId) {
-        await api.put(`/categories/${editingId}`, form);
+        await api.put(`/categories/${editingId}`, payload);
       } else {
-        await api.post("/categories", form);
+        await api.post("/categories", payload);
       }
       resetForm();
       await loadData();

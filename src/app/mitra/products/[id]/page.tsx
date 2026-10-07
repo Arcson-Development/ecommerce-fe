@@ -55,8 +55,8 @@ export default function MitraProductDetailPage() {
 			setForm({
 				name: data.name || "",
 				description: data.description || "",
-				category: data.category?.name || "",
-				categoryId: data.categoryId || "",
+			category: data.subSector?.name || data.category?.name || "",
+			categoryId: data.subSectorId || data.categoryId || "",
 				unit: data.unit || "Item",
 			});
 			setVariants(
@@ -90,8 +90,8 @@ export default function MitraProductDetailPage() {
 		setForm({
 			name: product.name,
 			description: product.description,
-			category: product.category?.name || "",
-			categoryId: product.categoryId || "",
+			category: product.subSector?.name || product.category?.name || "",
+			categoryId: product.subSectorId || product.categoryId || "",
 			unit: product.unit || "Item",
 		});
 		setVariants(
@@ -151,7 +151,7 @@ export default function MitraProductDetailPage() {
 				name: form.name,
 				description: form.description,
 				unit: form.unit,
-				categoryId: form.categoryId || undefined,
+				subSectorId: form.categoryId || undefined,
 				images: photos,
 				variants: variantList,
 			});
@@ -195,7 +195,7 @@ export default function MitraProductDetailPage() {
 			});
 			if (!res.ok) throw new Error("Upload gagal");
 			const data = await res.json();
-			setPhotos((p) => [...p, data.url]);
+			setPhotos((p) => [...p, (data.data ?? data).url]);
 		} catch (err: any) {
 			toast.error("Gagal upload foto: " + (err?.message || "Unknown error"));
 		}
@@ -781,7 +781,7 @@ export default function MitraProductDetailPage() {
 									</p>
 									<div className="mt-1.5 flex flex-wrap gap-1.5">
 										<span className="inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium bg-zinc-100 text-zinc-700">
-											{product.category?.name || "Umum"}
+											{product.subSector?.name || product.category?.name || "Umum"}
 										</span>
 									</div>
 								</div>

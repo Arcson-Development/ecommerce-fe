@@ -48,7 +48,39 @@ export async function request(path: string, options: RequestInit = {}) {
     throw new Error(errorData.message || `Request failed with status ${response.status}`);
   }
 
-  return response.json();
+  return unwrapEnvelope(await response.json());
+}
+
+/**
+ * Backend (sejak migrasi envelope) membungkus semua respons sukses:
+ *   { success: true, message, data, meta? }
+ * - List paginated { data: [...], meta: { total, page, limit, totalPages } }
+ *   → dikembalikan ke bentuk lama { items, total, page, limit, totalPages }
+ * - Selain itu → kembalikan `data` apa adanya (array / objek).
+ * Bentuk lama (tanpa envelope) diteruskan tanpa perubahan.
+ */
+export function unwrapEnvelope(json: any) {
+  if (
+    json &&
+    typeof json === "object" &&
+    !Array.isArray(json) &&
+    "success" in json &&
+    "data" in json
+  ) {
+    const data = (json as any).data;
+    const meta = (json as any).meta;
+    if (Array.isArray(data) && meta && typeof meta === "object") {
+      return {
+        items: data,
+        total: meta.total ?? data.length,
+        page: meta.page ?? 1,
+        limit: meta.limit ?? data.length,
+        totalPages: meta.totalPages ?? 1,
+      };
+    }
+    return data;
+  }
+  return json;
 }
 
 export const api = {
